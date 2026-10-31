@@ -1,0 +1,1 @@
+const fs=require('fs');const p='src/modules/messenger/outboxController.test.ts';let s=fs.readFileSync(p,'utf8').replace("import type { Message }","import type { Message, SendPayload }").replace('vi.fn(async()=>msg)','vi.fn<(conversation:string,payload:SendPayload,signal:AbortSignal)=>Promise<Message>>(async()=>msg)');fs.writeFileSync(p,s)

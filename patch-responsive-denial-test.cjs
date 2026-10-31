@@ -1,0 +1,1 @@
+const fs=require('fs');const p='mocked-ui.cjs';let s=fs.readFileSync(p,'utf8');s=s.replace("await page.getByText('Select a conversation to get started.', { exact: true }).waitFor()", "await page.getByRole('button', { name: 'Open Updated example group', exact: true }).waitFor()");fs.writeFileSync(p,s);

@@ -1,0 +1,1 @@
+const fs=require('node:fs');let s=fs.readFileSync('mocked-ui.cjs','utf8');s=s.replace("page.getByRole('button',{name:'companies',exact:true}).click()", "page.getByRole('dialog').getByRole('button',{name:'companies',exact:true}).click()");fs.writeFileSync('mocked-ui.cjs',s);

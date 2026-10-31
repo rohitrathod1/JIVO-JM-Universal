@@ -1,0 +1,10 @@
+const fs=require('fs');function edit(p,a,b){let s=fs.readFileSync(p,'utf8');if(!s.includes(a))throw Error(p+' '+a);fs.writeFileSync(p,s.replace(a,b))}
+edit('src/core/auth/Session.tsx',"import { outbox }", "import { announceSessionBoundary,onOtherSessionBoundary,withSessionLock } from './sessionCoordination'\nimport { outbox }")
+edit('src/core/auth/Session.tsx','useEffect, useState,','useEffect, useRef, useState,')
+edit('src/core/auth/Session.tsx','const [controller] = useState','const external=useRef(false)\n  const [controller] = useState')
+edit('src/core/auth/Session.tsx','boundary: preserve => { advanceSession(); void outbox.bind(null, !preserve) }','boundary: preserve => { advanceSession(); outbox.setActive(false); void outbox.bind(null, !preserve); if(!preserve&&!external.current)announceSessionBoundary() }')
+edit('src/core/auth/Session.tsx',"login: async (email, password) => (await api.post<LoginResponse>('/auth/login/', { email, password })).data,","login: (email, password) => withSessionLock(async()=>{try{return (await api.post<LoginResponse>('/auth/login/', { email, password })).data}finally{announceSessionBoundary()}}),")
+edit('src/core/auth/Session.tsx',"logout: () => api.post('/auth/logout/'),","logout: () => withSessionLock(async()=>{try{return await api.post('/auth/logout/')}finally{announceSessionBoundary()}}),")
+edit('src/core/auth/Session.tsx','const state = useSyncExternalStore(controller.subscribe, controller.snapshot, controller.snapshot)','useEffect(()=>onOtherSessionBoundary(()=>{outbox.setActive(false);external.current=true;try{controller.lose()}finally{external.current=false}}),[controller])\n  const state = useSyncExternalStore(controller.subscribe, controller.snapshot, controller.snapshot)')
+edit('src/modules/messenger/media/capture.ts','map(p=>p.number)','map(p=>p.number??\'\').filter(Boolean)');edit('src/modules/messenger/media/capture.ts','map(e=>e.address)','map(e=>e.address??\'\').filter(Boolean)')
+edit('src/modules/messenger/media/voiceController.ts',"this.state.phase!=='recording'","this.snapshot().phase!=='recording'")

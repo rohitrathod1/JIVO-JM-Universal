@@ -1,0 +1,96 @@
+{
+  "recorded": "2026-10-21T05:30:02.916Z",
+  "root": "C:/Users/JIVO/Desktop/JIVO/JM/JIVO-JM-Frontend/src",
+  "comparisonBaseline": "2026-10-21T05:13:56.533Z",
+  "changedSinceBaseline": [
+    "core/auth/security.ts",
+    "main.tsx",
+    "modules/profile/components/AppSection.tsx"
+  ],
+  "recentFiles": [
+    {
+      "path": "core/auth/StepUpDialog.tsx",
+      "modified": "2026-10-21T05:07:13.010Z",
+      "sha256": "f1163248ef4f03e1dab00959fc99a532b77ddcb1505709c1fb387f6d0c882d31"
+    },
+    {
+      "path": "modules/passwords/components/LockGate.tsx",
+      "modified": "2026-10-21T05:07:43.426Z",
+      "sha256": "9f29a98eb6955b39e88a83651ee94812c8067480d393c61e6968b2694309d635"
+    },
+    {
+      "path": "core/auth/StepUpDialog.test.tsx",
+      "modified": "2026-10-21T05:08:24.107Z",
+      "sha256": "c59ae4887e761192441b3426074388aa297c9b3a977ad4f99714fe2eb70a81fd"
+    },
+    {
+      "path": "modules/passwords/__tests__/SecretField.test.tsx",
+      "modified": "2026-10-21T05:09:14.722Z",
+      "sha256": "39101f1f757d5647d3739f7bf5330c7a0bd0dddc02ec254f47f4707955f322ce"
+    }
+  ],
+  "laterRead": "2026-10-21T05:33:57.120Z",
+  "laterReferenceFiles": [
+    {
+      "path": "core/auth/appLock.ts",
+      "sha256": "fb7c2baf9840053e4bd988fd09b5582022bb15641dd9428f476209072ac11bd8",
+      "modified": "2026-10-21T05:27:00.115Z"
+    },
+    {
+      "path": "core/auth/AppLockGate.test.tsx",
+      "sha256": "3bacf1b7be7a8cd899324f70f41d947cfe0a12e771d9e8afc69d3c4698074377",
+      "modified": "2026-10-21T05:27:00.113Z"
+    },
+    {
+      "path": "core/auth/AppLockGate.tsx",
+      "sha256": "c2392ffd1424c9096593815a3dafd5abfcb66bbb92212390f67691f59daf7417",
+      "modified": "2026-10-21T05:27:00.114Z"
+    },
+    {
+      "path": "core/auth/security.ts",
+      "sha256": "aa006f8a23f591b36de2528bd616b8671e27804684c82345924e29097c5aaa44",
+      "modified": "2026-10-21T05:27:00.117Z"
+    },
+    {
+      "path": "main.tsx",
+      "sha256": "cdec2e99978678625c739c28d6522d7cb66eee47e0a3e620f0f95e93a786e6a7",
+      "modified": "2026-10-21T05:27:00.119Z"
+    },
+    {
+      "path": "modules/profile/components/AppSection.tsx",
+      "sha256": "635f36025fbd9561d1b564818515e30106527f8f1f449433ef99c5ce8f42555f",
+      "modified": "2026-10-21T05:27:00.121Z"
+    }
+  ],
+  "changedExisting": [
+    {
+      "path": "core/auth/security.ts",
+      "sha256": "aa006f8a23f591b36de2528bd616b8671e27804684c82345924e29097c5aaa44",
+      "modified": "2026-10-21T05:27:00.117Z"
+    },
+    {
+      "path": "main.tsx",
+      "sha256": "cdec2e99978678625c739c28d6522d7cb66eee47e0a3e620f0f95e93a786e6a7",
+      "modified": "2026-10-21T05:27:00.119Z"
+    },
+    {
+      "path": "modules/profile/components/AppSection.tsx",
+      "sha256": "635f36025fbd9561d1b564818515e30106527f8f1f449433ef99c5ce8f42555f",
+      "modified": "2026-10-21T05:27:00.121Z"
+    }
+  ],
+  "addedSource": [
+    {
+      "path": "core/auth/appLock.ts",
+      "sha256": "fb7c2baf9840053e4bd988fd09b5582022bb15641dd9428f476209072ac11bd8",
+      "modified": "2026-10-21T05:27:00.115Z"
+    },
+    {
+      "path": "core/auth/AppLockGate.tsx",
+      "sha256": "c2392ffd1424c9096593815a3dafd5abfcb66bbb92212390f67691f59daf7417",
+      "modified": "2026-10-21T05:27:00.114Z"
+    }
+  ],
+  "finalRead": "2026-10-21T05:50:06.751Z",
+  "changedSinceReconciledRead": []
+}

@@ -1,0 +1,1 @@
+const fs=require('fs');const p='mocked-ui.cjs';let s=fs.readFileSync(p,'utf8').replace('Allow sender Example Colleague','Allow sender New Example Member').replace("sender_ids:['peer']","sender_ids:['new-member']");fs.writeFileSync(p,s)

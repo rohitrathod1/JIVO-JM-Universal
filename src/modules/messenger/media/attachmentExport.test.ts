@@ -1,0 +1,13 @@
+import { describe,expect,it,vi } from 'vitest'
+import { attachmentDownloadPath,exportMessageAttachment } from './attachmentExport'
+import type { MessageWindow } from '../api'
+function setup(){const abort=new AbortController();let current=true;const file={id:'file',name:'../mock.txt',size:4,status:'ready',download_url:'/api/jm/media/mock.txt'};const deps={window:vi.fn(async()=>({results:[{id:'message',deleted:false,attachments:[file]}]} as unknown as MessageWindow)),download:vi.fn(async()=>new Blob(['MOCK'])),validate:vi.fn(),save:vi.fn(async()=>{})};const run=()=>exportMessageAttachment({message:'message',attachment:'file'},abort.signal,()=>current,deps);return{abort,file,deps,run,invalidate:()=>{current=false}}}
+describe('guarded message attachment export',()=>{
+ it('rechecks message and attachment before authenticated download and handoff',async()=>{const f=setup();await f.run();expect(f.deps.download).toHaveBeenCalledWith('/media/mock.txt');expect(f.deps.validate).toHaveBeenCalledTimes(2);expect(f.deps.save).toHaveBeenCalledOnce()})
+ it('does not download after the server denies message access',async()=>{const f=setup();f.deps.window.mockRejectedValue(Error('Forbidden'));await expect(f.run()).rejects.toThrow('Forbidden');expect(f.deps.download).not.toHaveBeenCalled()})
+ it('does not download deleted or unavailable attachments',async()=>{const f=setup();f.deps.window.mockResolvedValue({results:[]} as unknown as MessageWindow);await expect(f.run()).rejects.toThrow('no longer available');expect(f.deps.download).not.toHaveBeenCalled()})
+ it.each(['https://other.invalid/file','//other.invalid/file','/api/jm/../secret','/api/jm/%2e%2e/x','/api/jm/media\\x','/unknown/file'])('rejects unsupported download path %s',path=>expect(()=>attachmentDownloadPath(path)).toThrow())
+ it('does not hand off a late aborted response',async()=>{const f=setup();f.deps.download.mockImplementation(async()=>{f.abort.abort();return new Blob(['MOCK'])});await expect(f.run()).rejects.toThrow('cancelled');expect(f.deps.save).not.toHaveBeenCalled()})
+ it('does not download after foreground/session invalidation during permission refresh',async()=>{const f=setup();const response=await f.deps.window();f.deps.window.mockImplementation(async()=>{f.invalidate();return response});await expect(f.run()).rejects.toThrow('cancelled');expect(f.deps.download).not.toHaveBeenCalled()})
+ it('rejects oversized metadata before allocation',async()=>{const f=setup();f.deps.validate.mockImplementation(()=>{throw Error('too large')});await expect(f.run()).rejects.toThrow('too large');expect(f.deps.download).not.toHaveBeenCalled()})
+})

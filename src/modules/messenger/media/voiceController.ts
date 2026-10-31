@@ -1,0 +1,12 @@
+import type { PickedFile } from './model'
+export interface VoicePort { permission:()=>Promise<boolean>;prepare:()=>Promise<void>;record:()=>void;stop:()=>Promise<PickedFile>;dispose:()=>Promise<void> }
+export class VoiceController {
+ private epoch=0;private port:VoicePort|null=null;private timer?:ReturnType<typeof setTimeout>;private state:{phase:'idle'|'preparing'|'recording'|'stopping'|'review';asset:PickedFile|null;error:string}={phase:'idle',asset:null,error:''};private listeners=new Set<()=>void>()
+ constructor(private create:()=>VoicePort){}
+ snapshot=()=>this.state;subscribe=(fn:()=>void)=>{this.listeners.add(fn);return()=>{this.listeners.delete(fn)}}
+ private set(value:Partial<typeof this.state>){this.state={...this.state,...value};this.listeners.forEach(fn=>fn())}
+ private async release(port:VoicePort){try{await port.dispose()}catch{this.set({error:'Temporary recording cleanup failed. Close capture and retry.'})}finally{if(this.port===port)this.port=null}}
+ async start(){if(this.state.phase!=='idle'||this.port)return;const epoch=++this.epoch;const port=this.create();this.port=port;this.set({phase:'preparing',error:''});try{if(!await port.permission())throw Error('Microphone permission was denied. You can retry from the recording button.');if(epoch!==this.epoch)return;await port.prepare();if(epoch!==this.epoch)return;port.record();this.set({phase:'recording'});this.timer=setTimeout(()=>void this.stop(),60000)}catch(e){if(epoch===this.epoch)this.set({phase:'idle',error:e instanceof Error?e.message:'Recording failed.'})}finally{if(epoch!==this.epoch||this.snapshot().phase!=='recording'){await this.release(port)}}}
+ async stop(){if(this.state.phase!=='recording'||!this.port)return;clearTimeout(this.timer);const epoch=this.epoch;const port=this.port;this.set({phase:'stopping'});try{const asset=await port.stop();if(epoch!==this.epoch){await asset.dispose?.();return}if(!asset.size||asset.size>20*1024*1024){await asset.dispose?.();throw Error('Voice recordings must be non-empty and at most 20 MB.')}this.set({phase:'review',asset})}catch(e){if(epoch===this.epoch)this.set({phase:'idle',error:e instanceof Error?e.message:'Recording failed.'})}finally{await this.release(port)}}
+ async cancel(){const phase=this.state.phase;const port=this.port;this.epoch++;clearTimeout(this.timer);const asset=this.state.asset;this.set({phase:'idle',asset:null,error:''});await asset?.dispose?.();if(phase==='recording'&&port){try{const output=await port.stop();await output.dispose?.()}finally{await this.release(port)}}}
+}

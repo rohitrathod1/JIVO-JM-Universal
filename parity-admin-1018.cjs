@@ -1,0 +1,12 @@
+const fs=require('fs');function edit(p,a,b){let s=fs.readFileSync(p,'utf8');if(!s.includes(a))throw Error(p+' marker');fs.writeFileSync(p,s.replace(a,b))}
+edit('src/modules/admin/api.ts','setUserPassword = async (id: string, password: string) => orPending<AdminUser>(api.post(`/admin/users/${id}/set-password/`, { password }))','setUserPassword = async (id: string, password: string, signal?: AbortSignal) => orPending<AdminUser>(api.post(`/admin/users/${id}/set-password/`, { password }, { signal }))')
+edit('src/components/AdminManagement.tsx',"import { Sheet }", "import { AdminPassword } from './AdminPassword'\nimport { Sheet }")
+edit('src/components/AdminManagement.tsx',"{tab === 'account' && <>","{tab === 'account' && <><AdminPassword key={user.id} user={user} onChanged={refresh}/>")
+edit('src/components/ProfileImages.tsx','const active=useRef(true)','const active=useRef(true);const mounted=useRef(true)')
+edit('src/components/ProfileImages.tsx','useEffect(()=>{active.current=true;','useEffect(()=>{mounted.current=true;active.current=true;')
+edit('src/components/ProfileImages.tsx','return()=>{active.current=false;','return()=>{mounted.current=false;active.current=false;')
+edit('src/components/ProfileImages.tsx',"async function pick(purpose:'avatar'|'background'){const token=++generation.current;", "async function pick(purpose:'avatar'|'background'){")
+edit('src/components/ProfileImages.tsx','if(!asset||token!==generation.current||!active.current)return','if(!asset||!mounted.current)return')
+edit('src/components/ProfileImages.tsx','finally{abort.current=null;if(active.current)setBusy(false)}','finally{if(abort.current===controller)abort.current=null;if(mounted.current)setBusy(false)}')
+edit('src/components/ProfilePanel.tsx','<ProfileImages />','<ProfileImages key={me?.id} />')
+console.log('Direct administrator password source and image lifecycle changes written')

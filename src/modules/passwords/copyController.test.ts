@@ -1,0 +1,11 @@
+import {describe,it,expect,vi} from 'vitest'
+import {SecretCopyController} from './copyController'
+const deferred=()=>{let resolve!:()=>void;const promise=new Promise<void>(r=>resolve=r);return{promise,resolve}}
+describe('explicit secret copy',()=>{
+ it('writes only the requested value, reports success and never schedules clearing',async()=>{vi.useFakeTimers();let clipboard='unrelated';const write=vi.fn(async(v:string)=>{clipboard=v}),report=vi.fn(async()=>{});const c=new SecretCopyController({write,report});await c.copy('synthetic');expect(clipboard).toBe('synthetic');clipboard='other app';c.setActive(false);await vi.advanceTimersByTimeAsync(60000);expect(clipboard).toBe('other app');expect(write).toHaveBeenCalledExactlyOnceWith('synthetic');expect(report).toHaveBeenCalledOnce();vi.useRealTimers()})
+ it('inactive view cannot start a write',async()=>{const write=vi.fn(),c=new SecretCopyController({write,report:vi.fn()});c.setActive(false);await c.copy('synthetic');expect(write).not.toHaveBeenCalled()})
+ it('suppresses repeated clicks and late audit after blur',async()=>{const d=deferred(),write=vi.fn(()=>d.promise),report=vi.fn();const c=new SecretCopyController({write,report});const pending=c.copy('synthetic');await c.copy('duplicate');c.setActive(false);d.resolve();await pending;expect(write).toHaveBeenCalledOnce();expect(report).not.toHaveBeenCalled();expect(c.snapshot()).toEqual({busy:false,notice:''})})
+ it('does not claim copy or audit after a write denial',async()=>{const report=vi.fn(),c=new SecretCopyController({write:async()=>{throw Error('denied')},report});await c.copy('synthetic');expect(report).not.toHaveBeenCalled();expect(c.snapshot().notice).toContain('Could not copy')})
+ it('distinguishes copied data from an unconfirmed audit',async()=>{const c=new SecretCopyController({write:async()=>{},report:async()=>{throw Error('denied')}});await c.copy('synthetic');expect(c.snapshot().notice).toContain('copy audit could not be confirmed')})
+ it('does not publish success after unmount during audit',async()=>{const d=deferred(),c=new SecretCopyController({write:async()=>{},report:()=>d.promise});const p=c.copy('synthetic');await Promise.resolve();c.setActive(false);d.resolve();await p;expect(c.snapshot().notice).toBe('')})
+})

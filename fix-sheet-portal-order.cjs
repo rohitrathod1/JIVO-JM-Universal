@@ -1,0 +1,1 @@
+const fs=require('node:fs');let s=fs.readFileSync('src/components/Sheet.tsx','utf8');s=s.replace('  return <Modal transparent visible={visible}', '  if (!visible) return null\n  return <Modal transparent visible={visible}');fs.writeFileSync('src/components/Sheet.tsx',s);

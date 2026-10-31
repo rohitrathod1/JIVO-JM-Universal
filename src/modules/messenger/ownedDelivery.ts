@@ -1,0 +1,3 @@
+export async function deliverOwned<T>(owner:string,signal:AbortSignal,deps:{lock:<R>(work:()=>Promise<R>)=>Promise<R>;exists:()=>Promise<boolean>;identity:()=>Promise<string>;send:()=>Promise<T>;remove:()=>Promise<void>;mismatch:()=>void}):Promise<T|null>{
+ return deps.lock(async()=>{if(signal.aborted)throw Error('Sending cancelled.');if(!await deps.exists())return null;const current=await deps.identity();if(current!==owner){deps.mismatch();throw Error('The shared browser session changed. This message was not sent.')}if(signal.aborted)throw Error('Sending cancelled.');const result=await deps.send();await deps.remove();return result})
+}

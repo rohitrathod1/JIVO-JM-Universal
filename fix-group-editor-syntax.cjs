@@ -1,0 +1,1 @@
+const fs=require('fs');const p='src/components/GroupPhoto.tsx';let s=fs.readFileSync(p,'utf8').replace('setFile(asset);setEditing(false)}}/>','setFile(asset);setEditing(false)}}}/>');fs.writeFileSync(p,s)

@@ -1,0 +1,8 @@
+import type {AppLockModel} from './appLockModel'
+export class AppLockAttempt {
+ private generation=0;private flight:AbortController|null=null;private listeners=new Set<()=>void>();private state={busy:false,error:''};
+ constructor(private deps:{model:AppLockModel;foreground:()=>boolean;status:(signal:AbortSignal)=>Promise<{mfa_enrolled:boolean;passkeys:unknown[]}>;options:(signal:AbortSignal)=>Promise<{methods:string[]}>;request:(methods:string[],signal:AbortSignal)=>Promise<boolean>;clear:()=>void;message:(e:unknown)=>string}){}
+ snapshot=()=>this.state;subscribe=(fn:()=>void)=>{this.listeners.add(fn);return()=>{this.listeners.delete(fn)}};private set(busy:boolean,error=''){this.state={busy,error};this.listeners.forEach(fn=>fn())}
+ cancel=()=>{this.generation++;this.flight?.abort();this.flight=null;this.deps.clear();this.set(false)}
+ start=async()=>{this.cancel();if(!this.deps.foreground())return;const generation=this.generation,token=this.deps.model.token(),controller=new AbortController();this.flight=controller;const current=()=>generation===this.generation&&!controller.signal.aborted&&this.deps.foreground()&&token===this.deps.model.token();this.set(true);try{const security=await this.deps.status(controller.signal);if(!current())return;if((!security.mfa_enrolled||!security.passkeys.length)&&!this.deps.model.snapshot().error){this.deps.model.disable();return}const options=await this.deps.options(controller.signal);if(!current())return;const ok=await this.deps.request(options.methods,controller.signal);if(ok&&current())this.deps.model.unlock(token)}catch(error){if(current())this.set(false,this.deps.message(error))}finally{if(generation===this.generation){this.flight=null;this.set(false,this.state.error)}}}
+}

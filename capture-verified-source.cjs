@@ -1,0 +1,7 @@
+const fs = require('node:fs'); const path = require('node:path'); const crypto = require('node:crypto');
+const verification = JSON.parse(fs.readFileSync('test-results/verification-latest.json', 'utf8'));
+if (verification.status !== 'passed') throw Error('Final verification has not passed');
+const walk = dir => fs.readdirSync(dir, { withFileTypes: true }).flatMap(item => item.isDirectory() ? walk(path.join(dir, item.name)) : [path.join(dir, item.name)]);
+const files = [...walk('src'), 'app.json', 'package.json', 'package-lock.json', 'tsconfig.json', 'mocked-ui.cjs', 'capture-interactions.cjs', 'cross-tab-ui.cjs', 'verify-current.cjs', 'run-mocked-ui.cjs', 'JIVO-063-STATUS.md', 'REMAINING-PARITY.md', 'NATIVE-INTEGRATION-ASSESSMENT.md', 'DEPENDENCY-TRIAGE.md', 'README.md', 'audit-current.json', 'audit-production-current.json', 'sdk-compatibility-current.log', 'FEATURE-PARITY-CHECKLIST.md', 'REFERENCE-SOURCE-INVENTORY.json', 'REFERENCE-UPDATE-2026-10-21.md', 'REFERENCE-UPDATE-2026-10-21.json', 'CLIPBOARD-LIFECYCLE.md'].sort().map(file => ({ path: file.replaceAll('\\', '/'), sha256: crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex') }));
+fs.writeFileSync('test-results/verified-source-manifest.json', JSON.stringify({ recorded: new Date().toISOString(), verification: 'verification-latest.json', verificationFinished: verification.finished, files }, null, 2));
+console.log('Recorded verified source manifest:', files.length, 'files');

@@ -1,0 +1,13 @@
+import { useEffect,useRef,useState,type ComponentRef } from 'react'
+import { Image,View } from 'react-native'
+import { captureRef,releaseCapture } from 'react-native-view-shot'
+import { File } from 'expo-file-system'
+import type { PickedFile } from '../modules/messenger/media/model'
+import type { ImageEdit } from '../modules/images/model'
+import { captureOwnedFrame } from '../modules/images/frameCapture'
+export interface ImageFrameProps{asset:PickedFile;frame:ImageEdit['frame'];onDone:(file:PickedFile)=>void;onError:(error:unknown)=>void}
+export function ImageFrame({asset,frame,onDone,onError}:ImageFrameProps){const view=useRef<ComponentRef<typeof View>>(null);const [size,setSize]=useState<{width:number;height:number}|null>(null);const [laid,setLaid]=useState(false);const callbacks=useRef({onDone,onError});useEffect(()=>{callbacks.current={onDone,onError}},[onDone,onError]);
+ useEffect(()=>{if(!size||!laid)return;let active=true;let frame1=0,frame2=0;frame1=requestAnimationFrame(()=>{frame2=requestAnimationFrame(()=>{if(frame==='circle'&&Math.abs(size.width-size.height)>1){callbacks.current.onError(Error('Use a square crop for a native circle frame.'));return}void captureOwnedFrame(()=>active,{capture:()=>captureRef(view,{format:'png',result:'tmpfile',width:size.width,height:size.height}),size:uri=>new File(uri).size,release:releaseCapture}).then(file=>{if(active)callbacks.current.onDone(file);else file.dispose?.()}).catch(error=>{if(active)callbacks.current.onError(error)})})});return()=>{active=false;cancelAnimationFrame(frame1);cancelAnimationFrame(frame2)}},[size,laid,frame]);
+ const ratio=size?size.width/size.height:1;const width=Math.min(280,240*ratio),height=width/ratio;const radius=frame==='circle'?Math.min(width,height)/2:frame==='rounded'?Math.min(width,height)*0.12:0;const border=frame==='thick'?0.05:frame==='thin'?0.015:0.02;
+ return <View ref={view} collapsable={false} onLayout={()=>setLaid(true)} style={{width,height,alignSelf:'center',overflow:'hidden',borderRadius:radius,backgroundColor:'transparent'}}><Image accessibilityLabel="Native framed image preview" source={{uri:asset.uri}} resizeMode="stretch" onLoad={event=>{const {width,height}=event.nativeEvent.source;if(width>0&&height>0)setSize({width,height});else onError(Error('Cannot determine frame dimensions.'))}} onError={()=>onError(Error('Cannot load the edited image for framing.'))} style={{width:'100%',height:'100%'}}/><View pointerEvents="none" style={{position:'absolute',inset:0,borderColor:'white',borderWidth:Math.max(2,Math.min(width,height)*border),borderRadius:radius}}/></View>
+}

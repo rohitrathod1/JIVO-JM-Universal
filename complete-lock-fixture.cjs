@@ -1,0 +1,1 @@
+const fs=require('fs');let s=fs.readFileSync('mocked-ui.cjs','utf8').replace("if (path === '/api/jm/auth/options/')", "if (path === '/api/jm/auth/mfa/') return send(me.security)\n        if (path === '/api/jm/auth/options/')");fs.writeFileSync('mocked-ui.cjs',s);

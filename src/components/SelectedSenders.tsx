@@ -1,0 +1,10 @@
+import { useState } from 'react'
+import { Switch, View } from 'react-native'
+import * as chat from '../modules/messenger/api'
+import { Button, Card, Label } from '../ui'
+import { errorMessage } from '../core/api/client'
+export function SelectedSenders({ detail, members, onChanged }: { detail: chat.ConversationDetail; members: chat.Member[]; onChanged: () => void }) {
+ const [ids,setIds] = useState(members.filter(m=>m.role==='member' && m.can_send && detail.send_mode==='selected').map(m=>m.user.id)); const [review,setReview] = useState(false); const [busy,setBusy] = useState(false); const [error,setError] = useState('')
+ async function save() { setBusy(true);setError('');try { const fresh = await chat.getConversation(detail.id); const current = await chat.listMembers(detail.id); if(!fresh.can.manage_members || ids.some(id=>!current.some(m=>m.user.id===id&&m.role==='member'))) throw Error('Group permissions or membership changed. Reopen these settings.'); await chat.setSendMode(detail.id,'selected',ids);setReview(false);onChanged() }catch(e){setError(errorMessage(e))}finally{setBusy(false)} }
+ return <Card><Label>Selected senders</Label><Label>Owners and administrators can still send. Choose additional members.</Label>{members.filter(m=>m.role==='member').map(m=><View key={m.user.id} style={{flexDirection:'row',gap:8,alignItems:'center'}}><View style={{flex:1}}><Label>{m.user.name}</Label></View><Switch accessibilityLabel={'Allow sender '+m.user.name} disabled={busy || review} value={ids.includes(m.user.id)} onValueChange={value=>setIds(old=>value?[...old,m.user.id]:old.filter(id=>id!==m.user.id))}/></View>)}{!!error&&<Label>{error}</Label>}<Button title="Review selected senders" disabled={busy||review} onPress={()=>setReview(true)}/>{review&&<><Label>Allow administrators and {ids.length} selected members to send?</Label><Button title="Confirm selected senders" disabled={busy} onPress={()=>void save()}/><Button title="Cancel selected senders" disabled={busy} onPress={()=>setReview(false)}/></>}</Card>
+}
