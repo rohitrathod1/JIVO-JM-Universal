@@ -4,6 +4,7 @@ import { randomUUID } from 'expo-crypto'
 import { createEvent, updateEvent, type EventData, type EventInput, type Message } from '../modules/messenger/api'
 import { eventInput, initialEventForm } from '../modules/messenger/eventForm'
 import { REMINDERS } from '../modules/messenger/lib/events'
+import { eventPlaceText } from '../modules/messenger/location/format'
 import { errorMessage } from '../core/api/client'
 import { Button, Field, Label } from '../ui'
 import { Sheet } from './Sheet'
@@ -22,7 +23,7 @@ function EventForm({ event, onSubmit, onClose }: { event?: EventData | null; onS
     catch (e) { if (alive.current) setError(errorMessage(e)) }
     finally { if (alive.current) setBusy(false) }
   }
-  if (picking) return <LocationPicker mode="pick" onClose={() => setPicking(false)} onSend={place => setForm(value => ({ ...value, place: [place.name, place.address].filter(Boolean).join(', ').slice(0, 200) || `${place.latitude.toFixed(5)}, ${place.longitude.toFixed(5)}`, point: { latitude: place.latitude, longitude: place.longitude } }))} />
+  if (picking) return <LocationPicker mode="pick" onClose={() => setPicking(false)} onSend={place => setForm(value => ({ ...value, place: eventPlaceText(place), point: { latitude: place.latitude, longitude: place.longitude } }))} />
   return <Sheet visible onClose={() => { if (!busy) onClose() }}><Label large>{event ? 'Edit event' : 'Create event'}</Label>
     <Field label="Event name" value={form.title} onChangeText={title => setForm(value => ({ ...value, title }))} maxLength={120} editable={!busy} />
     <Field label="Description (optional)" value={form.description} onChangeText={description => setForm(value => ({ ...value, description }))} maxLength={1000} multiline editable={!busy} />

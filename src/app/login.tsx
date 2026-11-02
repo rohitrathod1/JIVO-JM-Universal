@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
-import { ScrollView, View, Text } from 'react-native'
+import { useState } from 'react'
+import { Linking, ScrollView, View, Text } from 'react-native'
 import { Redirect, Link, useLocalSearchParams, type Href } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useSession } from '../core/auth/Session'
-import { api, errorMessage, origin } from '../core/api/client'
+import { api, errorMessage } from '../core/api/client'
+import { useIdentity } from '../core/auth/identity'
 import { passkeysSupported, signInWithPasskey } from '../core/auth/security'
 import { Button, Card, Field, Label, useColors } from '../ui'
 import { AuthBackdrop, Brand } from '../components/Brand'
@@ -15,14 +16,10 @@ export default function Login() {
   const { next } = useLocalSearchParams<{ next?: string }>()
   const [email, setEmail] = useState(''); const [password, setPassword] = useState('')
   const [token, setToken] = useState(''); const [code, setCode] = useState('')
-  const [methods, setMethods] = useState<string[]>([]); const [offerPasskey, setOfferPasskey] = useState(false)
+  const [methods, setMethods] = useState<string[]>([])
+  // One read of GET /auth/options/: passkey sign-in, and whether accounts live in Jivo Auth (FE-032).
+  const { passkeySignIn: offerPasskey, jivo, passwordResetUrl } = useIdentity()
   const [error, setError] = useState(''); const [busy, setBusy] = useState(false)
-  useEffect(() => {
-    if (!origin) return
-    let active = true
-    api.get<{ passkey_sign_in: boolean }>('/auth/options/').then(r => { if (active) setOfferPasskey(r.data.passkey_sign_in) }).catch(() => {})
-    return () => { active = false }
-  }, [])
   if (me) return <Redirect href={safeNext(next) as Href} />
   async function submit() {
     setBusy(true); setError('')
@@ -49,14 +46,16 @@ export default function Login() {
         <Brand />
         <View style={{ marginTop: 8, marginBottom: 8, gap: 4 }}><Label large>{token ? 'Two-step verification' : 'Sign in'}</Label><Text style={{ fontFamily: 'Inter_400Regular', color: c.muted, fontSize: 14, lineHeight: 20 }}>{token ? `Confirm it’s you, ${email.trim()}.` : 'Messenger and Passwords for JIVO.'}</Text></View>
         {token ? methods.includes('recovery_code') && <Field label="Recovery code" value={code} onChangeText={setCode} autoCapitalize="none" secureTextEntry /> : <>
-          <Field label="Email" accessibilityLabel="Email address" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" />
-          <PasswordField label="Password" value={password} onChangeText={setPassword} autoComplete="current-password" onSubmitEditing={() => void submit()} />
+          <Field label={jivo ? 'JIVO email' : 'Email'} accessibilityLabel={jivo ? 'JIVO email address' : 'Email address'} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" />
+          <PasswordField label={jivo ? 'JIVO password' : 'Password'} value={password} onChangeText={setPassword} autoComplete="current-password" onSubmitEditing={() => void submit()} />
         </>}
         {!!(error || sessionError) && <Text accessibilityRole="alert" style={{ color: c.danger, backgroundColor: c.dangerSoft, padding: 10, borderRadius: 10, fontSize: 14 }}>{error || sessionError}</Text>}
         {(!token || methods.includes('recovery_code')) && <Button title={busy ? 'Signing in…' : 'Continue'} onPress={() => void submit()} disabled={busy || (status === 'loading' || status === 'signing-out') || (token ? !code : !email || !password)} />}
         {passkeysSupported() && (token ? methods.includes('passkey') : offerPasskey) && <Button variant="secondary" title="Sign in with a passkey" onPress={() => void passkey()} disabled={busy || (status === 'loading' || status === 'signing-out')} />}
         {!!token && <Button variant="ghost" title="Back to sign in" disabled={busy} onPress={() => { setToken(''); setMethods([]); setCode(''); setError('') }} />}
-        <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 16, color: c.muted, marginTop: 4 }}>Forgot your password or new here? Ask a JM administrator for a link.</Text>
+        {jivo ? <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 16, color: c.muted, marginTop: 4 }}>One password for every JIVO app.{' '}
+          {!!passwordResetUrl && <Text accessibilityRole="link" onPress={() => void Linking.openURL(passwordResetUrl).catch(() => {})} style={{ fontFamily: 'Inter_600SemiBold', color: c.primary }}>Forgot it?</Text>}{' '}New here? Ask IT for JM access.</Text>
+          : <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 16, color: c.muted, marginTop: 4 }}>Forgot your password or new here? Ask a JM administrator for a link.</Text>}
       </Card>
       <Link href="/preview" style={{ color: c.primary, padding: 12, textAlign: 'center', fontSize: 12 }}>Preview responsive workspace</Link>
     </View>

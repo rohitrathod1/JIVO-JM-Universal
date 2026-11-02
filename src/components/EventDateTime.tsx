@@ -2,12 +2,19 @@ import { useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { localDate, parseLocal } from '../modules/messenger/eventForm'
 import { Button, Label, useColors } from '../ui'
+import { Icon } from './Icon'
 import { Sheet } from './Sheet'
 
 export function EventDateTime({ label, value, onChange, type, min, disabled = false }: { label: string; value: string; onChange: (value: string) => void; type: 'date' | 'time'; min?: string; disabled?: boolean }) {
   const [open, setOpen] = useState(false)
   const display = type === 'date' ? parseLocal(value, '12:00')?.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : parseLocal('2026-01-01', value)?.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })
-  return <View style={{ gap: 6, flex: 1 }}><Label>{label}</Label><Button title={display ?? `Choose ${type}`} accessibilityLabel={label} variant="secondary" disabled={disabled} onPress={() => setOpen(true)} />
+  const c = useColors()
+  return <View style={{ gap: 6, flex: 1, minWidth: 0 }}><Text style={{ fontFamily: 'Inter_500Medium', color: c.text, fontSize: 14, lineHeight: 20 }}>{label}</Text>
+    <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityHint={display ? undefined : `Choose ${type}`} accessibilityState={{ disabled, expanded: open }} disabled={disabled} onPress={() => setOpen(true)}
+      style={state => ({ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingHorizontal: 12, borderWidth: 1, borderRadius: 10, borderColor: open || (state as { hovered?: boolean }).hovered ? c.brand : c.border, backgroundColor: c.panel, opacity: disabled ? 0.6 : 1, cursor: disabled ? 'auto' : 'pointer' })}>
+      <Text numberOfLines={1} style={{ flex: 1, minWidth: 0, fontFamily: 'Inter_400Regular', fontSize: 14, color: display ? c.text : c.muted }}>{display ?? (type === 'date' ? 'Choose a date' : 'Choose a time')}</Text>
+      {type === 'time' ? <Icon name="clock" size={16} /> : <CalendarGlyph color={c.muted} />}
+    </Pressable>
     {open && <Sheet visible onClose={() => setOpen(false)}><Label large>{label}</Label>{type === 'date' ? <Calendar value={value} min={min} onChange={next => { onChange(next); setOpen(false) }} /> : <Time value={value} onChange={next => { onChange(next); setOpen(false) }} />}<Button title="Close picker" variant="ghost" onPress={() => setOpen(false)} /></Sheet>}
   </View>
 }
@@ -49,4 +56,8 @@ function Time({ value, onChange }: { value: string; onChange: (value: string) =>
     })}</View>}
     <Button title="Apply" onPress={() => onChange(`${pad(hour % 12 + (pm ? 12 : 0))}:${pad(minute)}`)} />
   </View>
+}
+/** Small drawn calendar mark (the icon set has no CalendarDays raster). */
+function CalendarGlyph({ color }: { color: string }) {
+  return <View accessible={false} style={{ width: 16, height: 16, borderWidth: 1.5, borderColor: color, borderRadius: 3, borderTopWidth: 4 }} />
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Image, Linking, PanResponder, Text, View } from 'react-native'
 import { origin } from '../core/api/client'
 import { mapTiles, pointAt, worldPoint, type LatLng } from '../modules/messenger/location/model'
@@ -6,7 +6,7 @@ import { tileHeaders } from '../modules/messenger/location/tileHeaders'
 import { Button, useColors } from '../ui'
 
 /** Shared OSM tile view. Requests stay on JM's authenticated map proxy on every platform. */
-export function LocationMap({ center, initialZoom = 16, interactive = false, onMove, height = 210 }: { center: LatLng; initialZoom?: number; interactive?: boolean; onMove?: (point: LatLng) => void; height?: number }) {
+export function LocationMap({ center, initialZoom = 16, interactive = false, onMove, height = 210, overlay }: { center: LatLng; initialZoom?: number; interactive?: boolean; onMove?: (point: LatLng) => void; height?: number; overlay?: ReactNode }) {
   const c = useColors(); const [width, setWidth] = useState(320); const [zoom, setZoom] = useState(initialZoom)
   const [drag, setDrag] = useState<{ base: LatLng; point: LatLng } | null>(null); const view = drag?.base === center ? drag.point : center
   const [headers, setHeaders] = useState<Record<string, string> | undefined>()
@@ -33,7 +33,8 @@ export function LocationMap({ center, initialZoom = 16, interactive = false, onM
       <View pointerEvents="none" style={{ position: 'absolute', top: height / 2 - 31, left: width / 2 - 12, width: 24, height: 30, backgroundColor: '#ef4444', borderColor: '#fff', borderWidth: 3, borderTopLeftRadius: 15, borderTopRightRadius: 15, borderBottomLeftRadius: 15, transform: [{ rotate: '-45deg' }] }} />
       {interactive && <View style={{ position: 'absolute', top: 8, right: 8, gap: 4 }}><Button title="+" accessibilityLabel="Zoom in map" variant="secondary" disabled={zoom === 19} onPress={() => zoomBy(1)} /><Button title="−" accessibilityLabel="Zoom out map" variant="secondary" disabled={zoom === 2} onPress={() => zoomBy(-1)} /></View>}
       {error && <Text style={{ position: 'absolute', bottom: 4, left: 6, right: 6, backgroundColor: c.panel, color: c.text, fontSize: 11 }}>Map tiles are unavailable. Search or use the coordinates below.</Text>}
+      {overlay}
     </View>
-    <Text accessibilityRole="link" onPress={() => void Linking.openURL('https://www.openstreetmap.org/copyright').catch(() => {})} style={{ color: c.muted, fontSize: 10, textAlign: 'right' }}>© OpenStreetMap contributors</Text>
+    <Text accessibilityRole="link" onPress={() => void Linking.openURL('https://www.openstreetmap.org/copyright').catch(() => {})} style={{ color: c.muted, fontSize: 10, textAlign: 'right', alignSelf: 'flex-end', textDecorationLine: 'none', cursor: 'pointer' }}>© OpenStreetMap contributors</Text>
   </View>
 }

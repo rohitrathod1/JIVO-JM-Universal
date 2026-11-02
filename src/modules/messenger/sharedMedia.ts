@@ -14,5 +14,5 @@ export function safeSharedLink(value: string | undefined): string | null {
 }
 export const sharedTabs: { kind: SharedKind; label: string }[] = [
   { kind: 'media', label: 'Media' }, { kind: 'docs', label: 'Docs' },
-  { kind: 'voice', label: 'Voice' }, { kind: 'links', label: 'Links' },
+  { kind: 'links', label: 'Links' },
 ]

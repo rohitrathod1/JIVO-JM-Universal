@@ -3,7 +3,7 @@ import { CapturePanel } from './CapturePanel'
 import { RichMessage } from './RichMessage'
 import { useChatImmersive } from './WorkspaceChrome'
 import { SpecialMessage } from './SpecialMessage'
-import { PeerCallButton } from './PeerCallButton'
+import { ChatHeaderTitle, PeerCallButton } from './PeerCallButton'
 import { EventComposer } from './EventComposer'
 import { LocationComposer } from './LocationPicker'
 import { ChatComposer } from './ChatComposer'
@@ -240,7 +240,7 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
       {(split || opened) && <View style={{ flex: 1, padding: compact ? 8 : 12, gap: compact ? 6 : 10, backgroundColor: c.shell }}>
         {concealed && opened ? <><IconButton name="back" label="Back to conversations" onPress={() => { setSelected(null); selectionGeneration.current++ }} /><LockedChatsGate /></> : selected ? <>
           {!split && !compact && <Button title="Back to conversations" disabled={blocked} onPress={() => { selectionGeneration.current++; setSelected(null); setAttachments([]) }} />}
-          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>{compact && !split && <IconButton name="back" label="Back to conversations" disabled={blocked} onPress={() => { selectionGeneration.current++; setSelected(null); setAttachments([]) }} />}<ChatAvatar name={selected.title || selected.peer?.name || 'Conversation'} seed={selected.peer?.id ?? selected.id} uri={mediaUrl(selected.avatar_url, origin)} group={selected.kind === 'group'} size={40} /><View style={{ flex: 1, minWidth: 0 }}><Text numberOfLines={1} style={{ color: c.text, fontFamily: 'Inter_600SemiBold', fontSize: 16, lineHeight: 24 }}>{selected.title || selected.peer?.name}</Text>{!!live.label && <Text numberOfLines={1} style={{ color: c.muted, fontSize: 12, lineHeight: 18 }}>{live.label}</Text>}</View>
+          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>{compact && !split && <IconButton name="back" label="Back to conversations" disabled={blocked} onPress={() => { selectionGeneration.current++; setSelected(null); setAttachments([]) }} />}<ChatHeaderTitle conversation={selected} live={live.label} onPress={() => setTool('details')} />
             <PeerCallButton conversation={selected} />
             {<IconButton name="menu" label="Conversation options" onPress={() => setMenu(true)} />}
           </View>

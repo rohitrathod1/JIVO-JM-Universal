@@ -1,3 +1,4 @@
+import type { JivoCandidate } from './jivoCandidates'
 import { api } from '@/core/api/client'
 import type { Page, Person } from '@/core/api/types'
 import type { Membership } from '@/core/auth/types'
@@ -165,6 +166,12 @@ const clean = (params: object) => Object.fromEntries(Object.entries(params).filt
 export const listUsers = async (f: UserFilters) => (await api.get<Page<AdminUser>>('/admin/users/', { params: clean(f) })).data
 export const getUser = async (id: string) => (await api.get<AdminUser>(`/admin/users/${id}/`, { params: { status: 'all' } })).data
 export const createUser = async (data: { email: string; full_name: string; display_name?: string; phone?: string; employee_code?: string; password?: string }) =>
+  (await api.post<AdminUser & { invite_link: string | null; password_set: boolean }>('/admin/users/', data)).data
+export type { JivoCandidate }
+/** With Jivo Auth: people granted JM there, with the JM account each already has (null: not added yet). */
+export const listJivoCandidates = async () => (await api.get<{ results: JivoCandidate[] }>('/admin/users/jivo-candidates/')).data.results
+/** With Jivo Auth: add someone who has a JIVO account (email, name and employee code come from it). */
+export const addJivoPerson = async (data: { auth_id: string; phone?: string; display_name?: string }) =>
   (await api.post<AdminUser & { invite_link: string | null; password_set: boolean }>('/admin/users/', data)).data
 export const setUserPassword = async (id: string, password: string, signal?: AbortSignal) => orPending<AdminUser>(api.post(`/admin/users/${id}/set-password/`, { password }, { signal }))
 export const updateUser = async (id: string, data: Partial<Pick<AdminUser, 'full_name' | 'display_name' | 'phone' | 'employee_code'>>) =>

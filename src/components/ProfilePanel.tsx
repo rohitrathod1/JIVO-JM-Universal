@@ -1,7 +1,7 @@
 import { ThemeSettings } from './ThemeControls'
 import { AppLockSetting } from './AppLock'
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { InstallApp } from './InstallApp'
 import { ProfileImages } from './ProfileImages'
 import { Sheet } from './Sheet'
@@ -9,11 +9,24 @@ import { useSession } from '../core/auth/Session'
 import { api, errorMessage } from '../core/api/client'
 import * as profile from '../modules/profile/api'
 import { addPasskey, passkeysSupported } from '../core/auth/security'
+import { useIdentity } from '../core/auth/identity'
+import { mobileError, safeTelHref } from '../shared/phone'
+import { safeMailHref } from '../modules/profile/contact'
 import { subscribeSensitiveView } from '../shared/sensitiveLifecycle'
 import { SensitiveRequestGuard } from '../shared/sensitive'
 import { Button, Card, Field, Label, styles, useColors } from '../ui'
+/** Mail / call shortcut on the same line as the address (FE-030). Opens the device's mail app or dialer. */
+function ContactButton({ glyph, label, href }: { glyph: string; label: string; href: string | null }) {
+  const c = useColors()
+  if (!href) return null
+  return <Pressable accessibilityRole="link" accessibilityLabel={label} onPress={() => { void Linking.openURL(href).catch(() => {}) }} style={({ pressed }) => ({ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 20, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.neutral : 'transparent' })}>
+    <Text accessible={false} style={{ color: c.muted, fontSize: 17, lineHeight: 20 }}>{glyph}</Text>
+  </Pressable>
+}
+const muted = (color: string) => ({ fontFamily: 'Inter_400Regular', color, fontSize: 12, lineHeight: 16 }) as const
 export function ProfilePanel() {
-  const { me, adopt } = useSession(); const c = useColors()
+  const { me, adopt } = useSession(); const c = useColors(); const { jivo } = useIdentity()
+  const [phoneError, setPhoneError] = useState('')
   const [name, setName] = useState(me?.display_name ?? ''); const [phone, setPhone] = useState(me?.phone ?? ''); const [bio, setBio] = useState(me?.bio ?? '')
   const [devices, setDevices] = useState<profile.DeviceSession[]>([]); const [revision, setRevision] = useState(0)
   const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [notice, setNotice] = useState('')
@@ -40,19 +53,28 @@ export function ProfilePanel() {
     {!!error && <Text accessibilityRole="alert" style={{ color: c.text }}>{error}</Text>}
     {!!notice && <Label>{notice}</Label>}{busy && <ActivityIndicator />}
     <View style={{ width: '100%', maxWidth: 820, gap: 18, alignSelf: 'center' }}>
-      <Card><Label large>{me?.name}</Label><Label>{me?.email}</Label>
+      <Card><Label large>{me?.name}</Label>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={{ flex: 1, minWidth: 0 }}><Text numberOfLines={1} style={{ fontFamily: 'Inter_400Regular', color: c.text, fontSize: 15, lineHeight: 22 }}>{me?.email}</Text>{jivo && <Text style={muted(c.muted)}>From your JIVO account</Text>}</View>
+          <ContactButton glyph={'✉'} label={`Email ${me?.email ?? ''}`} href={safeMailHref(me?.email)} />
+        </View>
         <Field label="Display name" value={name} onChangeText={setName} maxLength={150} />
-        <Field label="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10 }}>
+          <View style={{ flex: 1, minWidth: 0 }}><Field label="Mobile number *" accessibilityLabel="Mobile number" value={phone} onChangeText={value => { setPhone(value); if (phoneError) setPhoneError('') }} onBlur={() => setPhoneError(phone.trim() ? mobileError(phone) ?? '' : '')} keyboardType="phone-pad" autoComplete="tel" textContentType="telephoneNumber" maxLength={24} /></View>
+          <ContactButton glyph={'☎'} label={`Call ${phone.trim()}`} href={safeTelHref(phone.trim())} />
+        </View>
+        {phoneError ? <Text accessibilityRole="alert" style={{ ...muted(c.danger), fontSize: 13 }}>{phoneError}</Text> : <Text style={muted(c.muted)}>Required. Shown only to people you chat with, so they can call you.</Text>}
         <Field label="About" value={bio} onChangeText={setBio} multiline maxLength={300} />
-        <Button title="Save profile" disabled={busy} onPress={() => void run(() => profile.updateMe({ display_name: name.trim(), phone, bio }), 'Profile updated.')} />
+        <Button title="Save profile" disabled={busy} onPress={() => { const problem = mobileError(phone); setPhoneError(problem ?? ''); if (!problem) void run(() => profile.updateMe({ display_name: name.trim(), phone: phone.trim(), bio: bio.trim() }), 'Profile updated.') }} />
       </Card>
       <ProfileImages key={me?.id} /><InstallApp /><AppLockSetting /><ThemeSettings /><Card><Label large>Sign-in email</Label>
-        {me?.pending_email ? <><Label>Awaiting administrator confirmation: {me.pending_email}</Label><Button title="Cancel email change" disabled={busy} onPress={() => void run(profile.cancelEmailChange, 'Email change cancelled.')} /></> : <>
+        {jivo ? <><Label>{me?.email}</Label><Text style={muted(c.muted)}>From your JIVO account. It is changed in Jivo Auth.</Text></> : me?.pending_email ? <><Label>Awaiting administrator confirmation: {me.pending_email}</Label><Button title="Cancel email change" disabled={busy} onPress={() => void run(profile.cancelEmailChange, 'Email change cancelled.')} /></> : <>
           <Field label="New email address" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
           <Button title="Request email change" disabled={busy || !email.trim()} onPress={() => void run(() => profile.requestEmailChange(email.trim()), 'Email change requested. An administrator must confirm it.')} />
         </>}
       </Card>
-      <Card><Label large>Password</Label>
+      <Card><Label large>{jivo ? 'JIVO password' : 'Password'}</Label>
+        {jivo && <Label>The same password for every JIVO app. Changing it here changes it everywhere.</Label>}
         <Field label="Current password" value={currentPassword} onChangeText={setCurrentPassword} secureTextEntry />
         <Field label="New password" value={password} onChangeText={setPassword} secureTextEntry />
         <Field label="Confirm new password" value={repeat} onChangeText={setRepeat} secureTextEntry />
