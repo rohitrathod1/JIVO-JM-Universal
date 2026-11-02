@@ -15,7 +15,7 @@ function NotificationList() {
   const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [selected, setSelected] = useState<notifications.AppNotification | null>(null)
   const [confirmation, setConfirmation] = useState<notifications.AppNotification | null>(null); const [preferences, setPreferences] = useState<notifications.Preferences | null>(null)
   const [settings, setSettings] = useState(false); const refresh = page.refresh
-  useEffect(() => realtime.on('*', frame => { if (frame.type.startsWith('NOTIFICATION_')) void refresh() }), [refresh])
+  useEffect(() => realtime.on('*', frame => { if (frame.type.startsWith('NOTIFICATION_') || frame.type === 'RESYNC') void refresh() }), [refresh])
   async function run(action: () => Promise<unknown>) { setBusy(true); setError(''); try { await action(); await refresh(); setConfirmation(null) } catch (e) { setError(errorMessage(e)) } finally { setBusy(false) } }
   async function openSettings() { setBusy(true); setError(''); try { setPreferences(await notifications.getPreferences()); setSettings(true) } catch (e) { setError(errorMessage(e)) } finally { setBusy(false) } }
   return <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.page}><Label large>Activity</Label>

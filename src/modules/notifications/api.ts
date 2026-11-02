@@ -100,7 +100,13 @@ export const deleteNotifications = async (target: string[] | { all: true; state?
 export const markNotificationsRead = async (ids: string[] | 'all') =>
   api.post('/notifications/read/', ids === 'all' ? { all: true } : { ids })
 export const getPreferences = async () => (await api.get<Preferences>('/me/notification-preferences/')).data
-export const updatePreferences = async (data: Partial<Preferences>) => (await api.patch<Preferences>('/me/notification-preferences/', data)).data
+const preferenceListeners = new Set<(preferences: Preferences) => void>()
+export const onPreferencesChanged = (listener: (preferences: Preferences) => void) => { preferenceListeners.add(listener); return () => { preferenceListeners.delete(listener) } }
+export const updatePreferences = async (data: Partial<Preferences>) => {
+  const preferences = (await api.patch<Preferences>('/me/notification-preferences/', data)).data
+  preferenceListeners.forEach(listener => listener(preferences))
+  return preferences
+}
 export const updatePrivacy = async (last_seen_privacy: Me['last_seen_privacy']) => (await api.patch<Me>('/me/', { last_seen_privacy })).data
 export const getVapidKey = async () => (await api.get<{ key: string | null; enabled: boolean }>('/push/vapid-public-key/')).data
 export const saveSubscription = async (sub: PushSubscriptionJSON) => api.post('/push/subscriptions/', { endpoint: sub.endpoint, keys: sub.keys })

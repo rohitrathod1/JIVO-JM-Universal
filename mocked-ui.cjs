@@ -98,7 +98,9 @@ async function run() {
         if(path==='/api/jm/auth/step-up/options/')return send({methods:body.scope==='app_unlock'?['passkey','password']:stepMethods,passkey:(body.scope==='app_unlock'||stepMethods.includes('passkey'))?{flow:'synthetic-flow',options:{challenge:'AQIDBAUGBwgJCgsMDQ4PEA',rpId:'localhost',allowCredentials:[],userVerification:'preferred'}}:null})
         if (path === '/api/jm/auth/step-up/') { if(body.scope==='jp')vaultVerified=true;verified = true; return send({ status: 'ok' }) }
         if (path === '/api/jm/search/messages/') return send({ results: messages.filter(m => m.body.includes(url.searchParams.get('q'))).map(m => ({ message: m, conversation: { id: 'chat', title: 'Example conversation', kind: 'direct' } })), next_cursor: null })
-        if (path === '/api/jm/conversations/chat/polls/') { const msg = { ...message('poll-' + messages.length, messages.length + 1, '', true), kind: 'poll', poll: { question: body.question, options: body.options.map((text, index) => ({ id: 'o' + index, text, votes: 0, me: false })), allow_multiple: body.allow_multiple, total_voters: 0 } }; messages.push(msg); return send(msg) }
+        if (path === '/api/jm/conversations/chat/polls/') { const msg = { ...message('poll-' + messages.length, messages.length + 1, '', true), kind: 'poll', poll: { question: body.question, options: body.options.map((text, index) => ({ id: 'o' + index, text, votes: 0, me: false })), allow_multiple: body.allow_multiple, voters: 0, total_votes: 0 } }; messages.push(msg); return send(msg) }
+        if (/^\/api\/jm\/messages\/[^/]+\/poll-votes\/$/.test(path)) return send([{ id: 'o0', text: 'First choice', users: [person] }])
+        if (path === '/api/jm/users/peer/') return send({ ...person, full_name: person.name, bio: 'Synthetic colleague profile', email: 'peer@example.invalid', phone: null, companies: [] })
         if (/^\/api\/jm\/messages\/[^/]+\/forward\/$/.test(path)) return send({})
         if (path === '/api/jm/conversations/') return send({ results: [conversation], next_cursor: null })
         if (path === '/api/jm/conversations/chat/') { if (method === 'PATCH') {Object.assign(conversation, body);if('avatar_upload_id' in body)conversation.avatar_url=body.avatar_upload_id?'/api/jm/media/mock.png':null;} return send({ ...conversation, my_role: 'owner', description: '', created_at: '2026-01-01', visible_from_seq: 1, is_owner: true }) }
@@ -133,6 +135,7 @@ async function run() {
         if (path === '/api/jm/admin/alerts/people/') return send({ results: [person], next_cursor: null })
         if (path === '/api/jm/admin/alerts/') { if (method === 'POST') { const alert = { ...body, id: 'alert', created_at: '2026-10-20', status: 'active', recipient_count: body.user_ids?.length || 1, cancelled_at: null }; sentAlerts.push(alert); return send(alert) } return send({ results: sentAlerts, next_cursor: null }) }
         if (path === '/api/jm/admin/alerts/alert/cancel/') { sentAlerts[0].status = 'cancelled'; return send(sentAlerts[0]) }
+        if (path === '/api/jm/notifications/summary/') return send({ unread_conversations: 0, unread_messages: 0, unread_notifications: 0, mention_unread: false })
         if (path === '/api/jm/notifications/') return send({ results: notes.filter(n => url.searchParams.get('state') !== 'unread' || !n.read_at), next_cursor: null })
         if (path === '/api/jm/notifications/read/') { notes.forEach(n => { n.read_at = '2026-10-20' }); return send({}) }
         if (path === '/api/jm/notifications/delete/') { notes = notes.filter(n => !body.ids.includes(n.id)); return send({ removed: 1 }) }
@@ -235,11 +238,14 @@ async function run() {
         await page.getByText('Read by',{exact:true}).waitFor()
         await page.getByText('Reactions',{exact:true}).waitFor()
         await page.getByRole('button',{name:'Close message information',exact:true}).click()
+        await page.getByLabel('Message', { exact: true }).fill('Draft before editing')
         await page.getByRole('button',{name:'Message actions',exact:true}).last().click()
         await page.getByRole('button', { name: 'Edit message', exact: true }).click()
       await page.getByLabel('Message', { exact: true }).fill('Edited mocked message')
       await page.getByRole('button', { name: 'Save edit', exact: true }).click()
       await page.getByText('Edited mocked message', { exact: true }).waitFor()
+      await expect(page.getByLabel('Message', { exact: true })).toHaveValue('Draft before editing')
+      await page.getByLabel('Message', { exact: true }).fill('')
       await captureTests.capture(page,height)
       const sendBounds = await page.getByRole('button', { name: 'Send message', exact: true }).boundingBox()
       assert.ok(sendBounds && sendBounds.y + sendBounds.height <= height, 'Composer is reachable inside the viewport');assert.ok(sendBounds.height<=52,'Send label fits without excessive wrapping')
@@ -249,6 +255,10 @@ async function run() {
       await page.getByLabel('Poll choices (one per line)', { exact: true }).fill('First choice\nSecond choice')
       await page.getByRole('button', { name: 'Send poll', exact: true }).click()
       await page.getByText('Mock poll question', { exact: true }).waitFor()
+      await page.getByRole('button', { name: 'View votes (0)', exact: true }).click()
+      await page.getByRole('button', { name: 'Example Colleague', exact: true }).click()
+      await page.getByText('Synthetic colleague profile', { exact: true }).waitFor()
+      await page.getByRole('button', { name: 'Close profile', exact: true }).click()
       if (height < 600) await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
       await page.getByRole('button', { name: 'Search messages', exact: true }).click()
       await page.getByLabel('Search messages', { exact: true }).fill('Edited mocked')

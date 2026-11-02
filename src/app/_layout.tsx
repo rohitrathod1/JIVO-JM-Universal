@@ -9,9 +9,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { SessionProvider } from '../core/auth/Session'
 import { StepUp } from '../components/StepUp'
+import { LiveUpdates } from '../components/LiveUpdates'
 export default function Layout() {
   const [loaded, error] = useFonts({ Inter_400Regular, Inter_600SemiBold, Inter_700Bold })
   if (!loaded && !error) return <ActivityIndicator accessibilityLabel="Loading JM" />
-  return <SafeAreaProvider><SessionProvider><ChatAppearance><VaultExportStatus /><AttachmentExportStatus /><StatusBar style="auto" /><AppLock><Stack screenOptions={{ headerShown: false }} /><StepUp /></AppLock></ChatAppearance></SessionProvider></SafeAreaProvider>
+  return <SafeAreaProvider><SessionProvider><ChatAppearance><VaultExportStatus /><AttachmentExportStatus /><StatusBar style="auto" /><AppLock><LiveUpdates><Stack screenOptions={{ headerShown: false }} /><StepUp /></LiveUpdates></AppLock></ChatAppearance></SessionProvider></SafeAreaProvider>
 }
 

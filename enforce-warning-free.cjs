@@ -1,2 +1,0 @@
-const fs=require('fs');let s=fs.readFileSync('src/components/AppLock.web.tsx','utf8').replace('useEffect(()=>{lifetime.current.active=true;return()=>{lifetime.current.active=false;lifetime.current.flight?.abort()}},[lifetime])','useEffect(()=>{const current=lifetime.current;current.active=true;return()=>{current.active=false;current.flight?.abort()}},[])');fs.writeFileSync('src/components/AppLock.web.tsx',s);
-s=fs.readFileSync('verify-current.cjs','utf8').replace("'src', '--no-cache'","'src', '--no-cache', '--max-warnings=0'");fs.writeFileSync('verify-current.cjs',s);

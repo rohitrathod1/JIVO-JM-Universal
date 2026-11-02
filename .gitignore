@@ -39,6 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+/.native-build/
 
 # Local configuration must never be committed
 .env

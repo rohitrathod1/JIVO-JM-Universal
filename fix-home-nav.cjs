@@ -1,3 +1,0 @@
-const fs=require('fs');const p='src/components/Workspace.tsx';let s=fs.readFileSync(p,'utf8').replace("    { title: 'Home', href: '/' },\n",'').replace('<Text style={{ color: c.primary, fontSize: 24, fontWeight: \'900\' }}>JIVO<Text style={{ color: \'#E8A317\' }}>.</Text> JM</Text>','<Link href={preview ? \'/preview\' : \'/\'} accessibilityLabel="Home" style={{ color: c.primary, fontSize: 24, fontWeight: \'900\' }}>JIVO<Text style={{ color: \'#E8A317\' }}>.</Text> JM</Link>');fs.writeFileSync(p,s)
-// Profile patch API files use CRLF; normalize only patch script's target before exact matching.
-const a='src/modules/messenger/api.ts';fs.writeFileSync(a,fs.readFileSync(a,'utf8').replace(/\r\n/g,'\n'))

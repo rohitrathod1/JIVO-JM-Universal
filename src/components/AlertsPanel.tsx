@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { realtime } from '../core/realtime/socket'
 import { ActivityIndicator, ScrollView, Switch, Text, View } from 'react-native'
 import * as alerts from '../modules/notifications/api'
 import { useCursor } from '../shared/useCursor'
@@ -28,6 +29,8 @@ export function AlertsPanel() {
   const [scope, setScope] = useState<'active' | 'history' | 'sent'>('active'); const [composer, setComposer] = useState(false); const [busy, setBusy] = useState(false); const [error, setError] = useState('')
   const [confirm, setConfirm] = useState<{ title: string; action: () => Promise<unknown> } | null>(null)
   const load = useCallback(async (cursor?: string | null) => scope === 'sent' && canSend ? alerts.adminAlerts(cursor) : scope === 'history' ? alerts.alertHistory(cursor) : { results: await alerts.activeAlerts(), next_cursor: null }, [scope, canSend]); const page = useCursor(load)
+  const refresh = page.refresh
+  useEffect(() => realtime.on('*', frame => { if (frame.type === 'RESYNC' || frame.type.startsWith('ALERT_')) void refresh() }), [refresh])
   async function run(action: () => Promise<unknown>) { if (busy) return; setBusy(true); setError(''); try { await action(); setConfirm(null); await page.refresh() } catch (e) { setError(errorMessage(e)) } finally { setBusy(false) } }
   return <ScrollView contentContainerStyle={styles.page}><Label large>Alerts</Label><View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}><Button title={scope === 'active' ? 'Active alerts selected' : 'Active alerts'} onPress={() => setScope('active')} /><Button title={scope === 'history' ? 'Alert history selected' : 'Alert history'} onPress={() => setScope('history')} />{canSend && <Button title={scope === 'sent' ? 'Sent alerts selected' : 'Sent alerts'} onPress={() => setScope('sent')} />}</View>
     {canSend && <Button title="Compose alert" disabled={busy} onPress={() => setComposer(true)} />}{!!(error || page.error) && <Text accessibilityRole="alert" style={{ color: c.text }}>{error || page.error}</Text>}

@@ -10,9 +10,9 @@ export function Label({ children, large = false }: { children: ReactNode; large?
   const c = useColors()
   return <Text style={{ fontFamily: large ? 'Inter_700Bold' : 'Inter_400Regular', color: c.text, fontSize: large ? 26 : 16, fontWeight: large ? '700' : '400', lineHeight: large ? 34 : 24 }}>{children}</Text>
 }
-export function Button({ title, onPress, disabled = false }: { title: string; onPress: () => void; disabled?: boolean }) {
+export function Button({ title, onPress, disabled = false, accessibilityLabel }: { title: string; onPress: () => void; disabled?: boolean; accessibilityLabel?: string }) {
   const c = useColors()
-  return <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
+  return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
     style={({ pressed }) => ({ padding: 12, minHeight: 46, borderRadius: 12, backgroundColor: c.primary, opacity: disabled ? 0.45 : pressed ? 0.75 : 1 })}>
     <Text style={{ fontFamily: 'Inter_600SemiBold', color: 'white', fontWeight: '600', textAlign: 'center', fontSize: 15 }}>{title}</Text>
   </Pressable>

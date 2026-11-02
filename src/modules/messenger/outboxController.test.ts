@@ -24,3 +24,18 @@ it('ignores hydration from an account replaced before its stored messages arrive
 it('aborts background sends and preserves their id for foreground retry',async()=>{
  const f=fixture();f.send.mockImplementationOnce((_conversation,_payload,signal)=>new Promise((_resolve,reject)=>signal.addEventListener('abort',()=>reject(Error('aborted')))));await f.controller.bind('a');f.controller.setActive(true);f.controller.enqueue('a','chat',payload);await tick();f.controller.setActive(false);await tick();expect(f.controller.snapshot().entries[0].status).toBe('queued');f.controller.setActive(true);await tick();expect(f.send.mock.calls[1][1].client_id).toBe('same-id');expect(f.controller.snapshot().entries).toEqual([])
 })
+
+it('requeues a message when backgrounding occurs while persisting its sending state', async () => {
+ const f = fixture(); await f.controller.bind('a')
+ const original = f.storage.put.getMockImplementation()!
+ let release!: () => void
+ f.storage.put.mockImplementation(async (entry, create) => {
+  if (entry.status === 'sending') await new Promise<void>(resolve => { release = resolve })
+  await original(entry, create)
+ })
+ f.controller.setActive(true); f.controller.enqueue('a', 'chat', payload); await tick()
+ expect(release).toBeTypeOf('function'); f.controller.setActive(false); release(); await tick()
+ expect(f.send).not.toHaveBeenCalled(); expect(f.controller.snapshot().entries[0].status).toBe('queued')
+ f.storage.put.mockImplementation(original); f.controller.setActive(true); await tick()
+ expect(f.send).toHaveBeenCalledOnce(); expect(f.controller.snapshot().entries).toEqual([])
+})

@@ -7,9 +7,12 @@ import { allows, ADMIN_ACCESS } from '../config/capabilities'
 import { Button, Label, useColors } from '../ui'
 import { errorMessage } from '../core/api/client'
 import type { ReactNode } from 'react'
+import { ConnectionStatus } from './ConnectionStatus'
+import { LiveAlertBanner, useLiveUpdates } from './LiveUpdates'
 export function Workspace({ children, preview = false }: { children: ReactNode; preview?: boolean }) {
   const { me, logout, status, retry, error: sessionError } = useSession(); const c = useColors(); const { width } = useWindowDimensions()
   const [error, setError] = useState('')
+  const { summary } = useLiveUpdates()
   if (!preview && (status === 'loading' || status === 'signing-out')) return <SafeAreaView style={{ flex: 1, justifyContent: 'center', backgroundColor: c.bg }}><ActivityIndicator accessibilityLabel="Restoring session" /></SafeAreaView>
   if (!preview && status === 'unreachable') return <SafeAreaView style={{ flex: 1, padding: 24, justifyContent: 'center', gap: 20, backgroundColor: c.bg }}><Label>{sessionError || 'Cannot reach JM.'}</Label><Button title="Retry connection" onPress={() => void retry()} /></SafeAreaView>
   if (!me && !preview) return <Redirect href="/login" />
@@ -29,6 +32,9 @@ export function Workspace({ children, preview = false }: { children: ReactNode; 
       {preview ? <Link href="/login" style={{ color: c.primary }}>Back to sign in</Link> : <Button title="Sign out" onPress={() => { void logout().catch(e => setError(errorMessage(e))) }} />}
     </View>
     {!!error && <Label>{error}</Label>}
+    {!preview && <ConnectionStatus />}
+    {!preview && <LiveAlertBanner />}
+    {!preview && summary.unread_notifications > 0 && <Link href="/notifications" style={{ padding: 8, color: c.primary }}>{summary.unread_notifications} unread notifications</Link>}
     {preview && <Text style={{ padding: 10, color: c.muted }}>Layout preview • fictional content • no API requests</Text>}
     <View style={{ flex: 1, flexDirection: wide ? 'row' : 'column' }}>
       {wide && <View style={{ width: 190, borderRightWidth: 1, borderColor: c.border }}>{nav}</View>}

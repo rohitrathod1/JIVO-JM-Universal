@@ -1,1 +1,0 @@
-const fs=require('fs');const p='mocked-ui.cjs';let s=fs.readFileSync(p,'utf8');s=s.replace("      await page.getByText('Reader sample 25', { exact: true }).evaluate(node =>", "      await page.getByText('Reader sample 25', { exact: true }).hover()\n      await page.getByText('Reader sample 25', { exact: true }).evaluate(node =>");fs.writeFileSync(p,s);

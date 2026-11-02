@@ -1,11 +1,13 @@
 import { useCallback, useRef, useState } from 'react'
-import { ActivityIndicator, Image, Switch, Text } from 'react-native'
+import { ActivityIndicator, Switch, Text } from 'react-native'
 import { randomUUID } from 'expo-crypto'
 import * as chat from '../modules/messenger/api'
 import { errorMessage, origin } from '../core/api/client'
 import { useCursor } from '../shared/useCursor'
 import { Button, Card, Field, Label, useColors } from '../ui'
 import { Sheet } from './Sheet'
+import { ImageViewer } from './ImageViewer'
+import { mediaUrl } from '../modules/messenger/media/url'
 export function SearchMessages({ conversation, onJump, onClose }: { conversation: string; onJump: (seq: number) => void; onClose: () => void }) {
   const c = useColors(); const [query, setQuery] = useState(''); const [submitted, setSubmitted] = useState('')
   const load = useCallback(async (cursor?: string | null) => { if (!submitted.trim()) return { results: [], next_cursor: null }; const page = await chat.searchMessages(submitted, cursor, conversation); return { ...page, results: page.results.map(hit => ({ ...hit, id: hit.message.id })) } }, [submitted, conversation]); const page = useCursor(load)
@@ -37,9 +39,8 @@ export function ShareContact({ conversation, onSent, onClose }: { conversation: 
     {!!(error || page.error) && <Text accessibilityRole="alert" style={{ color: c.text }}>{error || page.error}</Text>}<Button title="Send contact" disabled={busy || !selected} onPress={() => { if (!selected) return; setBusy(true); void chat.sendContact(conversation, id.current, selected.id).then(onSent).catch(e => setError(errorMessage(e))).finally(() => setBusy(false)) }} /><Button title="Cancel contact" disabled={busy} onPress={onClose} />
   </Sheet>
 }
-export function FullImage({ attachment, onClose }: { attachment: chat.Attachment; onClose: () => void }) {
-  const path = attachment.preview_url || attachment.download_url
-  const valid = path.startsWith('/') && !path.startsWith('//') && !path.includes('\\')
-  return <Sheet visible onClose={onClose}><Label large>{attachment.name}</Label>{valid ? <Image accessibilityLabel={attachment.name} source={{ uri: `${origin}${path}` }} style={{ width: '100%', aspectRatio: Math.max(0.5, Math.min(2, (attachment.width || 1) / (attachment.height || 1))) }} resizeMode="contain" /> : <Label>This image URL is unsupported.</Label>}<Button title="Close image" onPress={onClose} /></Sheet>
+export function FullImage({ attachment, onClose, previous, next }: { attachment: chat.Attachment; onClose: () => void; previous?: () => void; next?: () => void }) {
+  const uri = mediaUrl(attachment.preview_url || attachment.download_url, origin)
+  return <Sheet visible onClose={onClose}><Label large>{attachment.name}</Label>{uri ? <ImageViewer key={attachment.id} uri={uri} name={attachment.name} previous={previous} next={next} /> : <Label>This image URL is unsupported.</Label>}<Button title="Close image" onPress={onClose} /></Sheet>
 }
 

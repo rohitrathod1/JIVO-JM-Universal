@@ -1,1 +1,0 @@
-const fs=require('fs');for(const p of ['src/shared/homeTiles.test.ts','mocked-ui.cjs']){let s=fs.readFileSync(p,'utf8');s=s.replace('Ann and Bob are typing.','Ann and Bob are typing\u2026').replace('Example is typing.','Example is typing\u2026');fs.writeFileSync(p,s)}

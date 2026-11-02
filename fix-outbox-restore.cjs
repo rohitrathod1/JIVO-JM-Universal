@@ -1,8 +1,0 @@
-const fs=require('fs');function edit(p,a,b){let s=fs.readFileSync(p,'utf8');if(!s.includes(a))throw Error(p);fs.writeFileSync(p,s.replace(a,b))}
-edit('src/core/auth/controller.ts','boundary?: () => void','boundary?: (preserveOutbox: boolean) => void');edit('src/core/auth/controller.ts','private advance() { this.deps.boundary?.();','private advance(preserveOutbox = false) { this.deps.boundary?.(preserveOutbox);');edit('src/core/auth/controller.ts','async restore() {\n    if (this.signingOut) return\n    const generation = this.advance()','async restore() {\n    if (this.signingOut) return\n    const generation = this.advance(true)')
-edit('src/core/auth/Session.tsx','boundary: () => { advanceSession(); void outbox.bind(null) }','boundary: preserve => { advanceSession(); void outbox.bind(null, !preserve) }')
-edit('src/core/auth/Session.tsx',"if (state.status !== 'ready') { realtime.stop(); return }","if (state.status !== 'ready') { realtime.stop(); if(state.status==='anonymous')void outbox.bind(null); return }")
-edit('src/modules/messenger/outboxController.ts','async bind(owner:string|null){if(owner===this.owner&&this.hydrated)return;','async bind(owner:string|null,clearStorage=true){if(owner!==null&&owner===this.owner&&this.hydrated)return;')
-edit('src/modules/messenger/outboxController.ts','if(!owner){this.hydrated=true;this.persist();return}','if(!owner){this.hydrated=true;if(clearStorage)this.persist();return}')
-// Null or malformed rows in local storage must not crash hydration.
-edit('src/modules/messenger/outboxController.ts','saved.filter(p=>p.owner===owner','saved.filter(p=>p && p.owner===owner')

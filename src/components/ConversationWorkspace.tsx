@@ -29,14 +29,22 @@ import { CreatePoll, ForwardMessage, FullImage, SearchMessages, ShareContact } f
 import { MediaPlayback } from './MediaPlayback'
 import { ConversationDetails } from './ConversationDetails'
 import { ConversationPicker } from './ConversationPicker'
+import { PersonDetails } from './PersonDetails'
+import { PollVoters } from './PollVoters'
+import { conversationDrafts } from '../modules/messenger/drafts'
+import { caretAfterEdit, insertMention, mentionAt, type Caret } from '../modules/messenger/composer'
+import { ComposerPreview } from './ComposerPreview'
 const viewability = { itemVisiblePercentThreshold: 80, minimumViewTime: 400 }
 
 export function Messenger({ preview = false, initialConversation, initialSeq }: { preview?: boolean; initialConversation?: chat.ConversationItem; initialSeq?: number }) {
   const appearance = useChatAppearance().value; const backgroundImage = appearance?.type === 'image' ? mediaUrl(appearance.image_url, origin) : null
-  const c = useColors(); const { width, height } = useWindowDimensions(); const compact = height < 600; const { me } = useSession()
+  const c = useColors(); const { width, height } = useWindowDimensions(); const nativePhone = Platform.OS !== 'web' && width < 600; const compact = height < 600 || nativePhone; const { me } = useSession()
   const [selection, setSelected] = useState<chat.ConversationItem | null>(initialConversation ?? null)
   const [query, setQuery] = useState(''); const [filter, setFilter] = useState<chat.ConversationFilter>('all')
-  const [body, setBody] = useState(''); const [reply, setReply] = useState<chat.Message | null>(null); const [editing, setEditing] = useState<chat.Message | null>(null)
+  const [body, setBody] = useState(() => initialConversation && me ? conversationDrafts.read(me.id, initialConversation.id) : ''); const [reply, setReply] = useState<chat.Message | null>(null); const [editing, setEditing] = useState<chat.Message | null>(null)
+  const [person, setPerson] = useState<chat.PersonCard | null>(null); const [votes, setVotes] = useState<string | null>(null)
+  const [caret, setCaret] = useState<Caret>({ start: body.length, end: body.length }); const [forcedCaret, setForcedCaret] = useState<Caret | undefined>()
+  const mention = mentionAt(body, caret)
   const [actions, setActions] = useState<chat.Message | null>(null); const [confirmDelete, setConfirmDelete] = useState<'me' | 'everyone' | null>(null)
   const [error, setError] = useState(''); const [sending, setSending] = useState(false)
   const [exporting,setExporting]=useState<{conversation:string;message:string;attachment:string}|null>(null)
@@ -56,12 +64,14 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
   const currentAttachment = (source: typeof media) => source && source.conversation === selection?.id && !historyState.accessLost ? messages.find(m => m.id === source.message && !m.deleted)?.attachments?.find(a => a.id === source.attachment && a.status === 'ready') : undefined
   const exportAttachment=currentAttachment(exporting);
   const mediaAttachment = currentAttachment(media); const imageAttachment = currentAttachment(image)
+  const gallery = messages.filter(message => !message.deleted).flatMap(message => message.attachments.filter(attachment => attachment.kind === 'image' && attachment.status === 'ready').map(attachment => ({ conversation: message.conversation, message: message.id, attachment: attachment.id })))
+  const imageIndex = gallery.findIndex(item => item.attachment === image?.attachment)
   useEffect(() => history.subscribe(() => {
     const state = history.snapshot()
     const retain = (source: typeof media) => source && source.conversation === state.id && !state.accessLost && state.window.messages.some(m => m.id === source.message && !m.deleted && m.attachments?.some(a => a.id === source.attachment && a.status === 'ready')) ? source : null
     setMedia(retain); setImage(retain)
-    if (state.accessLost) { upload.current?.abort(); setAttachments([]); setTool(null); setActions(null); setForwarding(null); setReply(null); setEditing(null); setBody('') }
-  }), [history])
+    if (state.accessLost) { if (state.id && me) conversationDrafts.write(me.id, state.id, ''); upload.current?.abort(); setAttachments([]); setTool(null); setActions(null); setForwarding(null); setReply(null); setEditing(null); setBody(''); setPerson(null); setVotes(null) }
+  }), [history, me])
   const loadConversations = useCallback((cursor?: string | null) => preview ? Promise.resolve({ results: [], next_cursor: null }) : chat.listConversations(filter, query, cursor), [preview, filter, query])
   const conversations = useCursor(loadConversations)
   const { items, cursor, loading, refresh: refreshConversations } = conversations
@@ -124,8 +134,14 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
     if (sending || uploadProgress !== null) return
     selectionGeneration.current++
     if (history.snapshot().accessLost && selectedId === item.id) void history.select(item.id)
-    setSelected(item); setBody(''); setReply(null); setEditing(null)
+    setSelected(item); setBody(conversationDrafts.read(me?.id ?? '', item.id)); setForcedCaret(undefined); setReply(null); setEditing(null); setPerson(null); setVotes(null)
     setAttachments([]); setError(''); setPicker(false); draftId.current = randomUUID()
+  }
+  function changeBody(value: string) {
+    setCaret(caretAfterEdit(body, value))
+    setBody(value)
+    if (selected && me && !editing) conversationDrafts.write(me.id, selected.id, value)
+    draftId.current = randomUUID()
   }
   async function send() {
     if (!selected || !selected.can.send || sending || uploadProgress !== null || (!body.trim() && !attachments.length)) return
@@ -134,8 +150,9 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
       live.stop()
       if (editing) history.accept(await chat.editMessage(editing.id, withMentionTokens(body.trim(), live.members)))
       else outbox.enqueue(me?.id ?? '', selected.id, { client_id: draftId.current, body: withMentionTokens(body.trim(), live.members), upload_ids: attachments.map(a => a.id), reply_to: reply?.id })
+      if (!editing && me) conversationDrafts.write(me.id, selected.id, '')
       if (!active.current) return
-      setBody(''); setAttachments([]); setEditing(null); setReply(null); draftId.current = randomUUID(); await history.latest(); refresh()
+      setBody(editing ? conversationDrafts.read(me?.id ?? '', selected.id) : ''); setAttachments([]); setEditing(null); setReply(null); draftId.current = randomUUID(); await history.latest(); refresh()
     } catch (e) { if (active.current) setError(errorMessage(e)) } finally { if (active.current) setSending(false) }
   }
   async function attach() {
@@ -181,10 +198,10 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
       {(split || selected) && <View style={{ flex: 1, padding: compact ? 8 : width < 500 ? 12 : 20, gap: compact ? 6 : 12 }}>
         {selected ? <>
           {!split && !compact && <Button title="Back to conversations" disabled={blocked} onPress={() => { selectionGeneration.current++; setSelected(null); setAttachments([]) }} />}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}><View style={{ flex: 1 }}><Label large>{selected.title || selected.peer?.name}</Label>{!!live.label && <Label>{live.label}</Label>}</View>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}><View style={{ flex: 1, minWidth: 0 }}>{nativePhone ? <><Text numberOfLines={1} style={{ color: c.text, fontFamily: 'Inter_700Bold', fontSize: 22, lineHeight: 28 }}>{selected.title || selected.peer?.name}</Text>{!!live.label && <Text numberOfLines={1} style={{ color: c.muted, fontSize: 12, lineHeight: 18 }}>{live.label}</Text>}</> : <><Label large>{selected.title || selected.peer?.name}</Label>{!!live.label && <Label>{live.label}</Label>}</>}</View>
             {!compact && <Button title={selected.pinned_at ? 'Unpin' : 'Pin'} disabled={blocked} onPress={() => void perform(() => chat.updateSettings(selected.id, { pinned: !selected.pinned_at }))} />}
             {!compact && <Button title={selected.archived_at ? 'Unarchive' : 'Archive'} disabled={blocked} onPress={() => void perform(() => chat.updateSettings(selected.id, { archived: !selected.archived_at }))} />}
-            {compact && <Button title="Conversation options" onPress={() => setMenu(true)} />}
+            {compact && <Button title={nativePhone ? 'Options' : 'Conversation options'} accessibilityLabel="Conversation options" onPress={() => setMenu(true)} />}
           </View>
           {!compact && <ScrollView horizontal style={{ flexGrow: 0, flexShrink: 0, minHeight: 48 }} contentContainerStyle={{ gap: 8 }}><Button title="Conversation details" disabled={blocked} onPress={() => setTool('details')} /><Button title="Search messages" disabled={blocked} onPress={() => setTool('search')} />{selected.can.send && <><Button title="Create poll" disabled={blocked} onPress={() => setTool('poll')} /><Button title="Share contact" disabled={blocked} onPress={() => setTool('contact')} /></>}</ScrollView>}
           {!compact && historyState.window.hasMoreBefore && <Button title="Load earlier messages" disabled={historyState.loading} onPress={() => loadEarlier()} />}
@@ -205,7 +222,8 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
                 {a.status === 'ready' && a.kind === 'image' && <Button title={`View image ${a.name}`} onPress={() => setImage({ conversation: m.conversation, message: m.id, attachment: a.id })} />}
               </View>)}
               {!m.deleted && m.poll && <><Label>{m.poll.question}</Label>{m.poll.options.map(option => <Button key={option.id} title={`${option.text} (${option.votes})${option.me ? ' • selected' : ''}`} disabled={blocked || !m.can.vote} onPress={() => void perform(() => chat.votePoll(m.id, m.poll!.allow_multiple ? m.poll!.options.filter(o => o.me !== (o.id === option.id)).map(o => o.id) : [option.id]))} />)}</>}
-              {!m.deleted && m.contact && <Label>Contact: {m.contact.name}</Label>}
+              {!m.deleted && m.poll && <Button title={`View votes (${m.poll.voters})`} onPress={() => setVotes(m.id)} />}
+              {!m.deleted && m.contact && <Button title={`Contact: ${m.contact.name}`} onPress={() => setPerson(m.contact!)} />}
               {m.reactions.length > 0 && <Label>{m.reactions.map(r => `${r.emoji} ${r.count}`).join('   ')}</Label>}
               <Text style={{ color: c.muted, fontSize: 12 }}>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{m.edited_at ? ' • edited' : ''}{m.sender?.id === me?.id ? ` • ${statusFor(m, me?.id ?? '', historyState.window.receipts) || m.status || 'sent'}` : ''}</Text>
               {!m.deleted && <Button title="Message actions" disabled={blocked} onPress={() => { setActions(m); setConfirmDelete(null) }} />}
@@ -215,11 +233,12 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
           {!compact && <Button title="Jump to latest" disabled={historyState.loading} onPress={() => void history.latest()} />}
           {pending.entries.some(p=>p.conversation===selected.id)&&<ScrollView style={{maxHeight:150}} contentContainerStyle={{gap:8}}><Label>{outboxStorageNotice}</Label>{pending.entries.filter(p=>p.conversation===selected.id).map(p=><Card key={p.payload.client_id}><Label>{p.payload.body || 'Attachment message'} — {p.status}</Label>{!!p.error&&<Label>{p.error}</Label>}<Button title="Retry queued message" disabled={p.status==='sending'} onPress={()=>{outbox.retry(p.payload.client_id);void outbox.flush()}}/><Button title="Discard queued message" disabled={p.status==='sending'} onPress={()=>outbox.discard(p.payload.client_id)}/></Card>)}</ScrollView>}{!!pending.notice&&<Label>{pending.notice}</Label>}
           {reply && <View style={{ flexDirection: 'row', gap: 8 }}><View style={{ flex: 1 }}><Label>Replying to {reply.sender?.name}: {reply.body.slice(0, 80)}</Label></View><Button title="Cancel reply" onPress={() => setReply(null)} /></View>}
-          {editing && <><Label>Editing message</Label><Button title="Cancel edit" onPress={() => { setEditing(null); setBody('') }} /></>}
+          {editing && <><Label>Editing message</Label><Button title="Cancel edit" onPress={() => { setEditing(null); setBody(conversationDrafts.read(me?.id ?? '', selected.id)) }} /></>}
           {attachments.map(a => <View key={a.id} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}><View style={{ flex: 1 }}><Label>{a.name} • ready</Label></View><Button title="Remove file" disabled={blocked} onPress={() => void perform(async () => { await chat.discardUpload(a.id); setAttachments(v => v.filter(item => item.id !== a.id)); draftId.current = randomUUID() })} /></View>)}
           {uploadProgress !== null && <><Label>{uploadProgress < 1 ? `Uploading ${Math.round(uploadProgress * 100)}%` : 'Waiting for server file checks…'}</Label><Button title="Cancel upload" onPress={() => upload.current?.abort()} /></>}
-          {selected.can.send && /(^|\s)@[^@\n]*$/.test(body) && <ScrollView horizontal style={{maxHeight:52}} contentContainerStyle={{gap:8}}>{live.members.filter(m=>!m.is_me&&m.user.name.toLowerCase().includes(body.slice(body.lastIndexOf('@')+1).toLowerCase())).slice(0,8).map(m=><Button key={m.user.id} title={'Mention '+m.user.name} disabled={blocked} onPress={()=>{setBody(body.slice(0,body.lastIndexOf('@'))+'@'+m.user.name+' ');draftId.current=randomUUID()}}/>)}</ScrollView>}
-          {selected.can.send ? <View style={{ flexDirection: compact ? 'row' : 'column', alignItems: compact ? 'center' : undefined, gap: 8 }}><View style={{ flex: compact ? 1 : undefined }}><Field compact={compact} label="Message" value={body} onBlur={live.stop} onChangeText={v => { setBody(v); draftId.current = randomUUID(); live.typing() }} multiline editable={!blocked} style={{ maxHeight: compact ? 64 : 120 }} /></View>
+          {selected.can.send && <ComposerPreview body={body} />}
+          {selected.can.send && mention && <ScrollView horizontal style={{maxHeight:52}} contentContainerStyle={{gap:8}}>{live.members.filter(member => !member.is_me && member.user.name.toLowerCase().includes(mention.query.toLowerCase())).slice(0,8).map(member => <Button key={member.user.id} title={'Mention '+member.user.name} disabled={blocked} onPress={() => { const next = insertMention(body, caret, member.user.name); changeBody(next.text); setCaret(next.caret); setForcedCaret(next.caret) }} />)}</ScrollView>}
+          {selected.can.send ? <View style={{ flexDirection: compact ? 'row' : 'column', alignItems: compact ? 'center' : undefined, gap: 8 }}><View style={{ flex: compact ? 1 : undefined }}><Field compact={compact} label="Message" value={body} onBlur={live.stop} selection={forcedCaret} onSelectionChange={event => { setCaret(event.nativeEvent.selection) }} onChangeText={v => { setForcedCaret(undefined); changeBody(v); live.typing() }} multiline editable={!blocked} style={{ maxHeight: compact ? 64 : 120 }} /></View>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>{!compact && selected.can.send_file && !editing && <><Button title="Capture or import" disabled={blocked} onPress={()=>setCapture(true)}/><Button title="Attach file" disabled={blocked} onPress={() => void attach()} /></>}<View style={{ flex: compact ? undefined : 1, minWidth: compact ? undefined : 140 }}><Button title={sending ? 'Sending…' : editing ? 'Save edit' : 'Send message'} disabled={blocked || (!body.trim() && !attachments.length)} onPress={() => void send()} /></View></View>
           </View> : <Label>Sending is unavailable in this conversation.</Label>}
         </> : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}><Text style={{ color: c.primary, fontSize: 54 }}>JM</Text><Label large>Your conversations, together</Label><Label>Select a conversation to get started.</Label></View>}
@@ -244,14 +263,16 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
     {selectedId && tool === 'poll' && <CreatePoll conversation={selectedId} onSent={message => { history.accept(message); setTool(null); void history.latest(); refresh() }} onClose={() => setTool(null)} />}
     {selectedId && tool === 'contact' && <ShareContact conversation={selectedId} onSent={message => { history.accept(message); setTool(null); void history.latest(); refresh() }} onClose={() => setTool(null)} />}
     {info && selected && info.conversation===selected.id && <MessageDetails message={info} onClose={()=>setInfo(null)} />}
+    {votes && selected && messages.some(message => message.id === votes && !message.deleted) && <PollVoters id={votes} onClose={() => setVotes(null)} onPerson={value => { setVotes(null); setPerson(value) }} />}
+    {person && selected && <PersonDetails person={person} onClose={() => setPerson(null)} />}
     {forwarding && <ForwardMessage message={forwarding} onClose={() => { setForwarding(null); refresh() }} />}
     {exporting&&exportAttachment&&<AttachmentExport key={exporting.message+exporting.attachment} conversation={exporting.conversation} message={exporting.message} seq={messages.find(m=>m.id===exporting.message)?.seq??0} attachment={exportAttachment} onClose={()=>setExporting(null)}/>}
     {mediaAttachment && <MediaPlayback attachment={mediaAttachment} onClose={() => setMedia(null)} />}
-    {imageAttachment && <FullImage attachment={imageAttachment} onClose={() => setImage(null)} />}
+    {imageAttachment && <FullImage attachment={imageAttachment} onClose={() => setImage(null)} previous={imageIndex > 0 ? () => setImage(gallery[imageIndex - 1]) : undefined} next={imageIndex >= 0 && imageIndex < gallery.length - 1 ? () => setImage(gallery[imageIndex + 1]) : undefined} />}
     {picker && <ConversationPicker groupAllowed={Boolean(me?.can_create_groups)} onChoose={choose} onClose={() => setPicker(false)} />}
     <Sheet visible={Boolean(actions)} onClose={() => { if (!sending) setActions(null) }}>
       <Label large>Message actions</Label>{actions && <Button title="Message information" onPress={()=>{setInfo(actions);setActions(null)}}/>}
-      {actions?.can.reply && selected?.can.send && <Button title="Reply" onPress={() => { setEditing(null); setReply(actions); setActions(null); draftId.current = randomUUID() }} />}
+      {actions?.can.reply && selected?.can.send && <Button title="Reply" onPress={() => { if (editing && selected) setBody(conversationDrafts.read(me?.id ?? '', selected.id)); setEditing(null); setReply(actions); setActions(null); draftId.current = randomUUID() }} />}
       {actions?.can.forward && <Button title="Forward message" onPress={() => { setForwarding(actions); setActions(null) }} />}
       {actions?.can.edit && <Button title="Edit message" disabled={attachments.length > 0} onPress={() => { setEditing(actions); setReply(null); setBody(actions.body); setActions(null) }} />}
       {actions?.can.react && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>{['👍', '❤️', '🎉'].map(emoji => <Button key={emoji} title={emoji} disabled={sending} onPress={() => void perform(() => chat.setReaction(actions.id, emoji))} />)}<Button title="Clear reaction" disabled={sending} onPress={() => void perform(() => chat.clearReaction(actions.id))} /></View>}

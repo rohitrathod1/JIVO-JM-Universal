@@ -1,7 +1,0 @@
-const fs=require('fs');function edit(p,a,b){let s=fs.readFileSync(p,'utf8');if(!s.includes(a))throw Error(p);fs.writeFileSync(p,s.replace(a,b))}
-edit('mocked-ui.cjs',"const chooser=page.waitForEvent('filechooser');await page.getByRole('button',{name:'Choose profile photo',exact:true}).click();await (await chooser)","const photoChooser=page.waitForEvent('filechooser');await page.getByRole('button',{name:'Choose profile photo',exact:true}).click();await (await photoChooser)")
-edit('src/components/AdminPassword.tsx','useEffect(()=>{const off=subscribeSensitiveView','useEffect(()=>{const invalidate=()=>{generation.current++;abort.current?.abort()};const off=subscribeSensitiveView')
-edit('src/components/AdminPassword.tsx','return()=>{generation.current++;abort.current?.abort();off()}','return()=>{invalidate();off()}')
-edit('src/components/ProfileImages.tsx','useEffect(()=>{mounted.current=true;','useEffect(()=>{const invalidate=()=>{generation.current++;abort.current?.abort()};mounted.current=true;')
-edit('src/components/ProfileImages.tsx','return()=>{mounted.current=false;active.current=false;generation.current++;abort.current?.abort();off()}','return()=>{mounted.current=false;active.current=false;invalidate();off()}')
-edit('src/modules/messenger/outboxController.ts',".slice(0,100).map(p=>({...p,status:p.status==='failed'", ".sort((a,b)=>a.created-b.created).slice(0,100).map(p=>({...p,status:p.status==='failed'")

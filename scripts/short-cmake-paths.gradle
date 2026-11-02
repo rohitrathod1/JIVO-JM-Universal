@@ -1,0 +1,22 @@
+// Keep generated native object paths short on Windows without editing generated projects
+// or changing the machine-wide long-path policy. Applied only by android:build.
+allprojects { project ->
+    ['com.android.application', 'com.android.library'].each { pluginId ->
+        project.pluginManager.withPlugin(pluginId) {
+            def android = project.extensions.getByName('android')
+            // A limit below the output directory length disables useful CMake hashing.
+            // Keep staging short and leave enough room for hashed object filenames.
+            def moduleId = java.security.MessageDigest.getInstance('SHA-256').digest(project.path.bytes).encodeHex().toString().take(12)
+            def shortAppStage = System.getenv('JM_NATIVE_APP_STAGE')
+            android.externalNativeBuild.cmake.buildStagingDirectory = pluginId == 'com.android.application' && shortAppStage
+                ? new File(shortAppStage, moduleId)
+                : new File(rootProject.projectDir.parentFile, ".native-build/${moduleId}")
+            android.defaultConfig.externalNativeBuild.cmake.arguments.addAll([
+                '-DCMAKE_OBJECT_PATH_MAX=240',
+                '-DCMAKE_JOB_POOLS=jm_compile=1;jm_link=1',
+                '-DCMAKE_JOB_POOL_COMPILE=jm_compile',
+                '-DCMAKE_JOB_POOL_LINK=jm_link'
+            ])
+        }
+    }
+}

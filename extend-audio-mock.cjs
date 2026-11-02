@@ -1,9 +1,0 @@
-const fs=require('fs');let s=fs.readFileSync('mocked-ui.cjs','utf8');s=s.replace('async function run() {', `function mockWave() {
-  const samples = 8000 * 8, buffer = Buffer.alloc(44 + samples * 2)
-  buffer.write('RIFF'); buffer.writeUInt32LE(buffer.length - 8, 4); buffer.write('WAVE', 8); buffer.write('fmt ', 12); buffer.writeUInt32LE(16, 16); buffer.writeUInt16LE(1, 20); buffer.writeUInt16LE(1, 22); buffer.writeUInt32LE(8000, 24); buffer.writeUInt32LE(16000, 28); buffer.writeUInt16LE(2, 32); buffer.writeUInt16LE(16, 34); buffer.write('data', 36); buffer.writeUInt32LE(samples * 2, 40); return buffer
-}
-async function run() {`);
-s=s.replace("let messages = [message('first', 1, 'Hello from the mocked API')]", "let messages = [message('first', 1, 'Hello from the mocked API')]\n      messages[0].attachments = [{ id: 'audio', name: 'Example audio.wav', kind: 'audio', status: 'ready', preview_url: '/api/jm/media/mock.wav', download_url: '/api/jm/media/mock.wav', thumb_url: null, mime: 'audio/wav', size: 128044 }]" );
-s=s.replace("if (path === '/api/jm/auth/csrf/')", "if (path === '/api/jm/media/mock.wav') return route.fulfill({ status: 200, contentType: 'audio/wav', body: mockWave() })\n        if (path === '/api/jm/auth/csrf/')");
-s=s.replace("await page.getByText('Hello from the mocked API', { exact: true }).waitFor()", "await page.getByText('Hello from the mocked API', { exact: true }).waitFor()\n      await page.getByRole('button', { name: 'Open media Example audio.wav', exact: true }).click()\n      await page.getByRole('button', { name: 'Play audio', exact: true }).click()\n      await page.getByRole('button', { name: 'Pause audio', exact: true }).click()\n      await page.getByRole('button', { name: 'Close media', exact: true }).click()");
-s=s.replace('mocked cookie login, conversation,', 'mocked cookie login, conversation/audio playback,');fs.writeFileSync('mocked-ui.cjs',s);

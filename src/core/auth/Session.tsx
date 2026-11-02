@@ -1,5 +1,6 @@
 import { announceSessionBoundary,onOtherSessionBoundary,withSessionLock } from './sessionCoordination'
 import { outbox } from '../../modules/messenger/outbox'
+import { conversationDrafts } from '../../modules/messenger/drafts'
 import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { isAxiosError } from 'axios'
 import { api, errorMessage, onSessionLost, origin, advanceSession } from '../api/client'
@@ -13,7 +14,7 @@ const Context = createContext<SessionController | null>(null)
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [external]=useState(()=>({active:false}))
   const [controller] = useState(() => new SessionController({
-    boundary: preserve => { advanceSession(); outbox.setActive(false); void outbox.bind(null, !preserve&&!external.active); if(!preserve&&!external.active)announceSessionBoundary() }, enabled: Boolean(origin), csrf: () => api.get('/auth/csrf/'),
+    boundary: preserve => { advanceSession(); conversationDrafts.bind(null); outbox.setActive(false); void outbox.bind(null, !preserve&&!external.active); if(!preserve&&!external.active)announceSessionBoundary() }, enabled: Boolean(origin), csrf: () => api.get('/auth/csrf/'),
     me: async () => (await api.get<Me>('/me/')).data,
     login: (email, password) => withSessionLock(async()=>{try{return (await api.post<LoginResponse>('/auth/login/', { email, password })).data}finally{announceSessionBoundary()}}),
     logout: () => withSessionLock(async()=>{try{return await api.post('/auth/logout/')}finally{announceSessionBoundary()}}),
@@ -29,11 +30,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [controller])
   useEffect(() => {
     if (state.status !== 'ready') { realtime.stop(); return }
+    conversationDrafts.bind(state.me?.id ?? null)
     void outbox.bind(state.me?.id ?? null)
     realtime.start()
     const off = subscribeLifecycle(active => { realtime.setActive(active); outbox.setActive(active) })
-    const reconnect = realtime.on('RESYNC', () => void outbox.flush())
-    return () => { off(); reconnect(); outbox.setActive(false); realtime.stop() }
+    const reconnect = realtime.on('HELLO', () => void outbox.flush())
+    // REST can recover before WebSockets. Do not strand queued sends until a socket reconnects.
+    const retry = setInterval(() => void outbox.flush(), 15000)
+    return () => { off(); reconnect(); clearInterval(retry); outbox.setActive(false); realtime.stop() }
   }, [state.status, state.me?.id])
   return <Context.Provider value={controller}>{children}</Context.Provider>
 }

@@ -50,7 +50,7 @@
         {
           "cameraPermission": "Allow JIVO JM to take a photo when you choose Camera.",
           "photosPermission": false,
-          "microphonePermission": false
+          "microphonePermission": "Allow JIVO JM to record a voice message when you choose to record."
         }
       ],
       [
@@ -58,7 +58,16 @@
         {
           "contactsPermission": "Allow JIVO JM to read the contact you select for sharing."
         }
-      ]
+      ],
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow JIVO JM to verify your identity when unlocking the app."
+        }
+      ],
+      "expo-sharing",
+      "expo-status-bar"
     ],
     "scheme": "jivo-jm"
   }
