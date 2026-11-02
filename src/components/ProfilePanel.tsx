@@ -1,3 +1,4 @@
+import { ThemeSettings } from './ThemeControls'
 import { AppLockSetting } from './AppLock'
 import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
@@ -45,7 +46,7 @@ export function ProfilePanel() {
         <Field label="About" value={bio} onChangeText={setBio} multiline maxLength={300} />
         <Button title="Save profile" disabled={busy} onPress={() => void run(() => profile.updateMe({ display_name: name.trim(), phone, bio }), 'Profile updated.')} />
       </Card>
-      <ProfileImages key={me?.id} /><InstallApp /><AppLockSetting /><Card><Label large>Sign-in email</Label>
+      <ProfileImages key={me?.id} /><InstallApp /><AppLockSetting /><ThemeSettings /><Card><Label large>Sign-in email</Label>
         {me?.pending_email ? <><Label>Awaiting administrator confirmation: {me.pending_email}</Label><Button title="Cancel email change" disabled={busy} onPress={() => void run(profile.cancelEmailChange, 'Email change cancelled.')} /></> : <>
           <Field label="New email address" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
           <Button title="Request email change" disabled={busy || !email.trim()} onPress={() => void run(() => profile.requestEmailChange(email.trim()), 'Email change requested. An administrator must confirm it.')} />

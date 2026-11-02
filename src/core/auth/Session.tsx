@@ -1,7 +1,12 @@
+import { webPush } from '../../modules/notifications/webPush'
+import { incomingShareBoundary } from '../../modules/sharing/incoming'
 import { announceSessionBoundary,onOtherSessionBoundary,withSessionLock } from './sessionCoordination'
 import { outbox } from '../../modules/messenger/outbox'
 import { conversationDrafts } from '../../modules/messenger/drafts'
-import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
+import { conversationCache } from '../../modules/messenger/conversationCache'
+import { chatLock } from '../../modules/messenger/chatLock'
+import { subscribeChatLockVisibility } from '../../modules/messenger/chatLockVisibility'
+import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { isAxiosError } from 'axios'
 import { api, errorMessage, onSessionLost, origin, advanceSession } from '../api/client'
 import { clearNativeCookies } from '../api/cookies'
@@ -12,33 +17,43 @@ import type { Me } from './types'
 import type { LoginResponse } from './security'
 const Context = createContext<SessionController | null>(null)
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [external]=useState(()=>({active:false}))
+  const external=useRef({active:false, owner:null as string | null})
+  // The constructor only stores callbacks; boundary refs are read on auth actions.
+  // eslint-disable-next-line react-hooks/refs
   const [controller] = useState(() => new SessionController({
-    boundary: preserve => { advanceSession(); conversationDrafts.bind(null); outbox.setActive(false); void outbox.bind(null, !preserve&&!external.active); if(!preserve&&!external.active)announceSessionBoundary() }, enabled: Boolean(origin), csrf: () => api.get('/auth/csrf/'),
+    boundary: preserve => { void webPush.bind(null); if (!preserve && external.current.owner) { incomingShareBoundary(); external.current.owner = null } advanceSession(); chatLock.bind(null); conversationDrafts.bind(null); void conversationCache.bind(null, undefined, preserve); outbox.setActive(false); void outbox.bind(null, !preserve&&!external.current.active); if(!preserve&&!external.current.active)announceSessionBoundary() }, enabled: Boolean(origin), csrf: () => api.get('/auth/csrf/'),
     me: async () => (await api.get<Me>('/me/')).data,
     login: (email, password) => withSessionLock(async()=>{try{return (await api.post<LoginResponse>('/auth/login/', { email, password })).data}finally{announceSessionBoundary()}}),
     logout: () => withSessionLock(async()=>{try{return await api.post('/auth/logout/')}finally{announceSessionBoundary()}}),
     clear: () => origin ? clearNativeCookies(origin) : Promise.resolve(),
     unauthorized: e => isAxiosError(e) && e.response?.status === 401, message: errorMessage,
   }))
-  useEffect(()=>onOtherSessionBoundary(()=>{outbox.setActive(false);external.active=true;try{controller.lose()}finally{external.active=false}}),[controller,external])
+  useEffect(()=>onOtherSessionBoundary(()=>{outbox.setActive(false);external.current.active=true;try{controller.lose()}finally{external.current.active=false}}),[controller,external])
   const state = useSyncExternalStore(controller.subscribe, controller.snapshot, controller.snapshot)
   useEffect(() => {
     const unsubscribe = onSessionLost(controller.lose)
     void controller.restore()
-    return unsubscribe
+    return () => { unsubscribe(); controller.dispose() }
   }, [controller])
   useEffect(() => {
     if (state.status !== 'ready') { realtime.stop(); return }
+    if (external.current.owner && external.current.owner !== state.me?.id) incomingShareBoundary()
+    external.current.owner = state.me?.id ?? null
     conversationDrafts.bind(state.me?.id ?? null)
+    chatLock.bind(state.me?.id ?? null)
+    void conversationCache.bind(state.me?.id ?? null, state.me?.session?.expires_at)
     void outbox.bind(state.me?.id ?? null)
+    let bound = true
+    void webPush.bind(state.me?.id ?? null).then(() => { if (bound) void webPush.sync() }).catch(() => undefined)
+    const offCache = realtime.on('*', conversationCache.event)
     realtime.start()
     const off = subscribeLifecycle(active => { realtime.setActive(active); outbox.setActive(active) })
+    const offVisibility = subscribeChatLockVisibility(foreground => { if (foreground) controller.checkExpiry(); chatLock.visibility(foreground) })
     const reconnect = realtime.on('HELLO', () => void outbox.flush())
     // REST can recover before WebSockets. Do not strand queued sends until a socket reconnects.
     const retry = setInterval(() => void outbox.flush(), 15000)
-    return () => { off(); reconnect(); clearInterval(retry); outbox.setActive(false); realtime.stop() }
-  }, [state.status, state.me?.id])
+    return () => { bound = false; off(); offVisibility(); offCache(); reconnect(); clearInterval(retry); outbox.setActive(false); realtime.stop() }
+  }, [controller, external, state.status, state.me?.id, state.me?.session?.expires_at])
   return <Context.Provider value={controller}>{children}</Context.Provider>
 }
 export function useSession() {

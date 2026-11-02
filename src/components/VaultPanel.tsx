@@ -13,10 +13,12 @@ import { useCursor } from '../shared/useCursor'
 import { Button, Card, Field, Label, styles, useColors } from '../ui'
 import { EntryAccess, FolderManager } from './VaultTools'
 import { Sheet } from './Sheet'
+import { PasswordGenerator } from './PasswordGenerator'
 function EntryEditor({ entry, vaultId, onClose, onSaved }: { entry?: vault.Entry; vaultId: string; onClose: () => void; onSaved: () => void }) {
   const c = useColors(); const [title, setTitle] = useState(entry?.title ?? ''); const [username, setUsername] = useState(entry?.username ?? ''); const [url, setUrl] = useState(entry?.url ?? '')
   const [kind, setKind] = useState<vault.EntryKind>(entry?.kind ?? 'login'); const [tags, setTags] = useState(entry?.tags.join(', ') ?? '')
   const [password, setPassword] = useState(''); const [notes, setNotes] = useState(''); const [custom, setCustom] = useState<{ id: string; name: string; value: string }[]>([])
+  const [showPassword, setShowPassword] = useState(false); const [showGenerator, setShowGenerator] = useState(false)
   const [busy, setBusy] = useState(false); const [error, setError] = useState('')
   const [removeFields, setRemoveFields] = useState<string[]>([])
   const [existingFields, setExistingFields] = useState<string[]>([])
@@ -40,7 +42,10 @@ function EntryEditor({ entry, vaultId, onClose, onSaved }: { entry?: vault.Entry
     <Field label="Entry title" value={title} onChangeText={setTitle} /><View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>{(['login', 'api_key', 'note', 'card', 'server', 'wifi', 'other'] as const).map(value => <Button key={value} title={`${value}${kind === value ? ' selected' : ''}`} onPress={() => setKind(value)} />)}</View>
     <Field label="Username" value={username} onChangeText={setUsername} autoCapitalize="none" /><Field label="Website" value={url} onChangeText={setUrl} autoCapitalize="none" keyboardType="url" /><Field label="Tags (comma separated)" value={tags} onChangeText={setTags} />
     <Label>{entry ? 'Leave secret fields blank to preserve their existing values.' : 'Secret values are submitted directly and kept only in this form until it closes.'}</Label>
-    <Field label="Secret password" secureTextEntry value={password} onChangeText={setPassword} autoComplete="off" /><Field label="Secret notes" secureTextEntry value={notes} onChangeText={setNotes} autoComplete="off" />
+    <Field label="Secret password" secureTextEntry={!showPassword} value={password} onChangeText={setPassword} autoComplete="off" autoCorrect={false} autoCapitalize="none" />
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}><Button title={showPassword ? 'Hide password' : 'Show password'} variant="ghost" disabled={busy} onPress={() => setShowPassword(value => !value)} /><Button title="Password generator" variant="secondary" disabled={busy} onPress={() => setShowGenerator(value => !value)} /></View>
+    {showGenerator && <PasswordGenerator onPick={value => { setPassword(value); setShowPassword(true) }} disabled={busy} />}
+    <Field label="Secret notes" secureTextEntry value={notes} onChangeText={setNotes} autoComplete="off" />
     {existingFields.map(name => <Button key={name} title={(removeFields.includes(name) ? 'Undo removal: ' : 'Remove stored field: ') + name} onPress={() => setRemoveFields(fields => fields.includes(name) ? fields.filter(f => f !== name) : [...fields, name])} />)}
     {custom.map((field, index) => <Card key={field.id}><Field label={`Custom field ${index + 1} name`} value={field.name} onChangeText={value => setCustom(items => items.map(item => item.id === field.id ? { ...item, name: value } : item))} /><Field label={`Custom field ${index + 1} value`} secureTextEntry autoComplete="off" value={field.value} onChangeText={value => setCustom(items => items.map(item => item.id === field.id ? { ...item, value } : item))} /><Button title={`Remove custom field ${index + 1}`} onPress={() => setCustom(items => items.filter(item => item.id !== field.id))} /></Card>)}
     <Button title="Add custom secret field" onPress={() => setCustom(items => [...items, { id: randomUUID(), name: '', value: '' }])} />

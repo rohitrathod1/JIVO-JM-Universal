@@ -27,13 +27,15 @@ function AccountLock({ account, children }: { account: string; children: ReactNo
     return () => { sub.remove(); model.dispose() }
   }, [model])
   const cover = !state.ready || (state.enabled && (state.locked || !foreground))
-  return <Context.Provider value={model}>{cover ? <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 16, backgroundColor: colors.bg }}>
+  // Preserve an already-open screen beneath the privacy cover. Native system
+  // pickers temporarily background JM; unmounting loses their reviewed result.
+  return <Context.Provider value={model}>{(state.opened || !cover) && <View style={{ flex: 1, display: cover ? 'none' : 'flex' }} accessibilityElementsHidden={cover} importantForAccessibility={cover ? 'no-hide-descendants' : 'auto'}>{children}</View>}{cover && <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 16, backgroundColor: colors.bg }}>
     <Label large>JIVO JM is locked</Label>
     {!!state.error && <Label>{state.error}</Label>}
     {state.busy && <ActivityIndicator />}
     <Button title={state.ready ? 'Unlock with device security' : 'Retry lock settings'} disabled={state.busy} onPress={() => { void (state.ready ? model.verify() : model.restore()) }} />
     <Button title="Sign out" disabled={state.busy} onPress={() => void logout().catch(() => {})} />
-  </View> : children}</Context.Provider>
+  </View>}</Context.Provider>
 }
 export function AppLockSetting() {
   const model = useContext(Context)

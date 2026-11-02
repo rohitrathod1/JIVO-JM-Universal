@@ -4,17 +4,16 @@
     "slug": "jivo-jm-universal",
     "version": "1.0.0",
     "orientation": "default",
-    "icon": "./assets/icon.png",
+    "icon": "./public/icons/icon-512.png",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./public/icons/maskable-512.png"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./public/icons/maskable-512.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.jivojmuniversal",
@@ -23,7 +22,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./public/favicon-32.png"
     },
     "plugins": [
       "expo-router",
@@ -66,7 +65,23 @@
           "faceIDPermission": "Allow JIVO JM to verify your identity when unlocking the app."
         }
       ],
-      "expo-sharing",
+      [
+        "expo-sharing",
+        {
+          "android": {
+            "enabled": true,
+            "singleShareMimeTypes": ["text/*", "image/*", "video/*", "audio/*", "application/*"],
+            "multipleShareMimeTypes": ["text/*", "image/*", "video/*", "audio/*", "application/*"]
+          },
+          "ios": { "enabled": false }
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow JIVO JM to use your location when you choose to share a location or an event place."
+        }
+      ],
       "expo-status-bar"
     ],
     "scheme": "jivo-jm"

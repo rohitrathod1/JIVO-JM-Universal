@@ -7,6 +7,7 @@ export interface SessionDependencies {
   logout: () => Promise<unknown>; clear: () => Promise<unknown>
   unauthorized: (error: unknown) => boolean; message: (error: unknown) => string
   boundary?: (preserveOutbox: boolean) => void
+  now?: () => number
 }
 export class SessionController {
   private state: SessionState = { status: 'loading', me: null }
@@ -14,11 +15,40 @@ export class SessionController {
   private generation = 0
   private signingOut: Promise<void> | null = null
   private cleanup: Promise<unknown> = Promise.resolve()
+  private expiryTimer: ReturnType<typeof setTimeout> | null = null
   constructor(private readonly deps: SessionDependencies) {}
   snapshot = () => this.state
   subscribe = (fn: () => void) => { this.listeners.add(fn); return () => { this.listeners.delete(fn) } }
-  private publish(state: SessionState) { this.state = state; this.listeners.forEach(fn => fn()) }
-  private advance(preserveOutbox = false) { this.deps.boundary?.(preserveOutbox); return ++this.generation }
+  private now() { return this.deps.now?.() ?? Date.now() }
+  private expiry(me: Me | null): number | null { return me?.session ? Date.parse(me.session.expires_at) : null }
+  private cancelExpiry() { if (this.expiryTimer !== null) clearTimeout(this.expiryTimer); this.expiryTimer = null }
+  private scheduleExpiry() {
+    this.cancelExpiry()
+    const expiry = this.expiry(this.state.me)
+    if (this.state.status !== 'ready' || expiry === null) return
+    // Recheck wall-clock changes, and never exceed the platform timeout range.
+    this.expiryTimer = setTimeout(() => { this.expiryTimer = null; this.checkExpiry() }, Math.max(0, Math.min(60_000, expiry - this.now())))
+    // Node-based tests/tooling must not be kept alive by a UI lifecycle timer.
+    const timer = this.expiryTimer as ReturnType<typeof setTimeout> & { unref?: () => void }
+    timer.unref?.()
+  }
+  private publish(state: SessionState) { this.cancelExpiry(); this.state = state; this.scheduleExpiry(); this.listeners.forEach(fn => fn()) }
+  private accept(me: Me) {
+    const expiry = this.expiry(me)
+    if (expiry !== null && (!Number.isFinite(expiry) || expiry <= this.now())) { this.lose(); return }
+    this.publish({ status: 'ready', me })
+  }
+  /** Call on foreground too: mobile/hidden-tab timers may have been suspended. */
+  checkExpiry = (): boolean => {
+    if (this.state.status !== 'ready') return false
+    const expiry = this.expiry(this.state.me)
+    if (expiry !== null && (!Number.isFinite(expiry) || expiry <= this.now())) { this.lose(); return false }
+    this.scheduleExpiry()
+    return true
+  }
+  /** Provider cleanup; a subsequent restore can reuse the controller in StrictMode. */
+  dispose = () => { this.generation++; this.cancelExpiry() }
+  private advance(preserveOutbox = false) { this.cancelExpiry(); this.deps.boundary?.(preserveOutbox); return ++this.generation }
   lose = () => {
     if (this.signingOut) return
     this.advance(); this.publish({ status: 'anonymous', me: null })
@@ -34,16 +64,17 @@ export class SessionController {
       await this.cleanup
       await this.deps.csrf()
       const me = await this.deps.me()
-      if (generation === this.generation) this.publish({ status: 'ready', me })
+      if (generation === this.generation) this.accept(me)
     } catch (error) {
       if (generation !== this.generation) return
-      this.publish(this.deps.unauthorized(error) ? { status: 'anonymous', me: null } : { status: 'unreachable', me: null, error: this.deps.message(error) })
+      if (this.deps.unauthorized(error)) this.lose()
+      else this.publish({ status: 'unreachable', me: null, error: this.deps.message(error) })
     }
   }
   async adopt() {
     const generation = this.generation
     const me = await this.deps.me()
-    if (generation === this.generation && !this.signingOut) this.publish({ status: 'ready', me })
+    if (generation === this.generation && !this.signingOut) this.accept(me)
   }
   async login(email: string, password: string) {
     // New authentication must not race a previous session's cookie cleanup.

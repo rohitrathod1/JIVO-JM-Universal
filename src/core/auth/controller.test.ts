@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { SessionController, type SessionDependencies } from './controller'
 import type { Me } from './types'
+afterEach(() => vi.useRealTimers())
 const me = { id: 'test-user', name: 'Test User' } as Me
 function setup(overrides: Partial<SessionDependencies> = {}) {
   const deps = { enabled: true, csrf: vi.fn(async () => {}), me: vi.fn(async () => me),
@@ -66,4 +67,56 @@ it('serializes new login behind logout and cookie cleanup even when logout fails
 
 it('preserves outbox storage only during session restoration, never login/logout boundaries',async()=>{
  const boundary=vi.fn();const {controller}=setup({boundary});await controller.restore();expect(boundary).toHaveBeenLastCalledWith(true);await controller.login('synthetic@example.invalid','mock-only');expect(boundary).toHaveBeenLastCalledWith(false);await controller.logout();expect(boundary).toHaveBeenLastCalledWith(false)
+})
+
+
+const expiringMe = (expires: number | string) => ({ ...me, session: { id: 'synthetic-session', expires_at: typeof expires === 'number' ? new Date(expires).toISOString() : expires, auth_method: 'password' } }) as Me
+it('expires an authenticated session at the server deadline even while offline', async () => {
+ vi.useFakeTimers(); vi.setSystemTime(100_000)
+ const boundary = vi.fn(); const { controller, deps } = setup({ me: async () => expiringMe(101_000), boundary })
+ await controller.restore(); await vi.advanceTimersByTimeAsync(999); expect(controller.snapshot().status).toBe('ready')
+ await vi.advanceTimersByTimeAsync(1); expect(controller.snapshot()).toEqual({ status: 'anonymous', me: null }); expect(boundary).toHaveBeenLastCalledWith(false); expect(deps.clear).toHaveBeenCalledOnce()
+ controller.dispose()
+})
+it.each([99_999, 100_000, 'invalid expiry'])('fails closed for an already expired or invalid server expiry %s', async expiry => {
+ vi.useFakeTimers(); vi.setSystemTime(100_000)
+ const boundary = vi.fn(); const { controller, deps } = setup({ me: async () => expiringMe(expiry), boundary }); await controller.restore(); await Promise.resolve()
+ expect(controller.snapshot()).toEqual({ status: 'anonymous', me: null }); expect(boundary).toHaveBeenLastCalledWith(false); expect(deps.clear).toHaveBeenCalledOnce(); expect(vi.getTimerCount()).toBe(0)
+})
+it('checks expiry immediately on foreground when suspended timers have not fired', async () => {
+ vi.useFakeTimers(); vi.setSystemTime(100_000)
+ const { controller } = setup({ me: async () => expiringMe(101_000) }); await controller.restore()
+ vi.setSystemTime(200_000); expect(controller.snapshot().status).toBe('ready'); expect(controller.checkExpiry()).toBe(false); expect(controller.snapshot().me).toBeNull(); expect(vi.getTimerCount()).toBe(0)
+})
+it('replaces an old expiry timer when the server extends the current session', async () => {
+ vi.useFakeTimers(); vi.setSystemTime(100_000)
+ const response = vi.fn(async () => expiringMe(101_000)); const { controller } = setup({ me: response }); await controller.restore()
+ response.mockResolvedValue(expiringMe(110_000)); await controller.adopt(); await vi.advanceTimersByTimeAsync(1000); expect(controller.snapshot().status).toBe('ready')
+ await vi.advanceTimersByTimeAsync(9000); expect(controller.snapshot().status).toBe('anonymous')
+})
+it('cancels timers on logout and disposal, and permits StrictMode restore after disposal', async () => {
+ vi.useFakeTimers(); vi.setSystemTime(100_000)
+ const { controller } = setup({ me: async () => expiringMe(200_000) }); await controller.restore(); expect(vi.getTimerCount()).toBe(1)
+ controller.dispose(); expect(vi.getTimerCount()).toBe(0); await controller.restore(); expect(vi.getTimerCount()).toBe(1)
+ await controller.logout(); expect(vi.getTimerCount()).toBe(0)
+})
+it('rejects a pending adopted session response after expiry clears the account', async () => {
+ vi.useFakeTimers(); vi.setSystemTime(100_000)
+ let release!: (value: Me) => void
+ const response = vi.fn(async () => expiringMe(101_000)); const { controller } = setup({ me: response }); await controller.restore()
+ response.mockImplementation(() => new Promise(resolve => { release = resolve })); const adopting = controller.adopt()
+ await vi.advanceTimersByTimeAsync(1000); release(expiringMe(500_000)); await adopting
+ expect(controller.snapshot().status).toBe('anonymous'); expect(vi.getTimerCount()).toBe(0)
+})
+it('invalidates pending restoration on provider disposal without clearing a valid server session', async () => {
+ let release!: (value: Me) => void
+ const { controller, deps } = setup({ me: () => new Promise(resolve => { release = resolve }) })
+ const restoring = controller.restore(); await vi.waitFor(() => expect(release).toBeTypeOf('function')); controller.dispose(); release(me); await restoring
+ expect(controller.snapshot().status).not.toBe('ready'); expect(deps.clear).not.toHaveBeenCalled()
+})
+it('does not overflow a timer for a long-lived session and clears preserved storage on server 401', async () => {
+ vi.useFakeTimers(); vi.setSystemTime(100_000)
+ const response = vi.fn(async () => expiringMe(100_000 + 90 * 24 * 60 * 60_000)); const boundary = vi.fn()
+ const { controller, deps } = setup({ me: response, boundary }); await controller.restore(); await vi.advanceTimersByTimeAsync(60_000); expect(controller.snapshot().status).toBe('ready')
+ response.mockRejectedValue('401'); await controller.restore(); await Promise.resolve(); expect(controller.snapshot().status).toBe('anonymous'); expect(boundary).toHaveBeenLastCalledWith(false); expect(deps.clear).toHaveBeenCalledOnce(); expect(vi.getTimerCount()).toBe(0)
 })

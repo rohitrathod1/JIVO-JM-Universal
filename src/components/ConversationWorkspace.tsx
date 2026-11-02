@@ -1,12 +1,23 @@
 import { AttachmentExport } from './AttachmentExport'
 import { CapturePanel } from './CapturePanel'
 import { RichMessage } from './RichMessage'
+import { useChatImmersive } from './WorkspaceChrome'
+import { SpecialMessage } from './SpecialMessage'
+import { PeerCallButton } from './PeerCallButton'
+import { EventComposer } from './EventComposer'
+import { LocationComposer } from './LocationPicker'
+import { ChatComposer } from './ChatComposer'
+import { MessageDay, MessageMeta } from './MessagePresentation'
+import { chatLock } from '../modules/messenger/chatLock'
+import { LockedChatsGate } from '../modules/messenger/components/LockedChatsGate'
+import { isAxiosError, isCancel } from 'axios'
+import { conversationCache } from '../modules/messenger/conversationCache'
 import { outbox, onOutboxSent } from '../modules/messenger/outbox'
 import { outboxStorageNotice } from '../modules/messenger/outboxStorage'
 import { useChatAppearance } from './ChatAppearance'
 import { mediaUrl } from '../modules/messenger/media/url'
 import { MessageDetails } from './MessageDetails'
-import { withMentionTokens } from '../modules/messenger/lib/text'
+import { listTime, withMentionTokens } from '../modules/messenger/lib/text'
 import { useConversationLive } from '../modules/messenger/useConversationLive'
 import { arrivalBehavior } from '../modules/messenger/reader'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
@@ -34,11 +45,13 @@ import { PollVoters } from './PollVoters'
 import { conversationDrafts } from '../modules/messenger/drafts'
 import { caretAfterEdit, insertMention, mentionAt, type Caret } from '../modules/messenger/composer'
 import { ComposerPreview } from './ComposerPreview'
+import { ChatAvatar } from './ChatAvatar'
+import { Icon, IconButton } from './Icon'
 const viewability = { itemVisiblePercentThreshold: 80, minimumViewTime: 400 }
 
 export function Messenger({ preview = false, initialConversation, initialSeq }: { preview?: boolean; initialConversation?: chat.ConversationItem; initialSeq?: number }) {
   const appearance = useChatAppearance().value; const backgroundImage = appearance?.type === 'image' ? mediaUrl(appearance.image_url, origin) : null
-  const c = useColors(); const { width, height } = useWindowDimensions(); const nativePhone = Platform.OS !== 'web' && width < 600; const compact = height < 600 || nativePhone; const { me } = useSession()
+  const c = useColors(); const { width, height } = useWindowDimensions(); const compact = height < 600 || width < 768; const { me } = useSession()
   const [selection, setSelected] = useState<chat.ConversationItem | null>(initialConversation ?? null)
   const [query, setQuery] = useState(''); const [filter, setFilter] = useState<chat.ConversationFilter>('all')
   const [body, setBody] = useState(() => initialConversation && me ? conversationDrafts.read(me.id, initialConversation.id) : ''); const [reply, setReply] = useState<chat.Message | null>(null); const [editing, setEditing] = useState<chat.Message | null>(null)
@@ -50,13 +63,19 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
   const [exporting,setExporting]=useState<{conversation:string;message:string;attachment:string}|null>(null)
   const [media, setMedia] = useState<{ conversation: string; message: string; attachment: string } | null>(null)
   const [menu, setMenu] = useState(false); const [capture,setCapture]=useState(false)
-  const [tool, setTool] = useState<'search' | 'poll' | 'contact' | 'details' | null>(null); const [forwarding, setForwarding] = useState<chat.Message | null>(null); const [image, setImage] = useState<{ conversation: string; message: string; attachment: string } | null>(null)
+  const [tool, setTool] = useState<'search' | 'poll' | 'contact' | 'details' | 'event' | 'location' | null>(null); const [forwarding, setForwarding] = useState<chat.Message | null>(null); const [image, setImage] = useState<{ conversation: string; message: string; attachment: string } | null>(null)
   const [revision, setRevision] = useState(0); const [picker, setPicker] = useState(false)
   const [attachments, setAttachments] = useState<chat.Attachment[]>([]); const [uploadProgress, setUploadProgress] = useState<number | null>(null)
   const upload = useRef<AbortController | null>(null); const active = useRef(true); const draftId = useRef(randomUUID())
-  const [history] = useState(() => new HistoryController({ detail: chat.getConversation, read: chat.getWindow, message: errorMessage }))
+  const lockState = useSyncExternalStore(chatLock.subscribe, chatLock.snapshot, chatLock.snapshot)
+  const [history] = useState(() => new HistoryController({ detail: chat.getConversation, read: chat.getWindow, message: errorMessage, cache: conversationCache, lockedAccess: () => chatLock.snapshot().unlocked }))
+  useEffect(() => chatLock.subscribe(history.lockChanged), [history])
+  useEffect(() => { const timer = setInterval(history.expire, 1000); return () => clearInterval(timer) }, [history])
   const historyState = useSyncExternalStore(history.subscribe, history.snapshot, history.snapshot)
-  const selected = historyState.accessLost ? null : historyState.detail?.id === selection?.id ? historyState.detail : selection
+  const concealed = historyState.locked || Boolean(selection?.locked && !lockState.unlocked)
+  const selected = historyState.accessLost || concealed ? null : historyState.detail?.id === selection?.id ? historyState.detail : selection
+  const opened = Boolean(selection) && !historyState.accessLost
+  useChatImmersive(opened && width < 768)
   const live = useConversationLive(preview ? null : selected, me?.id ?? '')
   const [info,setInfo] = useState<chat.Message | null>(null)
   const pending = useSyncExternalStore(outbox.subscribe,outbox.snapshot,outbox.snapshot)
@@ -70,9 +89,27 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
     const state = history.snapshot()
     const retain = (source: typeof media) => source && source.conversation === state.id && !state.accessLost && state.window.messages.some(m => m.id === source.message && !m.deleted && m.attachments?.some(a => a.id === source.attachment && a.status === 'ready')) ? source : null
     setMedia(retain); setImage(retain)
-    if (state.accessLost) { if (state.id && me) conversationDrafts.write(me.id, state.id, ''); upload.current?.abort(); setAttachments([]); setTool(null); setActions(null); setForwarding(null); setReply(null); setEditing(null); setBody(''); setPerson(null); setVotes(null) }
+    if (state.accessLost || state.locked) { if (state.id && me) conversationDrafts.write(me.id, state.id, ''); upload.current?.abort(); setAttachments([]); setTool(null); setActions(null); setForwarding(null); setReply(null); setEditing(null); setBody(''); setPerson(null); setVotes(null); setInfo(null); setCapture(false); setExporting(null); setMenu(false) }
   }), [history, me])
-  const loadConversations = useCallback((cursor?: string | null) => preview ? Promise.resolve({ results: [], next_cursor: null }) : chat.listConversations(filter, query, cursor), [preview, filter, query])
+  const loadConversations = useCallback(async (cursor?: string | null) => {
+    if (preview || filter === 'locked' && !lockState.unlocked) return { results: [], next_cursor: null }
+    const cacheGeneration = conversationCache.generation()
+    try {
+      const page = await chat.listConversations(filter, query, cursor)
+      if (!cursor && filter === 'all' && !query) conversationCache.rememberList(page.results, cacheGeneration)
+      return page
+    } catch (e) {
+      if (cursor || !isAxiosError(e) || e.response || isCancel(e)) throw e
+      const saved = await conversationCache.list()
+      if (!saved.length) throw e
+      return { results: saved.filter(item =>
+        (filter === 'archived' ? !!item.archived_at : !item.archived_at) &&
+        (filter !== 'unread' || item.unread_count > 0) &&
+        (filter !== 'groups' || item.kind === 'group') &&
+        (filter !== 'direct' || item.kind === 'direct') && filter !== 'locked' &&
+        (item.title || item.peer?.name || '').toLowerCase().includes(query.toLowerCase())), next_cursor: null }
+    }
+  }, [preview, filter, query, lockState.unlocked])
   const conversations = useCursor(loadConversations)
   const { items, cursor, loading, refresh: refreshConversations } = conversations
   useEffect(()=>onOutboxSent(message=>{history.event({type:'MESSAGE_CREATED',data:message});void refreshConversations()}),[history,refreshConversations])
@@ -149,7 +186,7 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
     try {
       live.stop()
       if (editing) history.accept(await chat.editMessage(editing.id, withMentionTokens(body.trim(), live.members)))
-      else outbox.enqueue(me?.id ?? '', selected.id, { client_id: draftId.current, body: withMentionTokens(body.trim(), live.members), upload_ids: attachments.map(a => a.id), reply_to: reply?.id })
+      else await outbox.enqueue(me?.id ?? '', selected.id, { client_id: draftId.current, body: withMentionTokens(body.trim(), live.members), upload_ids: attachments.map(a => a.id), reply_to: reply?.id })
       if (!editing && me) conversationDrafts.write(me.id, selected.id, '')
       if (!active.current) return
       setBody(editing ? conversationDrafts.read(me?.id ?? '', selected.id) : ''); setAttachments([]); setEditing(null); setReply(null); draftId.current = randomUUID(); await history.latest(); refresh()
@@ -179,40 +216,43 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
   return <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     {!!(error || historyState.error || conversations.error) && <View style={{ padding: 12, gap: 8 }}><Text accessibilityRole="alert" style={{ color: c.text }}>{error || historyState.error || conversations.error}</Text><Button title="Retry" onPress={() => { setError(''); if (historyState.accessLost) void history.select(selectedId ?? null); else void history.reconcile(); refresh() }} /></View>}
     <View style={{ flex: 1, flexDirection: split ? 'row' : 'column' }}>
-      {(split || !selected) && <View style={{ width: split ? 340 : '100%', flex: split ? undefined : 1, padding: compact ? 8 : 18, gap: compact ? 6 : 12, borderRightWidth: split ? 1 : 0, borderColor: c.border }}>
-        {!compact && <Label large>Messages</Label>}<View style={{ flexDirection: compact ? 'row' : 'column', gap: 8 }}><View style={{ flex: compact ? 1 : undefined }}><Field compact={compact} label="Search conversations" value={query} onChangeText={setQuery} /></View>{compact && !preview && <Button title="New conversation" onPress={() => setPicker(true)} disabled={blocked} />}</View>
-        {!preview && <>{!compact && <Button title="New conversation" onPress={() => setPicker(true)} disabled={blocked} />}
+      {(split || !opened) && <View style={{ width: split ? 360 : '100%', flex: split ? undefined : 1, padding: 12, gap: 10, backgroundColor: c.panel, borderRightWidth: split ? 1 : 0, borderColor: c.border }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}><Label large>Chats</Label>{!preview && <IconButton name="plus" label="New conversation" onPress={() => setPicker(true)} disabled={blocked} />}</View>
+        <Field compact label="Search conversations" placeholder="Search chats" value={query} onChangeText={setQuery} style={{ backgroundColor: c.neutral, borderWidth: 0 }} />
+        {!preview && <>
           <ScrollView horizontal style={{ flexGrow: 0, flexShrink: 0, minHeight: 48 }} contentContainerStyle={{ gap: 8 }}>
-            {(['all', 'unread', 'groups', 'direct', 'archived'] as const).map(f => <Pressable key={f} onPress={() => setFilter(f)} accessibilityRole="button" accessibilityState={{ selected: f === filter }} style={{ padding: 10, borderRadius: 12, backgroundColor: f === filter ? c.primary : c.panel }}><Text style={{ color: f === filter ? 'white' : c.text }}>{f}</Text></Pressable>)}
+            {(['all', 'unread', 'groups', 'direct', 'archived', 'locked'] as const).map(f => <Pressable key={f} onPress={() => setFilter(f)} accessibilityLabel={f} accessibilityRole="button" accessibilityState={{ selected: f === filter }} style={{ paddingHorizontal: 14, minHeight: 44, justifyContent: 'center', borderRadius: 24, backgroundColor: f === filter ? c.soft : c.neutral }}><Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 13, color: f === filter ? c.primary : c.muted }}>{f[0].toUpperCase() + f.slice(1)}</Text></Pressable>)}
           </ScrollView></>}
         {loading && <ActivityIndicator />}
-        <ScrollView style={{ flex: 1, minHeight: 0 }} contentContainerStyle={{ gap: 10 }}>
+        {filter === 'locked' && !lockState.unlocked && <LockedChatsGate title="Locked chats" />}
+        <ScrollView style={{ flex: 1, minHeight: 0 }} contentContainerStyle={{ gap: 0 }}>
           {preview ? ['Design team', 'Operations', 'Saved messages'].filter(t => t.toLowerCase().includes(query.toLowerCase())).map(title => <Card key={title}><Label>{title}</Label><Label>A place for your team’s conversations.</Label></Card>) :
-            items.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Open ${item.title || item.peer?.name}`} disabled={blocked} onPress={() => choose(item)}><Card>
-              <Label>{item.title || item.peer?.name || 'Conversation'}</Label><Text numberOfLines={2} style={{ color: c.muted }}>{item.last_message?.preview || 'No messages yet'}</Text>{item.unread_count > 0 && <Label>{item.unread_count} unread</Label>}
-            </Card></Pressable>)}
+            items.filter(item => !item.locked || lockState.unlocked).map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Open ${item.title || item.peer?.name}`} disabled={blocked} onPress={() => choose(item)} style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, paddingHorizontal: 4, borderRadius: 10, backgroundColor: selected?.id === item.id ? c.soft : pressed ? c.neutral : 'transparent' })}>
+              <ChatAvatar name={item.title || item.peer?.name || 'Conversation'} seed={item.peer?.id ?? item.id} uri={mediaUrl(item.avatar_url, origin)} group={item.kind === 'group'} />
+              <View style={{ flex: 1, minWidth: 0, gap: 4 }}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}><Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Inter_600SemiBold', color: c.text, fontSize: 15 }}>{item.title || item.peer?.name || 'Conversation'}</Text>{item.last_message && <Text style={{ color: item.unread_count ? c.primary : c.muted, fontSize: 11 }}>{listTime(item.last_message.created_at)}</Text>}</View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}><Text numberOfLines={1} style={{ flex: 1, fontFamily: 'Inter_400Regular', fontSize: 13, color: c.muted }}>{item.left ? 'You left this group' : item.last_message?.preview || 'No messages yet'}</Text>{item.pinned_at && <Icon name="pin" size={14} />}{item.mention_unread && <Text style={{ color: c.primary }}>@</Text>}{item.unread_count > 0 && <Text accessibilityLabel={`${item.unread_count} unread`} style={{ minWidth: 20, paddingHorizontal: 5, lineHeight: 20, borderRadius: 10, backgroundColor: c.primary, color: '#ffffff', textAlign: 'center', fontSize: 11 }}>{item.unread_count > 99 ? '99+' : item.unread_count}</Text>}</View>
+              </View>
+            </Pressable>)}
           {!preview && !loading && !items.length && !error && <Label>No conversations found.</Label>}
           {cursor && <Button title="Load more conversations" disabled={loading} onPress={() => void conversations.more()} />}
         </ScrollView>
       </View>}
-      {(split || selected) && <View style={{ flex: 1, padding: compact ? 8 : width < 500 ? 12 : 20, gap: compact ? 6 : 12 }}>
-        {selected ? <>
+      {(split || opened) && <View style={{ flex: 1, padding: compact ? 8 : 12, gap: compact ? 6 : 10, backgroundColor: c.shell }}>
+        {concealed && opened ? <><IconButton name="back" label="Back to conversations" onPress={() => { setSelected(null); selectionGeneration.current++ }} /><LockedChatsGate /></> : selected ? <>
           {!split && !compact && <Button title="Back to conversations" disabled={blocked} onPress={() => { selectionGeneration.current++; setSelected(null); setAttachments([]) }} />}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}><View style={{ flex: 1, minWidth: 0 }}>{nativePhone ? <><Text numberOfLines={1} style={{ color: c.text, fontFamily: 'Inter_700Bold', fontSize: 22, lineHeight: 28 }}>{selected.title || selected.peer?.name}</Text>{!!live.label && <Text numberOfLines={1} style={{ color: c.muted, fontSize: 12, lineHeight: 18 }}>{live.label}</Text>}</> : <><Label large>{selected.title || selected.peer?.name}</Label>{!!live.label && <Label>{live.label}</Label>}</>}</View>
-            {!compact && <Button title={selected.pinned_at ? 'Unpin' : 'Pin'} disabled={blocked} onPress={() => void perform(() => chat.updateSettings(selected.id, { pinned: !selected.pinned_at }))} />}
-            {!compact && <Button title={selected.archived_at ? 'Unarchive' : 'Archive'} disabled={blocked} onPress={() => void perform(() => chat.updateSettings(selected.id, { archived: !selected.archived_at }))} />}
-            {compact && <Button title={nativePhone ? 'Options' : 'Conversation options'} accessibilityLabel="Conversation options" onPress={() => setMenu(true)} />}
+          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>{compact && !split && <IconButton name="back" label="Back to conversations" disabled={blocked} onPress={() => { selectionGeneration.current++; setSelected(null); setAttachments([]) }} />}<ChatAvatar name={selected.title || selected.peer?.name || 'Conversation'} seed={selected.peer?.id ?? selected.id} uri={mediaUrl(selected.avatar_url, origin)} group={selected.kind === 'group'} size={40} /><View style={{ flex: 1, minWidth: 0 }}><Text numberOfLines={1} style={{ color: c.text, fontFamily: 'Inter_600SemiBold', fontSize: 16, lineHeight: 24 }}>{selected.title || selected.peer?.name}</Text>{!!live.label && <Text numberOfLines={1} style={{ color: c.muted, fontSize: 12, lineHeight: 18 }}>{live.label}</Text>}</View>
+            <PeerCallButton conversation={selected} />
+            {<IconButton name="menu" label="Conversation options" onPress={() => setMenu(true)} />}
           </View>
-          {!compact && <ScrollView horizontal style={{ flexGrow: 0, flexShrink: 0, minHeight: 48 }} contentContainerStyle={{ gap: 8 }}><Button title="Conversation details" disabled={blocked} onPress={() => setTool('details')} /><Button title="Search messages" disabled={blocked} onPress={() => setTool('search')} />{selected.can.send && <><Button title="Create poll" disabled={blocked} onPress={() => setTool('poll')} /><Button title="Share contact" disabled={blocked} onPress={() => setTool('contact')} /></>}</ScrollView>}
           {!compact && historyState.window.hasMoreBefore && <Button title="Load earlier messages" disabled={historyState.loading} onPress={() => loadEarlier()} />}
-          <View style={{flex:1,backgroundColor:appearance?.type==='color' && /^#[0-9a-f]{6}$/i.test(appearance.color??'')?appearance.color!:undefined}}>{backgroundImage&&<Image pointerEvents="none" source={{uri:backgroundImage}} style={{position:'absolute',width:'100%',height:'100%',opacity:0.35}} resizeMode="cover"/>}<FlatList accessibilityLabel={readerAway ? 'Message history' : 'Latest messages'} key={selected.id} ref={listRef} data={messages} keyExtractor={m => m.id} contentContainerStyle={{ gap: 10, paddingVertical: 8 }} keyboardShouldPersistTaps="handled" onViewableItemsChanged={onViewable} viewabilityConfig={viewability} maintainVisibleContentPosition={readerAway ? { minIndexForVisible: 0 } : undefined}
+          <View style={{flex:1,backgroundColor:appearance?.type==='color' && /^#[0-9a-f]{6}$/i.test(appearance.color??'')?appearance.color!:c.chat}}>{backgroundImage&&<Image pointerEvents="none" source={{uri:backgroundImage}} style={{position:'absolute',width:'100%',height:'100%',opacity:0.35}} resizeMode="cover"/>}<FlatList accessibilityLabel={readerAway ? 'Message history' : 'Latest messages'} key={selected.id} ref={listRef} data={messages} keyExtractor={m => m.id} contentContainerStyle={{ gap: 6, paddingVertical: 12, paddingHorizontal: 8 }} keyboardShouldPersistTaps="handled" onViewableItemsChanged={onViewable} viewabilityConfig={viewability} maintainVisibleContentPosition={readerAway ? { minIndexForVisible: 0 } : undefined}
             scrollEventThrottle={16} onScroll={event => { const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent; const atBottom = contentSize.height - layoutMeasurement.height - contentOffset.y < 96; const movedUp = contentOffset.y < scrollOffset.current - 1; const moved = Math.abs(contentOffset.y - scrollOffset.current) > 1; scrollOffset.current = contentOffset.y; if (movedUp) { followIncoming.current = false; nearBottom.current = atBottom } else if (atBottom || moved && !followIncoming.current) nearBottom.current = atBottom; setReaderAway(!nearBottom.current); if (nearBottom.current && !historyState.window.hasMoreAfter) setNewMessages(false) }}
             onContentSizeChange={(_width, height) => { contentHeight.current = height; scrollRequested(); if (followIncoming.current) { listRef.current?.scrollToOffset({ offset: contentHeight.current, animated: false }) } }}
             onScrollToIndexFailed={info => { if (jumpAttempts.current++ >= 3) return; listRef.current?.scrollToOffset({ offset: info.averageItemLength * info.index, animated: false }); if (jumpTimer.current) clearTimeout(jumpTimer.current); jumpTimer.current = setTimeout(() => listRef.current?.scrollToIndex({ index: info.index, animated: false, viewPosition: 0, viewOffset: 8 }), 100) }}
             ListEmptyComponent={<Label>No messages yet.</Label>}
-            renderItem={({ item: m }) => <Pressable onLongPress={() => { setActions(m); setConfirmDelete(null) }} accessibilityLabel={`Message from ${m.sender?.name || 'JM'}`}><Card>
-              <Text style={{ color: c.primary, fontWeight: '700' }}>{m.sender?.name || 'JM'}</Text>
-              {m.reply_to && <Text style={{ color: c.muted }}>{m.reply_to.sender_name}: {m.reply_to.preview}</Text>}
+            renderItem={({ item: m, index }) => <><MessageDay createdAt={m.created_at} previousAt={messages[index - 1]?.created_at} /><Pressable onLongPress={() => { setActions(m); setConfirmDelete(null) }} accessibilityLabel={`Message from ${m.sender?.name || 'JM'}`} style={{ alignItems: m.kind === 'system' ? 'center' : m.sender?.id === me?.id ? 'flex-end' : 'flex-start' }}><Card style={{ maxWidth: '86%', paddingHorizontal: 12, paddingVertical: 6, gap: 4, borderWidth: 0, borderRadius: 16, borderBottomRightRadius: m.sender?.id === me?.id ? 4 : 16, borderBottomLeftRadius: m.sender?.id === me?.id ? 16 : 4, backgroundColor: m.kind === 'system' ? c.neutral : m.sender?.id === me?.id ? c.outgoing : c.incoming }}>
+              {m.sender?.id !== me?.id && m.kind !== 'system' && <Text style={{ color: c.primary, fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>{m.sender?.name || 'JM'}</Text>}
+              {m.reply_to && <Text style={{ color: c.muted, backgroundColor: c.neutral, padding: 8, borderLeftWidth: 3, borderColor: c.brand, borderRadius: 8, fontSize: 12 }}>{m.reply_to.sender_name}: {m.reply_to.preview}</Text>}
               {m.deleted ? <Label>Message deleted</Label> : <RichMessage body={m.body || (m.kind === 'system' ? m.system?.text ?? '' : '')} mentions={live.members.filter(member=>m.mentions.includes(member.user.id)).map(member=>member.user.name)} />}
               {!m.deleted && m.attachments.map(a => <View key={a.id} style={{ gap: 4 }}>
                 {a.kind === 'image' && a.status === 'ready' && a.thumb_url?.startsWith('/') && !a.thumb_url.startsWith('//') && <Image accessibilityLabel={a.name} source={{ uri: `${origin}${a.thumb_url}` }} style={{ width: '100%', maxWidth: 280, height: 180, borderRadius: 12 }} resizeMode="contain" />}
@@ -223,11 +263,12 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
               </View>)}
               {!m.deleted && m.poll && <><Label>{m.poll.question}</Label>{m.poll.options.map(option => <Button key={option.id} title={`${option.text} (${option.votes})${option.me ? ' • selected' : ''}`} disabled={blocked || !m.can.vote} onPress={() => void perform(() => chat.votePoll(m.id, m.poll!.allow_multiple ? m.poll!.options.filter(o => o.me !== (o.id === option.id)).map(o => o.id) : [option.id]))} />)}</>}
               {!m.deleted && m.poll && <Button title={`View votes (${m.poll.voters})`} onPress={() => setVotes(m.id)} />}
+              {!m.deleted && (m.location || m.event) && <SpecialMessage message={m} onChanged={() => void history.reconcile()} />}
               {!m.deleted && m.contact && <Button title={`Contact: ${m.contact.name}`} onPress={() => setPerson(m.contact!)} />}
               {m.reactions.length > 0 && <Label>{m.reactions.map(r => `${r.emoji} ${r.count}`).join('   ')}</Label>}
-              <Text style={{ color: c.muted, fontSize: 12 }}>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{m.edited_at ? ' • edited' : ''}{m.sender?.id === me?.id ? ` • ${statusFor(m, me?.id ?? '', historyState.window.receipts) || m.status || 'sent'}` : ''}</Text>
-              {!m.deleted && <Button title="Message actions" disabled={blocked} onPress={() => { setActions(m); setConfirmDelete(null) }} />}
-            </Card></Pressable>} /></View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}><MessageMeta createdAt={m.created_at} edited={!!m.edited_at} status={m.sender?.id === me?.id ? statusFor(m, me?.id ?? '', historyState.window.receipts) || m.status || 'sent' : null} />
+              {!m.deleted && <IconButton name="down" label="Message actions" disabled={blocked} onPress={() => { setActions(m); setConfirmDelete(null) }} />}</View>
+            </Card></Pressable></>} /></View>
           {newMessages && <Button title="New messages — jump to latest" onPress={() => { setNewMessages(false); void history.latest() }} />}
           {!compact && historyState.window.hasMoreAfter && <Button title="Load newer messages" disabled={historyState.loading} onPress={() => void history.page('after')} />}
           {!compact && <Button title="Jump to latest" disabled={historyState.loading} onPress={() => void history.latest()} />}
@@ -238,16 +279,17 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
           {uploadProgress !== null && <><Label>{uploadProgress < 1 ? `Uploading ${Math.round(uploadProgress * 100)}%` : 'Waiting for server file checks…'}</Label><Button title="Cancel upload" onPress={() => upload.current?.abort()} /></>}
           {selected.can.send && <ComposerPreview body={body} />}
           {selected.can.send && mention && <ScrollView horizontal style={{maxHeight:52}} contentContainerStyle={{gap:8}}>{live.members.filter(member => !member.is_me && member.user.name.toLowerCase().includes(mention.query.toLowerCase())).slice(0,8).map(member => <Button key={member.user.id} title={'Mention '+member.user.name} disabled={blocked} onPress={() => { const next = insertMention(body, caret, member.user.name); changeBody(next.text); setCaret(next.caret); setForcedCaret(next.caret) }} />)}</ScrollView>}
-          {selected.can.send ? <View style={{ flexDirection: compact ? 'row' : 'column', alignItems: compact ? 'center' : undefined, gap: 8 }}><View style={{ flex: compact ? 1 : undefined }}><Field compact={compact} label="Message" value={body} onBlur={live.stop} selection={forcedCaret} onSelectionChange={event => { setCaret(event.nativeEvent.selection) }} onChangeText={v => { setForcedCaret(undefined); changeBody(v); live.typing() }} multiline editable={!blocked} style={{ maxHeight: compact ? 64 : 120 }} /></View>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>{!compact && selected.can.send_file && !editing && <><Button title="Capture or import" disabled={blocked} onPress={()=>setCapture(true)}/><Button title="Attach file" disabled={blocked} onPress={() => void attach()} /></>}<View style={{ flex: compact ? undefined : 1, minWidth: compact ? undefined : 140 }}><Button title={sending ? 'Sending…' : editing ? 'Save edit' : 'Send message'} disabled={blocked || (!body.trim() && !attachments.length)} onPress={() => void send()} /></View></View>
-          </View> : <Label>Sending is unavailable in this conversation.</Label>}
+          {selected.can.send ? <ChatComposer disabled={blocked} sendDisabled={!body.trim() && !attachments.length} sendLabel={sending ? 'Sending?' : editing ? 'Save edit' : 'Send message'} onSend={() => void send()} accessories={!editing ? <IconButton name="plus" label="Message tools" disabled={blocked} onPress={() => setMenu(true)} /> : undefined} inputProps={{ value: body, onBlur: live.stop, selection: forcedCaret, onSelectionChange: event => setCaret(event.nativeEvent.selection), onChangeText: value => { setForcedCaret(undefined); changeBody(value); live.typing() } }} /> : <Text style={{ color: selected.send_block === 'peer_inactive' ? (c.dark ? '#fbbf24' : '#b45309') : c.muted, backgroundColor: selected.send_block === 'peer_inactive' ? (c.dark ? '#3b3020' : '#fef3c7') : 'transparent', padding: 12, borderRadius: 10, fontFamily: 'Inter_400Regular', fontSize: 14 }}>{selected.send_block === 'peer_inactive' ? 'This person is no longer active. You can still read your history, but cannot send new messages.' : 'Sending is unavailable in this conversation.'}</Text>}
         </> : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}><Text style={{ color: c.primary, fontSize: 54 }}>JM</Text><Label large>Your conversations, together</Label><Label>Select a conversation to get started.</Label></View>}
       </View>}
     </View>
-    {compact && selected && <Sheet visible={menu} onClose={() => setMenu(false)}><Label large>Conversation options</Label>
+    {selected && <Sheet visible={menu} onClose={() => setMenu(false)}><Label large>Conversation options</Label>
       <Button title="Back to conversations" disabled={blocked} onPress={() => { setMenu(false); setSelected(null); selectionGeneration.current++ }} />
       <Button title="Conversation details" onPress={() => { setMenu(false); setTool('details') }} /><Button title="Search messages" onPress={() => { setMenu(false); setTool('search') }} />
       {selected.can.send && <><Button title="Create poll" onPress={() => { setMenu(false); setTool('poll') }} /><Button title="Share contact" onPress={() => { setMenu(false); setTool('contact') }} /></>}
+      {selected.can.send && <><Button title="Create event" onPress={() => { setMenu(false); setTool('event') }} /><Button title="Share location" onPress={() => { setMenu(false); setTool('location') }} /></>}
+      <Button title={selected.locked ? 'Unlock chat' : 'Lock chat'} disabled={blocked || lockState.busy} onPress={() => { setMenu(false); void perform(async () => { const detail = await chatLock.setLocked(selected.id, !selected.locked); if (!detail) throw new Error(chatLock.snapshot().error || 'Chat lock change was cancelled.'); setSelected(detail); await history.select(detail.id) }) }} />
+      {lockState.unlocked && <Button title="Hide locked chats" onPress={() => { setMenu(false); chatLock.relock() }} />}
       {selected.can.send_file && <Button title="Capture or import" disabled={blocked} onPress={()=>{setMenu(false);setCapture(true)}}/>}
       {selected.can.send_file && <Button title="Attach file" disabled={blocked} onPress={() => { setMenu(false); void attach() }} />}
       {historyState.window.hasMoreBefore && <Button title="Load earlier messages" disabled={historyState.loading} onPress={() => { setMenu(false); loadEarlier() }} />}
@@ -258,10 +300,12 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
       <Button title="Close options" onPress={() => setMenu(false)} />
     </Sheet>}
     {selected && capture && <CapturePanel key={selected.id} conversation={selected.id} onClose={()=>setCapture(false)} onReady={file=>{setAttachments(old=>[...old,file]);draftId.current=randomUUID();setCapture(false)}}/>}
-    {selectedId && tool === 'details' && <ConversationDetails conversation={selectedId} onClear={() => void history.latest()} onChanged={() => { void history.refreshDetail(); void history.reconcile(); refresh() }} onLeave={() => { setTool(null); setSelected(null); refresh() }} onClose={() => setTool(null)} />}
-    {selectedId && tool === 'search' && <SearchMessages conversation={selectedId} onJump={seq => void history.latest(seq)} onClose={() => setTool(null)} />}
-    {selectedId && tool === 'poll' && <CreatePoll conversation={selectedId} onSent={message => { history.accept(message); setTool(null); void history.latest(); refresh() }} onClose={() => setTool(null)} />}
-    {selectedId && tool === 'contact' && <ShareContact conversation={selectedId} onSent={message => { history.accept(message); setTool(null); void history.latest(); refresh() }} onClose={() => setTool(null)} />}
+    {selected && selectedId && tool === 'details' && <ConversationDetails conversation={selectedId} onClear={() => void history.latest()} onChanged={() => { void history.refreshDetail(); void history.reconcile(); refresh() }} onLeave={() => { setTool(null); setSelected(null); refresh() }} onClose={() => setTool(null)} />}
+    {selected && selectedId && tool === 'search' && <SearchMessages conversation={selectedId} onJump={seq => void history.latest(seq)} onClose={() => setTool(null)} />}
+    {selected && selectedId && tool === 'poll' && <CreatePoll conversation={selectedId} onSent={message => { history.accept(message); setTool(null); void history.latest(); refresh() }} onClose={() => setTool(null)} />}
+    {selected && selectedId && tool === 'contact' && <ShareContact conversation={selectedId} onSent={message => { history.accept(message); setTool(null); void history.latest(); refresh() }} onClose={() => setTool(null)} />}
+    {selected && tool === 'event' && <EventComposer conversation={selected.id} onSent={message => { history.accept(message); setTool(null); void history.latest(); refresh() }} onClose={() => setTool(null)} />}
+    {selected && tool === 'location' && <LocationComposer conversation={selected.id} onSent={message => { history.accept(message); setTool(null); void history.latest(); refresh() }} onClose={() => setTool(null)} />}
     {info && selected && info.conversation===selected.id && <MessageDetails message={info} onClose={()=>setInfo(null)} />}
     {votes && selected && messages.some(message => message.id === votes && !message.deleted) && <PollVoters id={votes} onClose={() => setVotes(null)} onPerson={value => { setVotes(null); setPerson(value) }} />}
     {person && selected && <PersonDetails person={person} onClose={() => setPerson(null)} />}

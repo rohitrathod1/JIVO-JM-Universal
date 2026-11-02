@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { chatLock } from '../modules/messenger/chatLock'
+import { useCallback, useState, useSyncExternalStore } from 'react'
 import { ActivityIndicator, Switch, Text, View } from 'react-native'
 import * as chat from '../modules/messenger/api'
 import { errorMessage } from '../core/api/client'
@@ -8,6 +9,7 @@ import { Button, Card, Field, Label, useColors } from '../ui'
 import { Sheet } from './Sheet'
 import { GroupPhoto } from './GroupPhoto'
 import { SelectedSenders } from './SelectedSenders'
+import { SharedMedia } from './SharedMedia'
 function GroupEditor({ detail, onSaved }: { detail: chat.ConversationDetail; onSaved: () => void }) {
   const c = useColors(); const [title, setTitle] = useState(detail.title); const [description, setDescription] = useState(detail.description); const [busy, setBusy] = useState(false); const [error, setError] = useState('')
   return <Card><Label large>Group information</Label><Field label="Group title" value={title} onChangeText={setTitle} /><Field label="Group description" value={description} onChangeText={setDescription} multiline />{!!error && <Text accessibilityRole="alert" style={{ color: c.text }}>{error}</Text>}<Button title="Save group information" disabled={busy || !title.trim()} onPress={() => { setBusy(true); void chat.updateGroup(detail.id, { title: title.trim(), description }).then(onSaved).catch(e => setError(errorMessage(e))).finally(() => setBusy(false)) }} /></Card>
@@ -19,13 +21,18 @@ export function ConversationDetails({ conversation, onClose, onChanged, onLeave,
   const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [confirm, setConfirm] = useState<{ title: string; action: () => Promise<unknown> } | null>(null)
   async function run(action: () => Promise<unknown>) { if (busy) return; setBusy(true); setError(''); try { await action(); setConfirm(null); resource.refresh(); onChanged() } catch (e) { setError(errorMessage(e)) } finally { setBusy(false) } }
   const detail = resource.value?.detail
+  const lock = useSyncExternalStore(chatLock.subscribe, chatLock.snapshot, chatLock.snapshot)
+  const [visibleMembers, setVisibleMembers] = useState(5)
   return <Sheet visible onClose={() => { if (!busy) onClose() }}><Label large>{detail?.title || detail?.peer?.name || 'Conversation details'}</Label>
     {resource.loading && <ActivityIndicator />}{!!(error || resource.error || people.error) && <Text accessibilityRole="alert" style={{ color: c.text }}>{error || (resource.error ? errorMessage(resource.error) : people.error)}</Text>}
     {detail?.kind === 'group' && detail.can.edit_info && <GroupPhoto detail={detail} onChanged={()=>{resource.refresh();onChanged()}}/>}
     {detail?.kind === 'group' && detail.can.edit_info && <GroupEditor key={detail.id} detail={detail} onSaved={() => { resource.refresh(); onChanged() }} />}
-    {resource.value?.members.map(member => <Card key={member.user.id}><Label>{member.user.name} · {member.role}{member.is_me ? ' · You' : ''}</Label><Label>{member.can_send ? 'Can send messages' : 'Sending restricted'}</Label>
+    {detail && (!detail.locked || lock.unlocked) && <SharedMedia key={`shared:${conversation}`} conversation={conversation} />}
+    {detail?.can.set_disappearing && <Card><Label large>Disappearing messages</Label><Label>New messages disappear after the selected time.</Label>{([{seconds: 0, label: 'Off'}, {seconds: 86400, label: '24 hours'}, {seconds: 604800, label: '7 days'}, {seconds: 7776000, label: '90 days'}] as const).map(option => <Button key={option.seconds} title={`${option.label}${(detail.disappearing_seconds ?? 0) === option.seconds ? ' selected' : ''}`} disabled={busy} onPress={() => void run(() => chat.setDisappearing(conversation, option.seconds))} />)}</Card>}
+    {resource.value?.members.slice(0, visibleMembers).map(member => <Card key={member.user.id}><Label>{member.user.name} · {member.role}{member.is_me ? ' · You' : ''}</Label><Label>{member.can_send ? 'Can send messages' : 'Sending restricted'}</Label>
       {detail?.can.manage_members && member.role !== 'owner' && !member.is_me && <><Button title={member.role === 'admin' ? `Make ${member.user.name} a member` : `Make ${member.user.name} an admin`} disabled={busy} onPress={() => setConfirm({ title: `Change ${member.user.name}'s group role?`, action: () => chat.setMemberRole(conversation, member.user.id, member.role === 'admin' ? 'member' : 'admin') })} /><Button title={`Remove ${member.user.name}`} disabled={busy} onPress={() => setConfirm({ title: `Remove ${member.user.name} from this group?`, action: () => chat.removeMember(conversation, member.user.id) })} /></>}
     </Card>)}
+    {(resource.value?.members.length ?? 0) > visibleMembers && <Button title="Show more members" onPress={() => setVisibleMembers(count => count + 10)} />}
     {detail?.can.manage_members && <><Button title={adding ? 'Close member search' : 'Add group members'} disabled={busy} onPress={() => setAdding(v => !v)} />
       {adding && <><Field label="Find group members" value={query} onChangeText={setQuery} />{people.items.filter(person => !resource.value?.members.some(m => m.user.id === person.id)).map(person => <Button key={person.id} title={`${selected.includes(person.id) ? 'Selected: ' : ''}${person.name}`} disabled={busy || !person.is_active} onPress={() => setSelected(ids => ids.includes(person.id) ? ids.filter(id => id !== person.id) : [...ids, person.id])} />)}{people.cursor && <Button title="More potential members" disabled={people.loading} onPress={() => void people.more()} />}<Label>Share recent history with new members</Label><Switch accessibilityLabel="Share recent group history" value={recent} onValueChange={setRecent} /><Button title={`Add ${selected.length} members`} disabled={busy || !selected.length} onPress={() => void run(async () => { await chat.addMembers(conversation, selected, recent ? 'recent' : 'none'); setSelected([]); setAdding(false) })} /></>}
       <SelectedSenders key={JSON.stringify([detail.send_mode,resource.value?.members])} detail={detail} members={resource.value?.members ?? []} onChanged={() => { resource.refresh(); onChanged() }} /><Label>Who can send</Label><View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>{(['everyone', 'admins'] as const).map(mode => <Button key={mode} title={`${mode}${detail.send_mode === mode ? ' selected' : ''}`} disabled={busy} onPress={() => setConfirm({ title: `Allow ${mode} to send messages?`, action: () => chat.setSendMode(conversation, mode) })} />)}</View>

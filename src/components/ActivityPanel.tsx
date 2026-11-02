@@ -9,6 +9,7 @@ import { errorMessage } from '../core/api/client'
 import { realtime } from '../core/realtime/socket'
 import { AlertsPanel } from './AlertsPanel'
 import { Sheet } from './Sheet'
+import { PushSettings } from './PushSettings'
 function NotificationList() {
   const c = useColors(); const [state, setState] = useState<notifications.ReadFilter>('all'); const [kind, setKind] = useState<notifications.KindFilter>('all')
   const load = useCallback((cursor?: string | null) => notifications.listNotifications(cursor, 30, { state, kind }), [state, kind]); const page = useCursor(load)
@@ -36,7 +37,7 @@ function NotificationList() {
         <Label>Push preview</Label>{(['none', 'sender', 'sender_and_text'] as const).map(value => <Button key={value} title={`${value.replaceAll('_', ' ')}${value === preferences.push_preview ? ' selected' : ''}`} onPress={() => setPreferences({ ...preferences, push_preview: value })} />)}
         <Field label="Quiet hours start (HH:MM)" value={preferences.dnd_start ?? ''} onChangeText={value => setPreferences({ ...preferences, dnd_start: value || null })} /><Field label="Quiet hours end (HH:MM)" value={preferences.dnd_end ?? ''} onChangeText={value => setPreferences({ ...preferences, dnd_end: value || null })} />
         <Button title="Save preferences" disabled={busy || [preferences.dnd_start, preferences.dnd_end].some(v => v !== null && !/^([01]\d|2[0-3]):[0-5]\d$/.test(v))} onPress={() => void run(async () => { setPreferences(await notifications.updatePreferences(preferences)); setSettings(false) })} />
-      </>}<Label>Device push registration is not yet connected in this client.</Label><Button title="Close preferences" disabled={busy} onPress={() => setSettings(false)} />
+      </>}<PushSettings /><Button title="Close preferences" disabled={busy} onPress={() => setSettings(false)} />
     </Sheet>
   </ScrollView>
 }

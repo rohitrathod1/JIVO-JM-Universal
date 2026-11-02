@@ -64,6 +64,32 @@ export interface PollData {
   total_votes: number
 }
 
+export interface LocationData {
+  latitude: number
+  longitude: number
+  accuracy: number | null
+  name: string
+  address: string
+}
+
+export type EventAnswer = 'going' | 'maybe' | 'not_going'
+export interface EventData {
+  title: string
+  starts_at: string
+  ends_at: string | null
+  place: string
+  /** Set when the place was picked on the map. */
+  place_point?: { latitude: number; longitude: number } | null
+  description: string
+  /** A meeting link (Google Meet, Teams, Zoom…). */
+  link?: string
+  /** Minutes before the start that the people going are reminded (null = no reminder). */
+  reminder_minutes?: number | null
+  cancelled?: boolean
+  counts: Record<EventAnswer, number>
+  my_answer: EventAnswer | null
+}
+
 export interface Message {
   content_status?: 'available' | 'unavailable' | 'temporarily_unavailable'
   id: string
@@ -71,7 +97,7 @@ export interface Message {
   seq: number
   sender: PersonCard | null
   client_id: string | null
-  kind: 'text' | 'attachment' | 'system' | 'poll' | 'contact'
+  kind: 'text' | 'attachment' | 'system' | 'poll' | 'contact' | 'location' | 'event'
   body: string
   mentions: string[]
   reply_to: ReplyPreview | null
@@ -81,13 +107,17 @@ export interface Message {
   edited_at: string | null
   deleted: boolean
   deleted_by_moderator: boolean
-  system: { type: string; actor: PersonCard | null; users: PersonCard[]; text: string } | null
+  system: { type: string; actor: PersonCard | null; users: PersonCard[]; text: string; call?: { status: string; duration: number } } | null
   poll?: PollData | null
   contact?: PersonCard | null
+  location?: LocationData | null
+  event?: EventData | null
+  /** Disappearing messages: hidden from this moment on (the server stops returning it). */
+  expires_at?: string | null
   created_at: string
   updated_at: string
   status: DeliveryStatus | null
-  can: { edit: boolean; delete_for_everyone: boolean; react: boolean; reply: boolean; forward: boolean; vote?: boolean }
+  can: { edit: boolean; delete_for_everyone: boolean; react: boolean; reply: boolean; forward: boolean; vote?: boolean; respond?: boolean; edit_event?: boolean }
 }
 
 export interface MessageWindow {
@@ -107,10 +137,10 @@ export interface MessageWindow {
 
 export type SendMode = 'everyone' | 'selected' | 'admins'
 /** Why the composer is replaced by a notice. */
-export type SendBlock = 'left' | 'company' | 'no_permission' | 'admins_only' | 'selected_only' | 'chat_restricted'
+export type SendBlock = 'left' | 'company' | 'no_permission' | 'admins_only' | 'selected_only' | 'chat_restricted' | 'peer_inactive'
 export type NotifyPreview = 'none' | 'sender' | 'sender_and_text'
 
-export type PreviewMedia = 'photo' | 'video' | 'voice' | 'file' | 'contact' | 'poll'
+export type PreviewMedia = 'photo' | 'video' | 'voice' | 'file' | 'contact' | 'poll' | 'location' | 'event'
 
 export interface ConversationItem {
   send_mode: SendMode
@@ -123,8 +153,12 @@ export interface ConversationItem {
   avatar_url: string | null
   restricted_company: string | null
   peer: PersonCard | null
-  /** Saved Messages: a chat with only yourself (notes, files to keep). */
+  /** The chat with yourself (notes, files to keep), titled with your own name. */
   is_self?: boolean
+  /** Disappearing messages for new messages, in seconds (0 = off). */
+  disappearing_seconds?: number
+  /** Chat lock: out of the list until "confirm it's you". */
+  locked?: boolean
   member_count: number
   last_message: {
     id: string
@@ -148,7 +182,7 @@ export interface ConversationItem {
   archived_at: string | null
   left: boolean
   updated_at: string
-  can: { send: boolean; send_file: boolean; edit_info: boolean; manage_members: boolean; leave: boolean }
+  can: { send: boolean; send_file: boolean; edit_info: boolean; manage_members: boolean; leave: boolean; set_disappearing?: boolean; call?: boolean }
 }
 
 export interface ConversationDetail extends ConversationItem {
@@ -172,7 +206,7 @@ export interface CursorPage<T> {
   next_cursor: string | null
 }
 
-export type ConversationFilter = 'all' | 'unread' | 'groups' | 'direct' | 'archived'
+export type ConversationFilter = 'all' | 'unread' | 'groups' | 'direct' | 'archived' | 'locked'
 
 export interface SendPayload {
   client_id: string
@@ -189,7 +223,7 @@ export const searchPeople = async (q: string, cursor?: string | null) =>
 
 // Conversations
 export const listConversations = async (filter: ConversationFilter, q: string, cursor?: string | null) =>
-  (await api.get<CursorPage<ConversationItem>>(`${C}/`, { params: { filter, q: q || undefined, cursor: cursor || undefined } })).data
+  (await api.get<CursorPage<ConversationItem> & { locked_count?: number | null }>(`${C}/`, { params: { filter, q: q || undefined, cursor: cursor || undefined } })).data
 export const getConversation = async (id: string) => (await api.get<ConversationDetail>(`${C}/${id}/`)).data
 export const openDirect = async (userId: string) => (await api.post<ConversationDetail>(`${C}/direct/`, { user_id: userId })).data
 export const createGroup = async (data: { title: string; description?: string; member_ids: string[]; restricted_company?: string | null }) =>
@@ -205,7 +239,7 @@ export const removeMember = async (id: string, userId: string) => api.delete(`${
 export const leaveConversation = async (id: string) => api.post(`${C}/${id}/leave/`)
 export const setSendMode = async (id: string, mode: SendMode, senderIds: string[] = []) =>
   (await api.put<{ send_mode: SendMode; results: Member[] }>(`${C}/${id}/send-mode/`, { mode, sender_ids: senderIds })).data
-export const updateSettings = async (id: string, data: { muted_until?: string | null; pinned?: boolean; archived?: boolean; notify_preview?: NotifyPreview | null }) =>
+export const updateSettings = async (id: string, data: { muted_until?: string | null; pinned?: boolean; archived?: boolean; notify_preview?: NotifyPreview | null; locked?: boolean }) =>
   (await api.patch<ConversationDetail>(`${C}/${id}/settings/`, data)).data
 export const clearChat = async (id: string) => (await api.post<ConversationDetail>(`${C}/${id}/clear/`)).data
 export const markRead = async (id: string, seq: number) => api.post(`${C}/${id}/read/`, { seq })
@@ -223,8 +257,8 @@ export interface WindowQuery {
 }
 export const getWindow = async (id: string, q: WindowQuery = {}) =>
   (await api.get<MessageWindow>(`${C}/${id}/messages/`, { params: q })).data
-export const sendMessage = async (id: string, payload: SendPayload, signal?: AbortSignal) =>
-  (await api.post<Message>(`${C}/${id}/messages/`, payload, { timeout: 30_000, signal })).data
+export const sendMessage = async (id: string, payload: SendPayload, signal?: AbortSignal, expectedOwner?: string) =>
+  (await api.post<Message>(`${C}/${id}/messages/`, payload, { timeout: 30_000, signal, headers: expectedOwner ? { 'X-JM-Expected-User': expectedOwner } : undefined })).data
 export const editMessage = async (messageId: string, body: string) => (await api.patch<Message>(`/messages/${messageId}/`, { body })).data
 export const deleteMessage = async (messageId: string, scope: 'me' | 'everyone', reason?: string) =>
   api.delete(`/messages/${messageId}/`, { params: { for: scope }, data: reason ? { reason } : undefined })
@@ -263,6 +297,52 @@ export const pollVoters = async (messageId: string) =>
   (await api.get<{ id: string; text: string; users: PersonCard[] }[]>(`/messages/${messageId}/poll-votes/`)).data
 export const sendContact = async (conversationId: string, client_id: string, contact_id: string) =>
   (await api.post<Message>(`/conversations/${conversationId}/messages/`, { client_id, contact_id })).data
+
+// Locations and events
+export const sendLocation = async (conversationId: string, data: { client_id: string; latitude: number; longitude: number; accuracy?: number | null; name?: string; address?: string }) =>
+  (await api.post<Message>(`${C}/${conversationId}/locations/`, data)).data
+export interface EventInput {
+  title: string
+  starts_at: string
+  ends_at: string | null
+  place: string
+  place_latitude?: number | null
+  place_longitude?: number | null
+  description: string
+  link: string
+  reminder_minutes: number | null
+}
+export const createEvent = async (conversationId: string, data: EventInput & { client_id: string }) =>
+  (await api.post<Message>(`${C}/${conversationId}/events/`, data)).data
+/** The creator edits the event, or cancels it. */
+export const updateEvent = async (messageId: string, data: EventInput | { cancel: true }) =>
+  (await api.patch<Message>(`/messages/${messageId}/event/`, data)).data
+
+// Maps for the location picker: through JM's server (tiles, search, the pin's address)
+export interface Place {
+  name: string
+  address: string
+  latitude: number
+  longitude: number
+  kind: string
+  /** From the map's centre, when the search was near it. */
+  distance_km?: number
+}
+export const MAP_TILES = '/api/jm/maps/tiles/{z}/{x}/{y}.png'
+export const searchPlaces = async (q: string, near?: { latitude: number; longitude: number } | null, signal?: AbortSignal) =>
+  (await api.get<{ results: Place[] }>('/maps/search/', { params: { q, lat: near?.latitude, lng: near?.longitude }, signal })).data.results
+export const placeAt = async (latitude: number, longitude: number) =>
+  (await api.get<{ place: Place | null }>('/maps/reverse/', { params: { lat: latitude, lng: longitude } })).data.place
+// What was shared in a chat (the profile's Media / Docs / Links tabs), newest first
+export type SharedKind = 'media' | 'docs' | 'voice' | 'links'
+export interface SharedItem {
+  message: { id: string; seq: number; created_at: string; sender: PersonCard | null }
+  attachment?: Attachment
+  url?: string
+  text?: string
+}
+export const getShared = async (conversationId: string, type: SharedKind, before?: number | null) =>
+  (await api.get<{ results: SharedItem[]; next_before: number | null }>(`${C}/${conversationId}/shared/`, { params: { type, before: before ?? undefined } })).data
 
 // A person's profile card (privacy rules on the server: the phone only for people who share a chat).
 export interface PersonProfile extends PersonCard {
@@ -364,4 +444,13 @@ export const getLinkPreview = async (url: string) => {
   const res = await api.get<LinkPreview | ''>('/link-preview/', { params: { url } })
   return res.status === 204 || !res.data ? null : res.data
 }
+
+
+export const setDisappearing = async (id: string, seconds: 0 | 86400 | 604800 | 7776000) =>
+  (await api.put<ConversationDetail>(`${C}/${id}/disappearing/`, { seconds })).data
+
+export const answerEvent = async (messageId: string, answer: EventAnswer | null) =>
+  (answer ? await api.put<EventData>(`/messages/${messageId}/event-response/`, { answer }) : await api.delete<EventData>(`/messages/${messageId}/event-response/`)).data
+export const eventAnswers = async (messageId: string) =>
+  (await api.get<{ answer: EventAnswer; users: PersonCard[] }[]>(`/messages/${messageId}/event-answers/`)).data
 

@@ -23,10 +23,11 @@ async function run() {
   const browser = await chromium.launch({ channel: 'msedge', headless: true })
   try {
     fs.mkdirSync('test-results', { recursive: true })
-    for (const [width, height] of [[360, 1000], [768, 1000], [1440, 1000], [844, 390]]) {
+    for (const [width, height] of [[360, 1000], [768, 1000], [1440, 1000], [844, 390]].filter(([width]) => !process.env.JM_UI_WIDTH || width === Number(process.env.JM_UI_WIDTH))) {
       const context = await browser.newContext({ viewport: { width, height } })
       await captureTests.installStubs(context)
       const page = await context.newPage()
+      try {
       const runtimeErrors = [], unexpected = [], mutations = []
       let stepMethods=['password'],vaultVerified=false,unlockCalls=0;let signedIn = false, verified = false, denied = false, socketClient; let appearance={type:'default',color:null,image_url:null,updated_at:'2026-10-20'};let passwordPending=false;let failNextSend=false; let recoveryReply; let recoveryRequested = false
       let messages = [message('first', 1, 'Hello from the mocked API')]
@@ -52,7 +53,7 @@ async function run() {
       const conversation = { id: 'chat', kind: 'group', title: 'Example conversation', avatar_url: null, peer: person, member_count: 2, last_message: null,
         restricted_company: null, send_mode: 'everyone', send_block: null, notify_preview: null, last_seq: 1, last_read_seq: 0, unread_count: 1,
         mention_unread: false, muted_until: null, pinned_at: null, archived_at: null, left: false, updated_at: '2026-10-20T06:00:00Z',
-        can: { send: true, send_file: true, edit_info: true, manage_members: true, leave: true } }
+        can: { send: true, send_file: true, edit_info: true, manage_members: true, leave: true, set_disappearing: true }, disappearing_seconds: 0 }
       page.on('pageerror', e => runtimeErrors.push(e.message))
       page.on('console', message => { if (message.type() === 'error' && !message.text().startsWith('Failed to load resource:')) runtimeErrors.push(message.text()) })
       await context.route('**/*', route => {
@@ -112,10 +113,14 @@ async function run() {
         if (path === '/api/jm/users/') return send({ results: [{ ...person, id: 'new-member', name: 'New Example Member' }], next_cursor: null })
         if (path === '/api/jm/conversations/chat/send-mode/') { conversation.send_mode = body.mode; return send({ send_mode: body.mode, results: members }) }
         if (path === '/api/jm/conversations/chat/settings/') { Object.assign(conversation, body); return send(conversation) }
+        if (path === '/api/jm/conversations/chat/shared/') return send({ results: url.searchParams.get('type') === 'docs' ? [{ message: { id: 'shared-doc', seq: 1, created_at: '2026-10-20T06:00:00Z', sender: person }, attachment: { ...audioAttachment, id: 'shared-document', name: 'Synthetic shared document.pdf', kind: 'file', mime: 'application/pdf' } }] : [], next_before: null })
+        if (path === '/api/jm/conversations/chat/disappearing/') { conversation.disappearing_seconds = body.seconds; return send(conversation) }
+        if (path === '/api/jm/messages/event-synthetic/event-response/') { const event = messages.find(m => m.id === 'event-synthetic').event; event.my_answer = method === 'DELETE' ? null : body.answer; event.counts.going = event.my_answer === 'going' ? 1 : 0; return send(event) }
+        if (path === '/api/jm/messages/event-synthetic/event-answers/') return send([{ answer: 'going', users: [person] }])
         if (path === '/api/jm/conversations/chat/clear/') { messages = []; return send(conversation) }
         if (path === '/api/jm/conversations/chat/messages/' && method === 'GET') return send({ results: messages, mode: 'latest', oldest_seq: 1, newest_seq: messages.length, has_more_before: false, has_more_after: false, first_unread_seq: 1, last_read_seq: 0, last_seq: messages.length, visible_from_seq: 1, receipts: { read_seq: 0, delivered_seq: 0 }, server_time: new Date().toISOString() })
         if (path === '/api/jm/conversations/chat/messages/' && method === 'POST') {
-          if(failNextSend){failNextSend=false;return route.abort('connectionfailed')}
+          if(failNextSend)return route.abort('connectionfailed')
           const msg = message('sent-' + messages.length, messages.length + 1, body.body, true); messages.push(msg); return send(msg)
         }
         if (/\/conversations\/chat\/(read|delivered)\/$/.test(path)) return send({})
@@ -228,7 +233,8 @@ async function run() {
         failNextSend=true
         await page.getByLabel('Message', { exact: true }).fill('Mocked text message')
       await page.getByRole('button', { name: 'Send message', exact: true }).click()
-      await page.getByRole('button',{name:'Retry queued message',exact:true}).click()
+      await expect(page.getByRole('button',{name:'Retry queued message',exact:true})).toBeEnabled()
+      failNextSend=false
         await page.getByText('Mocked text message', { exact: true }).waitFor()
         const retries=mutations.filter(m=>m.path.endsWith('/messages/')&&m.method==='POST');assert.equal(retries[0].body.client_id,retries[1].body.client_id)
       const post = mutations.find(m => m.path.endsWith('/messages/') && m.method === 'POST')
@@ -249,7 +255,7 @@ async function run() {
       await captureTests.capture(page,height)
       const sendBounds = await page.getByRole('button', { name: 'Send message', exact: true }).boundingBox()
       assert.ok(sendBounds && sendBounds.y + sendBounds.height <= height, 'Composer is reachable inside the viewport');assert.ok(sendBounds.height<=52,'Send label fits without excessive wrapping')
-      if (height < 600) await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
       await page.getByRole('button', { name: 'Create poll', exact: true }).click()
       await page.getByLabel('Poll question', { exact: true }).fill('Mock poll question')
       await page.getByLabel('Poll choices (one per line)', { exact: true }).fill('First choice\nSecond choice')
@@ -259,7 +265,7 @@ async function run() {
       await page.getByRole('button', { name: 'Example Colleague', exact: true }).click()
       await page.getByText('Synthetic colleague profile', { exact: true }).waitFor()
       await page.getByRole('button', { name: 'Close profile', exact: true }).click()
-      if (height < 600) await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
       await page.getByRole('button', { name: 'Search messages', exact: true }).click()
       await page.getByLabel('Search messages', { exact: true }).fill('Edited mocked')
       await page.getByRole('button', { name: 'Find messages', exact: true }).click()
@@ -269,8 +275,35 @@ async function run() {
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Messenger overflow at ' + width)
       await page.getByRole('button', { name: 'Close actions', exact: true }).waitFor({ state: 'hidden' })
       await page.screenshot({ path: `test-results/messenger-mocked-${width}.png`, fullPage: true })
-      if (height < 600) await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      if (width === 360) await require('./scripts/special-message-ui.cjs')(page, { base, person, message, getMessages: () => messages, setMessages: value => { messages = value } })
+      const eventMessage = { ...message('event-synthetic', messages.length + 1, ''), kind: 'event', event: { title: 'Synthetic team event', starts_at: '2027-01-01T12:00:00Z', ends_at: null, place: 'Synthetic room', description: 'Event response test', counts: { going: 0, maybe: 0, not_going: 0 }, my_answer: null }, can: { ...message('x', 1, '').can, respond: true } }
+      messages.push(eventMessage); socketClient.send(JSON.stringify({ type: 'MESSAGE_CREATED', data: eventMessage }))
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await page.getByRole('dialog').getByRole('button', { name: 'Jump to latest', exact: true }).click()
+      await page.getByRole('button', { name: 'Going (0)', exact: true }).click()
+      await expect(page.getByRole('button', { name: 'Going (1) selected', exact: true })).toBeVisible()
+      await page.getByRole('button', { name: 'View event responses', exact: true }).click()
+      await expect(page.getByText('Example Colleague', { exact: true }).last()).toBeVisible()
+      await page.getByRole('button', { name: 'Close event responses', exact: true }).click()
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await page.getByRole('button', { name: 'Lock chat', exact: true }).click()
+      await expect.poll(() => conversation.locked).toBe(true)
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await page.getByRole('button', { name: 'Hide locked chats', exact: true }).click()
+      await expect(page.getByLabel('Message', { exact: true })).toHaveCount(0)
+      await expect(page.getByText('Synthetic team event', { exact: true })).toHaveCount(0)
+      await page.getByRole('button', { name: 'Unlock', exact: true }).click()
+      await page.getByLabel('Message', { exact: true }).waitFor()
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await page.getByRole('button', { name: 'Unlock chat', exact: true }).click()
+      await expect.poll(() => conversation.locked).toBe(false)
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
       await page.getByRole('button', { name: 'Conversation details', exact: true }).click()
+      await page.getByRole('button', { name: 'Docs', exact: true }).click()
+      await expect(page.getByText('Synthetic shared document.pdf', { exact: true })).toBeVisible()
+      await page.getByRole('button', { name: '24 hours', exact: true }).click()
+      await expect.poll(() => conversation.disappearing_seconds).toBe(86400)
+      await expect(page.getByRole('button', { name: '24 hours selected', exact: true })).toBeVisible()
       await captureTests.groupPhoto(page)
       await page.getByLabel('Group title', { exact: true }).fill('Updated example group')
       await page.getByRole('button', { name: 'Save group information', exact: true }).click()
@@ -305,7 +338,7 @@ async function run() {
       await page.getByRole('link', { name: 'Profile', exact: true }).click()
       await page.getByLabel('Display name').waitFor()
       await page.getByRole('link',{name:'Home',exact:true}).click()
-        await page.getByText('Welcome, Example Tester',{exact:true}).waitFor()
+        await page.getByRole('link',{name:'Profile & security',exact:true}).waitFor()
         await page.screenshot({path:'test-results/home-mocked-'+width+'.png',fullPage:true})
         await page.getByRole('link',{name:'Profile & security',exact:true}).click()
         await page.getByLabel('Display name').fill('Updated Example Tester')
@@ -390,6 +423,13 @@ async function run() {
       assert.equal(entries[0].folder, 'folder')
       await page.getByRole('button', { name: 'Create entry', exact: true }).click()
       await page.getByLabel('Entry title', { exact: true }).fill('New mocked entry')
+      const savesBeforeGeneration = mutations.filter(m => m.path === '/api/jp/entries/' && m.method === 'POST').length
+      await page.getByRole('button', { name: 'Password generator', exact: true }).click()
+      await page.getByRole('button', { name: 'Generate password', exact: true }).click()
+      await expect(page.getByLabel('Secret password', { exact: true })).toHaveValue(/^.{20}$/)
+      await page.getByRole('button', { name: 'Passphrase', exact: true }).click()
+      await expect(page.getByLabel('Secret password', { exact: true })).toHaveValue(/^(?:[a-z]+-){6}[1-9]\d$/)
+      assert.equal(mutations.filter(m => m.path === '/api/jp/entries/' && m.method === 'POST').length, savesBeforeGeneration, 'Generation remains on device until Save')
       await page.getByLabel('Secret password', { exact: true }).fill('MOCK_INPUT_ONLY')
       await page.getByRole('button', { name: 'Add custom secret field', exact: true }).click()
       await page.getByLabel('Custom field 1 name', { exact: true }).fill('unchanged')
@@ -403,7 +443,7 @@ async function run() {
       await page.emulateMedia({colorScheme:'dark'})
       await page.getByRole('button',{name:'Preview file mock.pem',exact:true}).click()
       await page.getByText('MOCK_FILE_PREVIEW',{exact:true}).waitFor()
-      await expect(page.getByText('MOCK_FILE_PREVIEW',{exact:true})).toHaveCSS('color','rgb(237, 246, 239)')
+      await expect(page.getByText('MOCK_FILE_PREVIEW',{exact:true})).toHaveCSS('color','rgb(241, 245, 249)') // Reference dark foreground #F1F5F9 (design.md).
       await page.getByText('MOCK_FILE_PREVIEW',{exact:true}).waitFor({state:'hidden'})
       await page.emulateMedia({colorScheme:'light'})
       delayedPreview=true
@@ -489,6 +529,7 @@ async function run() {
       await page.getByRole('button', {name:'Go to linked item',exact:true}).click()
       await page.getByText('Restricted example',{exact:true}).waitFor()
       assert.match(page.url(), /conversation=chat/)
+      if (width < 768) await page.getByRole('button', {name:'Back to conversations',exact:true}).click()
       await page.getByRole('link', {name:'Activity',exact:true}).click()
       await page.getByRole('button', { name: 'Remove notification', exact: true }).click()
       await page.getByRole('button', { name: 'Confirm removal', exact: true }).click()
@@ -597,6 +638,7 @@ async function run() {
       await page.getByRole('button',{name:'approvals',exact:true}).click()
       for(const kind of ['approve','deny','cancel']){await page.getByRole('button',{name:kind[0].toUpperCase()+kind.slice(1)+' Mock '+kind,exact:true}).click();await expect(page.getByRole('dialog').getByText('Target: Same name (target-'+kind+'@example.invalid)',{exact:true})).toBeVisible();await expect(page.getByRole('dialog').getByText('Requested by: Example Tester (tester@example.invalid)',{exact:true})).toBeVisible();await expect(page.getByRole('dialog').getByText(/^Expires:/)).toBeVisible();if(kind==='approve')await expect(page.getByRole('dialog').getByText(/24 hours/)).toBeVisible();await page.getByRole('button',{name:'Confirm decision',exact:true}).click();await page.getByRole('button',{name:'Go back',exact:true}).waitFor({state:'hidden'});if(kind==='approve'){await page.getByText('https://example.invalid/reset/MOCK_APPROVED',{exact:true}).waitFor();await page.evaluate(()=>window.dispatchEvent(new Event('blur')));await page.getByRole('button',{name:'Close access link',exact:true}).waitFor({state:'hidden'});await page.evaluate(()=>window.dispatchEvent(new Event('focus')))}}
       assert.deepEqual(approvalRows.map(a=>a.status),['approve','deny','cancel'])
+      if (width === 360) await require('./scripts/share-ui.cjs')(page, { base, me, conversation })
 
       await page.getByRole('button', { name: 'Sign out', exact: true }).click()
       await page.getByRole('button', { name: 'Continue', exact: true }).waitFor()
@@ -611,6 +653,7 @@ async function run() {
       assert.deepEqual(unexpected, [], 'No unmocked or external request is permitted')
       assert.deepEqual(runtimeErrors, [], 'No browser runtime exceptions')
       console.log(`PASS ${width}px: home, mentions/typing, selected senders, outbox retry, receipts/reactions, profile photo, appearance, direct/pending admin passwords; mocked cookie login, conversation/audio playback/deletion/access loss, recovery race, reader follow/indicator, permission changes, vault blur/blank fields, text send/edit, poll/search, group edit/role/add/mute/clear, step-up profile save, vault reveal expiry/version/create/share/revoke/move/folders, notifications/preferences/alert review/send/cancel, admin lifecycle/groups/security/device/membership/chat/approval decisions, vault file upload/download/rename/delete/preview races, vault management/owner approval/emergency/activity, notification navigation, invite/reset, logout; no external requests`)
+      } catch (error) { await page.screenshot({path:'test-results/failure-'+width+'.png',fullPage:true}).catch(()=>{}); console.error('Failed URL:',page.url()); throw error }
       await context.close()
     }
   } finally { await browser.close() }

@@ -8,6 +8,7 @@ import { realtime } from '../core/realtime/socket'
 import { Button, Card, Label } from '../ui'
 import { Sheet } from './Sheet'
 import { useSession } from '../core/auth/Session'
+import { ProfileCallButton } from './PeerCallButton'
 
 export function PersonDetails({ person, onClose }: { person: PersonCard; onClose: () => void }) {
   const { me } = useSession(); const [busy, setBusy] = useState(false); const [error, setError] = useState('')
@@ -19,6 +20,7 @@ export function PersonDetails({ person, onClose }: { person: PersonCard; onClose
     {!!resource.error && <><Label>{errorMessage(resource.error)}</Label><Button title="Retry profile" onPress={resource.refresh} /></>}
     {profile && <><Label>{profile.full_name}</Label><Label>{profile.bio}</Label><Label>{profile.email}</Label>
       {profile.phone && <Label>{profile.phone}</Label>}
+      {profile.id !== me?.id && <ProfileCallButton key={profile.id} profile={profile} />}
       {profile.companies.map(company => <Card key={company.id}><Label>{company.company_name}</Label><Label>{[company.title, company.department].filter(Boolean).join(' · ')}</Label></Card>)}
       {!profile.is_active && <Label>This account is inactive.</Label>}
       {profile.is_active && profile.id !== me?.id && <Button title="Message this person" disabled={busy} onPress={() => {
