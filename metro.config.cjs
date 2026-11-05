@@ -1,6 +1,9 @@
 const { getDefaultConfig } = require('expo/metro-config')
 
 const config = getDefaultConfig(__dirname)
+// Leave memory for Android Studio and the emulator on the local 8 GB PC.
+// CLI --max-workers can override this on a larger build machine.
+config.maxWorkers = 1
 const existing = config.resolver.blockList
 const root = __dirname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 // CMake caches contain deep generated trees. They are never JavaScript inputs.

@@ -24,9 +24,17 @@ describe('upload scanner boundary', () => {
     const assertion = expect(promise).rejects.toThrow('cancelled'); abort.abort(); await assertion
     await vi.advanceTimersByTimeAsync(200000); expect(off).toHaveBeenCalledOnce(); expect(read).not.toHaveBeenCalled()
   })
+  it('stops waiting at once when the server says the file was not virus-scanned', async () => {
+    const refused = Object.assign(new Error('Request failed with status code 409'), { response: { status: 409, data: { code: 'upload_not_scanned', detail: 'This file was not virus-scanned.' } } })
+    const read = vi.fn(async () => { throw refused })
+    const promise = awaitScan(upload, { read, subscribe: () => () => {} }, new AbortController().signal)
+    const assertion = expect(promise).rejects.toBe(refused)
+    await vi.advanceTimersByTimeAsync(2000); await assertion
+    expect(read).toHaveBeenCalledOnce()
+  })
   it('bounds the wait even if the scan never finishes', async () => {
     const promise = awaitScan(upload, { read: vi.fn(async () => upload), subscribe: () => () => {} }, new AbortController().signal, 5000)
-    const assertion = expect(promise).rejects.toThrow('still being checked')
+    const assertion = expect(promise).rejects.toMatchObject({ retryable: true })
     await vi.advanceTimersByTimeAsync(5000); await assertion
   })
   it('preserves existing file size limits', () => {

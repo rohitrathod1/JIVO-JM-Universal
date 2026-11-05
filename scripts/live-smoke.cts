@@ -21,9 +21,9 @@ async function main() {
   const runId = Date.now().toString()
   try {
     await first.goto(`${universal}/login`, { waitUntil: 'domcontentloaded' })
-    await first.getByLabel('Email address', { exact: true }).fill(fixture.users[0].email)
+    await first.getByLabel(/^(Email|JIVO email)$/).fill(fixture.users[0].email)
     await first.getByLabel('Password', { exact: true }).fill(fixture.users[0].password)
-    await first.getByRole('button', { name: 'Continue', exact: true }).click()
+    await first.getByRole('button', { name: 'Sign in', exact: true }).click()
     await expect(first.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible({ timeout: 30000 })
     await second.goto(`${reference}/login`, { waitUntil: 'domcontentloaded' })
     await second.getByLabel('Email', { exact: true }).fill(fixture.users[1].email)

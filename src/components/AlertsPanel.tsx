@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { realtime } from '../core/realtime/socket'
-import { ActivityIndicator, ScrollView, Switch, Text, View } from 'react-native'
+import { Switch, Text, View } from 'react-native'
 import * as alerts from '../modules/notifications/api'
 import { useCursor } from '../shared/useCursor'
 import { useSession } from '../core/auth/Session'
 import { errorMessage } from '../core/api/client'
-import { Button, Card, Field, Label, styles, useColors } from '../ui'
+import { Button, Card, EmptyState, Field, Label, Spinner, Surface, useColors } from '../ui'
+import { Badge, Muted, PillTabs, SeverityDot, ToolButton, relative } from './InboxVaultKit'
 import { Sheet } from './Sheet'
 function AlertComposer({ onClose, onSent }: { onClose: () => void; onSent: () => void }) {
   const c = useColors(); const [title, setTitle] = useState(''); const [message, setMessage] = useState(''); const [severity, setSeverity] = useState<alerts.AlertSeverity>('info')
@@ -32,13 +33,28 @@ export function AlertsPanel() {
   const refresh = page.refresh
   useEffect(() => realtime.on('*', frame => { if (frame.type === 'RESYNC' || frame.type.startsWith('ALERT_')) void refresh() }), [refresh])
   async function run(action: () => Promise<unknown>) { if (busy) return; setBusy(true); setError(''); try { await action(); setConfirm(null); await page.refresh() } catch (e) { setError(errorMessage(e)) } finally { setBusy(false) } }
-  return <ScrollView contentContainerStyle={styles.page}><Label large>Alerts</Label><View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}><Button title={scope === 'active' ? 'Active alerts selected' : 'Active alerts'} onPress={() => setScope('active')} /><Button title={scope === 'history' ? 'Alert history selected' : 'Alert history'} onPress={() => setScope('history')} />{canSend && <Button title={scope === 'sent' ? 'Sent alerts selected' : 'Sent alerts'} onPress={() => setScope('sent')} />}</View>
-    {canSend && <Button title="Compose alert" disabled={busy} onPress={() => setComposer(true)} />}{!!(error || page.error) && <Text accessibilityRole="alert" style={{ color: c.text }}>{error || page.error}</Text>}
-    {page.items.map(alert => <Card key={alert.id}><Label large>{alert.title}</Label><Label>{alert.message}</Label><Label>{alert.severity} · {alert.status} · {new Date(alert.created_at).toLocaleString()}</Label>
-      {scope !== 'sent' && alert.dismissible && !alert.dismissed_at && alert.status === 'active' && <Button title={`Dismiss ${alert.title}`} disabled={busy} onPress={() => void run(() => alerts.dismissAlert(alert.id))} />}
-      {scope === 'sent' && canSend && <Button title={`${alert.status === 'active' ? 'Cancel' : 'Remove'} sent alert ${alert.title}`} disabled={busy} onPress={() => setConfirm({ title: `${alert.status === 'active' ? 'Cancel this active alert for recipients' : 'Remove this alert from the sent list'}?`, action: () => alert.status === 'active' ? alerts.cancelAlert(alert.id) : alerts.deleteAlert(alert.id) })} />}
-    </Card>)}{page.loading && <ActivityIndicator />}{!page.loading && !page.items.length && <Label>No alerts in this view.</Label>}{page.cursor && <Button title="More alerts" disabled={page.loading} onPress={() => void page.more()} />}
+  return <View style={{ gap: 12 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+      <PillTabs label="Alert views" value={scope} onChange={setScope} tabs={[{ value: 'active', label: 'Active', accessibilityLabel: scope === 'active' ? 'Active alerts selected' : 'Active alerts' }, { value: 'history', label: 'History', accessibilityLabel: scope === 'history' ? 'Alert history selected' : 'Alert history' }, ...(canSend ? [{ value: 'sent' as const, label: 'Sent', accessibilityLabel: scope === 'sent' ? 'Sent alerts selected' : 'Sent alerts' }] : [])]} />
+      {canSend && <View style={{ marginLeft: 'auto', marginBottom: 16 }}><ToolButton variant="primary" icon="plus" label="New alert" a11y="Compose alert" disabled={busy} onPress={() => setComposer(true)} /></View>}
+    </View>
+    {!!(error || page.error) && <Text accessibilityRole="alert" style={{ color: c.danger, fontSize: 14, textAlign: 'center' }}>{error || page.error}</Text>}
+    <Surface>
+      {page.loading && !page.items.length && <View style={{ padding: 24 }}><Spinner label="Loading alerts" /></View>}
+      {!page.loading && !page.items.length && <EmptyState title="No alerts in this view." />}
+      {page.items.map((alert, i) => <View key={alert.id} style={{ flexDirection: 'row', gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: c.border, alignItems: 'flex-start' }}>
+        <SeverityDot severity={alert.severity} />
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={{ fontFamily: 'Inter_600SemiBold', fontWeight: '600', fontSize: 14, lineHeight: 20, color: c.text }}>{alert.title}</Text>
+          <Muted size={14}>{alert.message}</Muted>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}><Badge tone={alert.severity === 'critical' ? 'danger' : alert.severity === 'warning' ? 'warning' : 'info'}>{alert.severity}</Badge><Badge tone={alert.status === 'active' ? 'brand' : 'neutral'}>{alert.status}</Badge><Muted>{relative(alert.created_at)}</Muted></View>
+        </View>
+        {scope !== 'sent' && alert.dismissible && !alert.dismissed_at && alert.status === 'active' && <ToolButton label="Dismiss" a11y={`Dismiss ${alert.title}`} disabled={busy} onPress={() => void run(() => alerts.dismissAlert(alert.id))} />}
+        {scope === 'sent' && canSend && <ToolButton danger label={alert.status === 'active' ? 'Cancel' : 'Remove'} a11y={`${alert.status === 'active' ? 'Cancel' : 'Remove'} sent alert ${alert.title}`} disabled={busy} onPress={() => setConfirm({ title: `${alert.status === 'active' ? 'Cancel this active alert for recipients' : 'Remove this alert from the sent list'}?`, action: () => alert.status === 'active' ? alerts.cancelAlert(alert.id) : alerts.deleteAlert(alert.id) })} />}
+      </View>)}
+      {page.cursor && <View style={{ alignItems: 'center', padding: 8 }}><Button variant="ghost" size="sm" title="More alerts" disabled={page.loading} onPress={() => void page.more()} /></View>}
+    </Surface>
     {composer && <AlertComposer onClose={() => setComposer(false)} onSent={() => { setComposer(false); setScope('sent'); void page.refresh() }} />}
-    <Sheet visible={Boolean(confirm)} onClose={() => { if (!busy) setConfirm(null) }}><Label>{confirm?.title}</Label><Button title="Confirm alert change" disabled={busy} onPress={() => { if (confirm) void run(confirm.action) }} /><Button title="Cancel alert change" disabled={busy} onPress={() => setConfirm(null)} /></Sheet>
-  </ScrollView>
+    <Sheet visible={Boolean(confirm)} onClose={() => { if (!busy) setConfirm(null) }}><Label large>{confirm?.title}</Label><View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}><Button variant="secondary" title="Cancel alert change" disabled={busy} onPress={() => setConfirm(null)} /><Button variant="danger" title="Confirm alert change" disabled={busy} onPress={() => { if (confirm) void run(confirm.action) }} /></View></Sheet>
+  </View>
 }

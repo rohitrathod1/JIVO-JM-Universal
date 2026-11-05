@@ -1,6 +1,6 @@
-export interface NativeLockState { ready: boolean; enabled: boolean; locked: boolean; busy: boolean; error: string }
+export interface NativeLockState { ready: boolean; opened: boolean; enabled: boolean; locked: boolean; busy: boolean; error: string }
 export class NativeAppLock {
-  private state: NativeLockState = { ready: false, enabled: false, locked: true, busy: false, error: '' }
+  private state: NativeLockState = { ready: false, opened: false, enabled: false, locked: true, busy: false, error: '' }
   private listeners = new Set<() => void>()
   private generation = 0
   private restoreRevision = 0
@@ -8,7 +8,7 @@ export class NativeAppLock {
   constructor(private deps: { read: () => Promise<boolean>; write: (enabled: boolean) => Promise<void>; authenticate: () => Promise<boolean>; cancel: () => void }) {}
   snapshot = () => this.state
   subscribe = (fn: () => void) => { this.listeners.add(fn); return () => { this.listeners.delete(fn) } }
-  private publish(patch: Partial<NativeLockState>) { if (!this.disposed) { this.state = { ...this.state, ...patch }; this.listeners.forEach(fn => fn()) } }
+  private publish(patch: Partial<NativeLockState>) { if (!this.disposed) { const next = { ...this.state, ...patch }; this.state = { ...next, opened: next.opened || next.ready && !next.locked }; this.listeners.forEach(fn => fn()) } }
   async restore() {
     // React development StrictMode can detach and attach the same effect/model instance.
     this.disposed = false

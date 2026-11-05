@@ -3,9 +3,10 @@ const root = name => path.dirname(require.resolve(name + '/package.json'));
 const stages = [
  ['typecheck', [path.join(root('typescript'), 'bin/tsc'), '--noEmit']],
  ['typecheck-tools', [path.join(root('typescript'), 'bin/tsc'), '-p', 'tsconfig.tools.json']],
+ ['typecheck-pwa', [path.join(root('typescript'), 'bin/tsc'), '-p', 'tsconfig.pwa.json']],
  ['lint', [path.join(root('eslint'), 'bin/eslint.js'), 'src', '--no-cache', '--max-warnings=0']],
  ['unit', [path.join(root('vitest'), 'vitest.mjs'), 'run', '--testTimeout=20000']],
- ['tools', [require.resolve('tsx/cli'), '--test', 'scripts/web-proxy-policy.test.cts']],
+ ['tools', [require.resolve('tsx/cli'), '--test', 'scripts/web-proxy-policy.test.cts', 'scripts/pwa-policy.test.cts']],
  ['mocked-web', ['run-mocked-ui.cjs']],
 ];
 (async () => {

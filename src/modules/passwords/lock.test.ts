@@ -9,3 +9,13 @@ describe('automatic vault gate',()=>{
  it('abort/unmount suppresses late unlock and remount starts afresh',async()=>{const f=setup();let finish!:(r:{unlocked:boolean})=>void;f.unlock.mockImplementationOnce(()=>new Promise(resolve=>finish=resolve));f.lock.start();f.lock.stop();expect(f.unlock.mock.calls[0][0].aborted).toBe(true);finish({unlocked:true});await tick();expect(f.lock.snapshot().unlocked).toBe(false);f.lock.start();await tick();expect(f.lock.snapshot().unlocked).toBe(true)})
  it('does not expose contents when server refuses unlock',async()=>{const f=setup();f.unlock.mockResolvedValueOnce({unlocked:false});f.lock.start();await tick();expect(f.lock.snapshot()).toMatchObject({unlocked:false,error:'Unlock failed.'})})
 })
+
+it('reuses verification when returning before ten idle minutes', async () => {
+ const f=setup();f.lock.start();await tick();f.lock.stop();f.advance(VAULT_IDLE_MS-1);f.lock.start();await tick();expect(f.lock.snapshot().unlocked).toBe(true);expect(f.unlock).toHaveBeenCalledOnce()
+})
+it('requires verification when returning after the idle window', async () => {
+ const f=setup();f.lock.start();await tick();f.lock.stop();f.advance(VAULT_IDLE_MS);f.unlock.mockRejectedValueOnce({code:'step_up_required'});f.lock.start();await tick();expect(f.lock.snapshot().unlocked).toBe(false);expect(f.unlock).toHaveBeenCalledTimes(2)
+})
+it('explicit session invalidation discards a retained unlock', async () => {
+ const f=setup();f.lock.start();await tick();f.lock.stop();f.lock.lock();f.lock.start();await tick();expect(f.unlock).toHaveBeenCalledTimes(2)
+})

@@ -1,0 +1,1 @@
+module.exports = async ({ P, out, OUT }) => { for (const u of ['alice','bob']) { out(u, P[u].url()); await P[u].screenshot({ path: OUT + `/inspect2-${u}.png` }); const t = await P[u].getByLabel(/^Message from /).allInnerTexts(); out(t.slice(-4).map(x=>x.replace(/\s+/g,' '))); out('typing els', await P[u].getByText(/typing…/).count()) } }

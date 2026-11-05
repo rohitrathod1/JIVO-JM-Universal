@@ -36,3 +36,15 @@ it('finishes initial restoration locked if the app backgrounds during the read',
  const pending = model.restore(); model.background(); finish(true); await pending
  expect(model.snapshot()).toMatchObject({ ready: true, enabled: true, locked: true })
 })
+
+it('mounts protected content only after first unlock and preserves it beneath later covers', async () => {
+ const { model } = fixture()
+ expect(model.snapshot().opened).toBe(false)
+ await model.restore(); expect(model.snapshot().opened).toBe(false)
+ await model.verify(); expect(model.snapshot().opened).toBe(true)
+ model.background(); expect(model.snapshot()).toMatchObject({ opened: true, locked: true })
+})
+it('permits initial content when the device lock preference is off', async () => {
+ const { model } = fixture(false); await model.restore()
+ expect(model.snapshot()).toMatchObject({ opened: true, locked: false })
+})

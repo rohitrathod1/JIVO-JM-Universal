@@ -102,8 +102,8 @@ export const newestSeq = (state: WindowState) => state.messages.at(-1)?.seq ?? n
 /** Ticks for my own messages from the conversation's receipts (lowest read / delivered among the others). */
 export function statusFor(message: Message, myId: string, receipts: WindowState['receipts']): DeliveryStatus | null {
   if (message.sender?.id !== myId || message.kind === 'system') return null
-  if (message.seq <= receipts.read_seq) return 'read'
-  if (message.seq <= receipts.delivered_seq) return 'delivered'
+  if (message.status === 'read' || message.seq <= receipts.read_seq) return 'read'
+  if (message.status === 'delivered' || message.seq <= receipts.delivered_seq) return 'delivered'
   return 'sent'
 }
 

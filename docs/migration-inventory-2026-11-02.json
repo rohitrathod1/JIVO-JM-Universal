@@ -1,0 +1,6214 @@
+{
+  "capturedAt": "2026-11-02T11:11:37.374088+00:00",
+  "scope": "Read-only source snapshot; lexical exports/routes, not execution or behavior equivalence",
+  "reference": {
+    "files": [
+      {
+        "path": "public/brand/jm-mark.png",
+        "bytes": 72822,
+        "sha256": "e09de8bc305a99cccac3491f69d3e5de87e58c63afe304a7730dd3a057116aff"
+      },
+      {
+        "path": "public/brand/jm-wordmark-dark.png",
+        "bytes": 4323,
+        "sha256": "807de310c68472dae63f101243c41b96fa690d2c8e89b0d1d8943f4dcbb64bfb"
+      },
+      {
+        "path": "public/brand/jm-wordmark-light.png",
+        "bytes": 4351,
+        "sha256": "0b9863708d64586f37d79e2a121c56993e8209f1c2716d64c374f7ef0a01f039"
+      },
+      {
+        "path": "public/favicon-32.png",
+        "bytes": 1503,
+        "sha256": "8181e23e5d93acafa465dd1078a82cf7dcf9303944fffa800da723c2485e4388"
+      },
+      {
+        "path": "public/favicon-48.png",
+        "bytes": 2648,
+        "sha256": "d53784b16a1f3d0baaa9918d0f1aff8da3fefe413e013e5ab1fef1a0061a8cc4"
+      },
+      {
+        "path": "public/favicon-dark-32.png",
+        "bytes": 1882,
+        "sha256": "46f8a035fa963a58e72598c6550f3f58ec519e62b4aa6e559a8ff19b194e855c"
+      },
+      {
+        "path": "public/favicon-dark-48.png",
+        "bytes": 3241,
+        "sha256": "b2385628393a03069b62c680523edeb9fc90f14a60e0e4632bd501059c0d10e5"
+      },
+      {
+        "path": "public/icons/apple-touch-icon.png",
+        "bytes": 11894,
+        "sha256": "3e12a0b30f0de87de19a363ae95276c6e1568e31b19bd281a1bf18e51c1d996c"
+      },
+      {
+        "path": "public/icons/badge-96.png",
+        "bytes": 2213,
+        "sha256": "16cac226c21dd2c07f7ab867f7db0aeda489a9094b38596cafb75165f959fef8"
+      },
+      {
+        "path": "public/icons/icon-192.png",
+        "bytes": 17294,
+        "sha256": "3a97623fb3725cf6f9549ac5b00f8d7b088636acc70c2d1cd67a205d19d9f6f3"
+      },
+      {
+        "path": "public/icons/icon-512.png",
+        "bytes": 81533,
+        "sha256": "182458f57a93fdd1cb05a8be18fa0169cca61a84b0e743d9792edd463f5ac3fa"
+      },
+      {
+        "path": "public/icons/icon-dark-512.png",
+        "bytes": 81703,
+        "sha256": "4cd616ed94b9748c7a4e7040c29ea6973aa0e61b2b9328d834f1533c4060d19c"
+      },
+      {
+        "path": "public/icons/maskable-512.png",
+        "bytes": 61412,
+        "sha256": "27bcd9686f8554e4a6ffdcf4ad8aa5f9e64b84ef62289506aef0a9f5888577ce"
+      },
+      {
+        "path": "public/sounds/jm-notify.wav",
+        "bytes": 14156,
+        "sha256": "e044bcfc5cd57645cc47349815e99bf39e3a9538105c2fa3bb71390094f55e58"
+      },
+      {
+        "path": "src/app/AppRoutes.tsx",
+        "bytes": 1353,
+        "sha256": "d333706f74c6f574483d9d8320e778bc44687e71814116bed1b308ab4a37cdb7",
+        "exports": [
+          "AppRoutes"
+        ],
+        "routes": [
+          "*",
+          "/invite/:token",
+          "/login",
+          "/reset-password/:token"
+        ]
+      },
+      {
+        "path": "src/app/layouts/AuthLayout.tsx",
+        "bytes": 480,
+        "sha256": "2c82b52024822c34e48a85a23d71e26784f9f79f38cc2ce48e0cfe010752ffe8",
+        "exports": [
+          "AuthLayout"
+        ]
+      },
+      {
+        "path": "src/app/layouts/BottomNav.tsx",
+        "bytes": 2406,
+        "sha256": "f3125f61fd01aac16df387bd72d9051e3105ac2f0820a7dbaa17d76dc0ae4bdc",
+        "exports": [
+          "BottomNav"
+        ]
+      },
+      {
+        "path": "src/app/layouts/ProfileTab.test.tsx",
+        "bytes": 1741,
+        "sha256": "a668cc2c5a8cc63916332dd8c17358b7bbda3341c11a197471ef6dad87306edf",
+        "exports": []
+      },
+      {
+        "path": "src/app/layouts/ProfileTab.tsx",
+        "bytes": 4842,
+        "sha256": "c6f61130251d510b0794e84a3f5884a090d425529f4dca76274e82c7a2d9dc7e",
+        "exports": [
+          "ProfileTab"
+        ]
+      },
+      {
+        "path": "src/app/layouts/RailTooltips.tsx",
+        "bytes": 2581,
+        "sha256": "299332483359af6583c7382bd0284cf10731f3d67463e9bd63b60d6573f5ea73",
+        "exports": [
+          "RailTooltips"
+        ]
+      },
+      {
+        "path": "src/app/layouts/Shell.tsx",
+        "bytes": 4995,
+        "sha256": "920a82abb60b0ce34d4c586e86785de991baff3d49cae2087f902b21fd207935",
+        "exports": [
+          "Shell"
+        ]
+      },
+      {
+        "path": "src/app/layouts/SidebarNav.test.tsx",
+        "bytes": 1876,
+        "sha256": "6482692913f4036366134c96a8f1745869fa293a4218d6cdf9bdb36f3a13217e",
+        "exports": []
+      },
+      {
+        "path": "src/app/layouts/SidebarNav.tsx",
+        "bytes": 1636,
+        "sha256": "f2a17f5d8f429945aaa6b4a0fadc2b6dc19884e5bf232463907514c9e181456e",
+        "exports": [
+          "SidebarNav"
+        ]
+      },
+      {
+        "path": "src/app/layouts/tabbar.ts",
+        "bytes": 179,
+        "sha256": "9d9a88468b74e315206b40a6864b249fe2da06dc52094b591772a7e76e53d2d0",
+        "exports": [
+          "TABBAR_PATHS"
+        ]
+      },
+      {
+        "path": "src/app/layouts/ThemeToggle.tsx",
+        "bytes": 1616,
+        "sha256": "35b11e2997231652e1a28cd251e015550442d2c84f559b673af784c1441a927f",
+        "exports": [
+          "ThemeToggle"
+        ]
+      },
+      {
+        "path": "src/app/layouts/UserMenu.test.tsx",
+        "bytes": 1102,
+        "sha256": "41da67c88bb9ea1fd5ff8aebccfc77d2405a30f9d3a2fe73aaa2849729d42abf",
+        "exports": []
+      },
+      {
+        "path": "src/app/layouts/UserMenu.tsx",
+        "bytes": 1884,
+        "sha256": "be756d8435e34057a374292f48f263b24e8ae0cd9e400ca98a85d9d68882c07f",
+        "exports": [
+          "UserMenu"
+        ]
+      },
+      {
+        "path": "src/app/registry.ts",
+        "bytes": 1422,
+        "sha256": "6dd30cc482d40e14f7856f46c9517d47978a70629dceb3ea9eabfbf0e1719aa7",
+        "exports": [
+          "modules",
+          "routes",
+          "navigation",
+          "background",
+          "headerItems",
+          "routeFor",
+          "titleFor"
+        ]
+      },
+      {
+        "path": "src/config/capabilities.test.ts",
+        "bytes": 577,
+        "sha256": "793601b419ef80cc4fc7e862e4375d42fa1ba2b6a1dd0868472a6bef6539d58b",
+        "exports": []
+      },
+      {
+        "path": "src/config/capabilities.ts",
+        "bytes": 1166,
+        "sha256": "d3335d2d2a28e83dd849b2e18d4357acc980dd023d83c465046d4392d4bde418",
+        "exports": [
+          "CAPABILITIES",
+          "Capability",
+          "CapabilityRule",
+          "ADMIN_ACCESS",
+          "allows"
+        ]
+      },
+      {
+        "path": "src/core/api/client.test.ts",
+        "bytes": 3798,
+        "sha256": "ee3c95aee2772b95f89ae053d1ab29011e0e957a9a93e843085a9a1e0c5b7e34",
+        "exports": []
+      },
+      {
+        "path": "src/core/api/client.ts",
+        "bytes": 4981,
+        "sha256": "dc442cd000d1253c35d8128f640ec1e23521b5ea1b79022cf7ff230319a842a3",
+        "exports": [
+          "api",
+          "SESSION_LOST_EVENT",
+          "onStepUpRequired",
+          "ApiErrorBody",
+          "errorCode",
+          "fieldErrors",
+          "errorMessage",
+          "isUnreachable"
+        ]
+      },
+      {
+        "path": "src/core/api/types.ts",
+        "bytes": 342,
+        "sha256": "86b14e22e85c78d6dcc8f3b5f819dda609afd44251acfc10b10857a84d3cda33",
+        "exports": [
+          "Page",
+          "Person"
+        ]
+      },
+      {
+        "path": "src/core/auth/appLock.ts",
+        "bytes": 1392,
+        "sha256": "fb7c2baf9840053e4bd988fd09b5582022bb15641dd9428f476209072ac11bd8",
+        "exports": [
+          "BACKGROUND_MS",
+          "isAppLockOn",
+          "setAppLockOn",
+          "useAppLock"
+        ]
+      },
+      {
+        "path": "src/core/auth/AppLockGate.test.tsx",
+        "bytes": 3793,
+        "sha256": "3bacf1b7be7a8cd899324f70f41d947cfe0a12e771d9e8afc69d3c4698074377",
+        "exports": []
+      },
+      {
+        "path": "src/core/auth/AppLockGate.tsx",
+        "bytes": 5811,
+        "sha256": "c2392ffd1424c9096593815a3dafd5abfcb66bbb92212390f67691f59daf7417",
+        "exports": [
+          "AppLockGate"
+        ]
+      },
+      {
+        "path": "src/core/auth/AuthProvider.tsx",
+        "bytes": 4364,
+        "sha256": "e389cf6c827341c8b6cdac358ba0ebfd7db9096c06e421cb1ec67eb7e909f3f3",
+        "exports": [
+          "AuthProvider",
+          "useAuth"
+        ]
+      },
+      {
+        "path": "src/core/auth/cleanup.ts",
+        "bytes": 518,
+        "sha256": "f608b348489b8b80b61595b98f7224f308b56912723525c8b153849cd0bd8a75",
+        "exports": [
+          "onSignOut",
+          "runSignOutCleanups"
+        ]
+      },
+      {
+        "path": "src/core/auth/guards.tsx",
+        "bytes": 2589,
+        "sha256": "3d67590f63b5bc450073c20d5a4640906e7b534e0f33ba4e6a4dd4cc254d57f3",
+        "exports": [
+          "RequireSession",
+          "RequireCapability",
+          "Authorized"
+        ]
+      },
+      {
+        "path": "src/core/auth/identity.ts",
+        "bytes": 681,
+        "sha256": "a457eaafe790149e7a955033036fc5c9d9a6bfd94cdb7912f6c9f9f3cf14a5de",
+        "exports": [
+          "useIdentity"
+        ]
+      },
+      {
+        "path": "src/core/auth/MfaBanner.tsx",
+        "bytes": 2016,
+        "sha256": "34162919d03728a74b3db38707633fee33194ac0fd1a780c753cf71a65bb73da",
+        "exports": [
+          "MfaBanner"
+        ]
+      },
+      {
+        "path": "src/core/auth/security.ts",
+        "bytes": 6526,
+        "sha256": "c767fcaa7c58ba1a98711fcbb6eeba9fdabab90c48fba415dfd975056f3742de",
+        "exports": [
+          "SecondFactor",
+          "StepUpScope",
+          "StepUpMethod",
+          "PasskeyInfo",
+          "SecurityStatus",
+          "LoginResponse",
+          "securityKeys",
+          "passkeysSupported",
+          "platformPasskeyAvailable",
+          "rememberPasskeyDevice",
+          "shouldAutoPasskey",
+          "verifySecondStep",
+          "signInWithPasskey",
+          "SignInOptions",
+          "getSignInOptions",
+          "getSecurityStatus",
+          "regenerateRecoveryCodes",
+          "renamePasskey",
+          "removePasskey",
+          "addPasskey",
+          "stepUpOptions",
+          "stepUp",
+          "isWebAuthnCancel"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/auth/login/passkey/"
+          ],
+          [
+            "'",
+            "/auth/login/passkey/options/"
+          ],
+          [
+            "'",
+            "/auth/login/verify/"
+          ],
+          [
+            "'",
+            "/auth/mfa/"
+          ],
+          [
+            "'",
+            "/auth/options/"
+          ],
+          [
+            "'",
+            "/auth/passkeys/"
+          ],
+          [
+            "'",
+            "/auth/passkeys/options/"
+          ],
+          [
+            "'",
+            "/auth/recovery-codes/regenerate/"
+          ],
+          [
+            "'",
+            "/auth/step-up/"
+          ],
+          [
+            "`",
+            "/auth/passkeys/${id}/"
+          ]
+        ]
+      },
+      {
+        "path": "src/core/auth/StepUpDialog.test.tsx",
+        "bytes": 3039,
+        "sha256": "c59ae4887e761192441b3426074388aa297c9b3a977ad4f99714fe2eb70a81fd",
+        "exports": []
+      },
+      {
+        "path": "src/core/auth/StepUpDialog.tsx",
+        "bytes": 6312,
+        "sha256": "f1163248ef4f03e1dab00959fc99a532b77ddcb1505709c1fb387f6d0c882d31",
+        "exports": [
+          "StepUpDialog"
+        ]
+      },
+      {
+        "path": "src/core/auth/types.ts",
+        "bytes": 1229,
+        "sha256": "d2260a9222b8fa3c58c581768c607d2a3f07a2bf0145195a17f834b155fbc248",
+        "exports": [
+          "Membership",
+          "Me"
+        ]
+      },
+      {
+        "path": "src/core/auth/usePermission.ts",
+        "bytes": 378,
+        "sha256": "f5a74d089dde15a0f0ef1012f9ae8e958a2e970ccf101b0f2cdf40fe5dea4319",
+        "exports": [
+          "usePermission"
+        ]
+      },
+      {
+        "path": "src/core/notifications/feedback.test.ts",
+        "bytes": 2209,
+        "sha256": "2e61ca3b64749d7db528d0cd1b1b088035f5a2f3cdf02c25840886324b636ee4",
+        "exports": []
+      },
+      {
+        "path": "src/core/notifications/feedback.ts",
+        "bytes": 2656,
+        "sha256": "c2c920c78bbdfe2a6935147f6833d78210a0dfae3340d4d50b7379709681db56",
+        "exports": [
+          "FeedbackStrength",
+          "setFeedbackPrefs",
+          "canVibrate",
+          "feedback",
+          "markKnown",
+          "resetFeedbackForTests"
+        ]
+      },
+      {
+        "path": "src/core/notifications/summary.ts",
+        "bytes": 1424,
+        "sha256": "de82804cdf22eaea636b474f58bdad0c1624a6ad740a33285dae94553d259974",
+        "exports": [
+          "UnreadSummary",
+          "SUMMARY_KEY",
+          "useUnreadSummary",
+          "setAppBadge"
+        ]
+      },
+      {
+        "path": "src/core/pwa/ConnectionBanner.tsx",
+        "bytes": 3213,
+        "sha256": "b15484ea56645e35adec560a0483a745dbff2ea817f8f04bddf53ecfd3c44f2f",
+        "exports": [
+          "ConnectionBanner"
+        ]
+      },
+      {
+        "path": "src/core/pwa/externalLinks.test.ts",
+        "bytes": 1641,
+        "sha256": "246f8dcea49a3b63dfd844bacc314b960aa909d9afef460d76d1e5cd46fb77bd",
+        "exports": []
+      },
+      {
+        "path": "src/core/pwa/externalLinks.ts",
+        "bytes": 1718,
+        "sha256": "d65114b64734857162c2a896ef0c92664ce98752fa37fc8baca000679b45203b",
+        "exports": [
+          "isExternal",
+          "installExternalLinks"
+        ]
+      },
+      {
+        "path": "src/core/pwa/install.ts",
+        "bytes": 2517,
+        "sha256": "ea06589efcfc44c3be8e90bc6021e279b1f37c56255e11496ffbe0ba869ae6c0",
+        "exports": [
+          "isStandalone",
+          "isIos",
+          "InstallPlatform",
+          "installPlatform",
+          "openInstallPopup",
+          "useInstallPopup",
+          "useInstall"
+        ]
+      },
+      {
+        "path": "src/core/pwa/InstallPopup.tsx",
+        "bytes": 5513,
+        "sha256": "7b6fc742c50f5f12d0e75428c13ed27dc1738844b7d13b97b64f75e91502a88f",
+        "exports": [
+          "InstallPopup"
+        ]
+      },
+      {
+        "path": "src/core/pwa/UpdatePrompt.tsx",
+        "bytes": 1000,
+        "sha256": "9513e4d8e3098dadd8ec770896ca071a43f3b624336755d1bfec1fc0cc9eb85b",
+        "exports": [
+          "UpdatePrompt"
+        ]
+      },
+      {
+        "path": "src/core/realtime/hooks.ts",
+        "bytes": 725,
+        "sha256": "85f061772febe88552c2d04a42c41e3270d60af301341a5c7409740d2c090715",
+        "exports": [
+          "useRealtimeEvent",
+          "useRealtimeStatus",
+          "useLive"
+        ]
+      },
+      {
+        "path": "src/core/realtime/socket.test.ts",
+        "bytes": 4171,
+        "sha256": "62aeb7bbd56b3192848ae29a3260dbc5c8b2cb646a37559490ed6990def63897",
+        "exports": []
+      },
+      {
+        "path": "src/core/realtime/socket.ts",
+        "bytes": 6910,
+        "sha256": "f2754cc8004bd77d174d73a53a95b73a61ea50db9cadc9a0c68c8c8ef686060c",
+        "exports": [
+          "RealtimeStatus",
+          "Frame",
+          "RESYNC",
+          "SESSION_REVOKED_EVENT",
+          "useRealtimeStore",
+          "RealtimeClient",
+          "realtime"
+        ]
+      },
+      {
+        "path": "src/core/theme.test.ts",
+        "bytes": 1022,
+        "sha256": "091adf592c8075853ad54b3f538d50f1e69415f9cc48747a035fbeb6d7e6eaec",
+        "exports": []
+      },
+      {
+        "path": "src/core/theme.ts",
+        "bytes": 1681,
+        "sha256": "ec6ede6525e7d183d9f959c8f7d1d46faf5fc73399ca92339fbf377e1ad1e488",
+        "exports": [
+          "ThemeChoice",
+          "storedTheme",
+          "resolveDark",
+          "applyTheme",
+          "saveTheme",
+          "toggleTheme",
+          "initTheme"
+        ]
+      },
+      {
+        "path": "src/core/types/module.ts",
+        "bytes": 2168,
+        "sha256": "7951ca2c56383e2c033074b653317fde78a10feeb5541305f169b76e4cd61702",
+        "exports": [
+          "ModuleRoute",
+          "ModuleNavItem",
+          "ShellItemProps",
+          "ShellItem",
+          "ShellExtension",
+          "ModuleConfig"
+        ]
+      },
+      {
+        "path": "src/index.css",
+        "bytes": 8566,
+        "sha256": "6d9bc8ca85c847482b055d67a6cfe12349307a318ad46bea4be54cf3dd45b22e",
+        "exports": []
+      },
+      {
+        "path": "src/main.tsx",
+        "bytes": 1650,
+        "sha256": "cdec2e99978678625c739c28d6522d7cb66eee47e0a3e620f0f95e93a786e6a7",
+        "exports": []
+      },
+      {
+        "path": "src/modules/admin/api.ts",
+        "bytes": 12366,
+        "sha256": "47feda3d9b7fb0fc69f765ec9b594447a7da4088abcf575b2063533090b2287c",
+        "exports": [
+          "UserStatus",
+          "AdminUser",
+          "AdminCompany",
+          "EffectivePermission",
+          "GroupInfo",
+          "CapabilityInfo",
+          "GroupMember",
+          "GroupInput",
+          "GroupOption",
+          "UserFilters",
+          "Approval",
+          "ApprovalPending",
+          "listApprovals",
+          "decideApproval",
+          "adminKeys",
+          "listUsers",
+          "getUser",
+          "createUser",
+          "JivoCandidate",
+          "listJivoCandidates",
+          "addJivoPerson",
+          "setUserPassword",
+          "updateUser",
+          "userAction",
+          "deleteUser",
+          "inviteLink",
+          "resetLink",
+          "resetUserMfa",
+          "decideEmailChange",
+          "unlockUser",
+          "UserDevice",
+          "listUserDevices",
+          "revokeUserDevice",
+          "revokeUserSessions",
+          "setUserGroups",
+          "groupOptions",
+          "addMembership",
+          "updateMembership",
+          "removeMembership",
+          "listCompanies",
+          "saveCompany",
+          "deleteCompany",
+          "restoreCompany",
+          "listGroups",
+          "listCapabilities",
+          "createGroup",
+          "updateGroup",
+          "deleteGroup",
+          "listGroupMembers",
+          "changeGroupMembers",
+          "SecurityPolicy",
+          "getSecurityPolicy",
+          "setTwoStepEnforced",
+          "ChatAccess",
+          "ChatPerson",
+          "getChatAccess",
+          "setChatAccess",
+          "listChatAllowed",
+          "changeChatAllowed"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/admin/approvals/"
+          ],
+          [
+            "'",
+            "/admin/capabilities/"
+          ],
+          [
+            "'",
+            "/admin/companies/"
+          ],
+          [
+            "'",
+            "/admin/groups/"
+          ],
+          [
+            "'",
+            "/admin/memberships/"
+          ],
+          [
+            "'",
+            "/admin/security-policy/"
+          ],
+          [
+            "'",
+            "/admin/users/"
+          ],
+          [
+            "'",
+            "/admin/users/group-options/"
+          ],
+          [
+            "'",
+            "/admin/users/jivo-candidates/"
+          ],
+          [
+            "`",
+            "${chatAccessUrl(id)}allowed/"
+          ],
+          [
+            "`",
+            "/admin/companies/${company.id}/"
+          ],
+          [
+            "`",
+            "/admin/companies/${id}/"
+          ],
+          [
+            "`",
+            "/admin/companies/${id}/restore/"
+          ],
+          [
+            "`",
+            "/admin/groups/${id}/"
+          ],
+          [
+            "`",
+            "/admin/memberships/${id}/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/${action}/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/email-change/${decision}/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/groups/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/invite-link/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/reset-link/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/reset-mfa/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/revoke-sessions/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/sessions/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/sessions/${sessionId}/revoke/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/set-password/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/unlock/"
+          ]
+        ]
+      },
+      {
+        "path": "src/modules/admin/approvalToast.ts",
+        "bytes": 531,
+        "sha256": "c6e382a13954f538f811c6d53764ba07edc58d2a2479b56a33b955b4588581f1",
+        "exports": [
+          "showActionOutcome"
+        ]
+      },
+      {
+        "path": "src/modules/admin/components/ChatAccessSection.test.tsx",
+        "bytes": 2346,
+        "sha256": "5eccb2540d9d0c6abf9bd48e0021d1d3c2164e78623969cd29567d65f45a5d37",
+        "exports": []
+      },
+      {
+        "path": "src/modules/admin/components/ChatAccessSection.tsx",
+        "bytes": 12031,
+        "sha256": "92ab36b216ef3d2a5fa4a69dbb8a3733e1f84b3b0e207bc0789b073e7927fc07",
+        "exports": [
+          "ChatAccessSection"
+        ]
+      },
+      {
+        "path": "src/modules/admin/components/GroupDialog.tsx",
+        "bytes": 15137,
+        "sha256": "b7ffde5780331700881919fa838a925c6c226f76b4301d08fbc130771fc8715f",
+        "exports": [
+          "NewGroupDialog",
+          "GroupDialog"
+        ]
+      },
+      {
+        "path": "src/modules/admin/components/GroupForm.tsx",
+        "bytes": 4571,
+        "sha256": "f8d68a45204118997e618ad347e8b1e2267231902293377f447debf306f0f4a7",
+        "exports": [
+          "GroupForm"
+        ]
+      },
+      {
+        "path": "src/modules/admin/components/PasswordField.tsx",
+        "bytes": 1661,
+        "sha256": "72916c724149a4b78bed630af0409b1efb669d069619bd7cd3faa679f3d185b4",
+        "exports": [
+          "PasswordField"
+        ]
+      },
+      {
+        "path": "src/modules/admin/components/StatusBadge.tsx",
+        "bytes": 510,
+        "sha256": "39b1179b1972dec253853f51b71053ee18385b788e193dc854117d7fd2be6c9a",
+        "exports": [
+          "UserStatusBadge"
+        ]
+      },
+      {
+        "path": "src/modules/admin/groupArea.ts",
+        "bytes": 414,
+        "sha256": "e555ee2586e02155331deb5cf17803535c6aa7456733099ec1100f73b5fc56da",
+        "exports": [
+          "groupArea"
+        ]
+      },
+      {
+        "path": "src/modules/admin/lib/audit.test.ts",
+        "bytes": 510,
+        "sha256": "7b72121ccf7998a0e5134b56826c3c52ff3010a22b490ffd45842ecb38ee3611",
+        "exports": []
+      },
+      {
+        "path": "src/modules/admin/lib/audit.ts",
+        "bytes": 508,
+        "sha256": "a142f7326bce124e5af72bad6af94c706b833e7d3d3c41ed736ae25865401937",
+        "exports": [
+          "detailText"
+        ]
+      },
+      {
+        "path": "src/modules/admin/lib/password.test.ts",
+        "bytes": 481,
+        "sha256": "3e3b48395da9aab25f0586a3a24f2df3539735ab4a82565401c297164a56c9e7",
+        "exports": []
+      },
+      {
+        "path": "src/modules/admin/lib/password.ts",
+        "bytes": 552,
+        "sha256": "7318bf0ecebe6681baaf72282d23e3e0e9e569fe1e32a40d2b40e422bec0db07",
+        "exports": [
+          "generatePassword"
+        ]
+      },
+      {
+        "path": "src/modules/admin/module.config.tsx",
+        "bytes": 2310,
+        "sha256": "2e07a14a26e084682a4b97e629cf26fe022e7d5c052729f20cad2c2e94e1bf78",
+        "exports": [
+          "adminModule"
+        ],
+        "routes": [
+          "/admin/alerts",
+          "/admin/approvals",
+          "/admin/groups",
+          "/admin/security",
+          "/admin/users",
+          "/admin/users/:id"
+        ]
+      },
+      {
+        "path": "src/modules/admin/pages/AddJivoPerson.test.tsx",
+        "bytes": 2654,
+        "sha256": "8b5188748ea1c1519e35489eea5b1baa421a91480d373b872f5f9ee9aef8a978",
+        "exports": []
+      },
+      {
+        "path": "src/modules/admin/pages/AlertsPage.tsx",
+        "bytes": 14524,
+        "sha256": "20081fca8ef01a1b60f9d23e76e4142b473384e319366589f09a134b3ec4c307",
+        "exports": [
+          "AlertsPage"
+        ]
+      },
+      {
+        "path": "src/modules/admin/pages/CompaniesPage.tsx",
+        "bytes": 7646,
+        "sha256": "669b17b9f6d1d73439d263e90b9b2e48361b7e486e0c943f43e06d31b45aacc2",
+        "exports": [
+          "CompaniesPage"
+        ]
+      },
+      {
+        "path": "src/modules/admin/pages/GroupsPage.test.tsx",
+        "bytes": 4348,
+        "sha256": "405f2a6db38580756c1cee3189c3f22e86325d30f6e318bb819cec955c6abcbd",
+        "exports": []
+      },
+      {
+        "path": "src/modules/admin/pages/GroupsPage.tsx",
+        "bytes": 6094,
+        "sha256": "5b9ae53c09a06d6a191278dc7a7462357e51d0349566a8cd4c89a57201e38d4f",
+        "exports": [
+          "GroupsPage"
+        ]
+      },
+      {
+        "path": "src/modules/admin/pages/SecurityPage.test.tsx",
+        "bytes": 2415,
+        "sha256": "688e45ff1bb30d9c33ca016a288e77351381c13e5a54ebd82473e8f6c122a6d2",
+        "exports": []
+      },
+      {
+        "path": "src/modules/admin/pages/SecurityPage.tsx",
+        "bytes": 5177,
+        "sha256": "338eae0f1a315df86bcc0a33c5d48be7cae0a7e6f164c7c1dc6e2a2dc6d4982a",
+        "exports": [
+          "SecurityPage"
+        ]
+      },
+      {
+        "path": "src/modules/admin/pages/UserDetailPage.tsx",
+        "bytes": 29471,
+        "sha256": "15484ced2bcafd102b2ae32264e771aefb8632d310fae39b155141cfac83054d",
+        "exports": [
+          "MembershipsEditor",
+          "UserDetailPage"
+        ]
+      },
+      {
+        "path": "src/modules/admin/pages/UsersPage.test.tsx",
+        "bytes": 1985,
+        "sha256": "b488d93db0c83abf761c8c2ee9293711ae8a851f2fbb63ab2f0139852b7c5c45",
+        "exports": []
+      },
+      {
+        "path": "src/modules/admin/pages/UsersPage.tsx",
+        "bytes": 24047,
+        "sha256": "540fb3fdddd7696231926f42011d56e6bd9887c4f06dd565a1adbccb5b6e9fb7",
+        "exports": [
+          "UsersPage"
+        ]
+      },
+      {
+        "path": "src/modules/approvals/api.ts",
+        "bytes": 2074,
+        "sha256": "1aa53298dda9ba72271685c4ee05626ba984b7764b98b2e2bbe7a50a76b93fba",
+        "exports": [
+          "ApprovalKind",
+          "ApprovalStatus",
+          "ApprovalItem",
+          "approvalKeys",
+          "listApprovals",
+          "decide",
+          "useWaitingApprovals"
+        ],
+        "apiPathLiterals": []
+      },
+      {
+        "path": "src/modules/approvals/ApprovalsBadge.tsx",
+        "bytes": 526,
+        "sha256": "dc9da8e192e1eb477993eb4c26a009be60bbedb2d3423e847f6d0c3973a607cb",
+        "exports": [
+          "ApprovalsBadge"
+        ]
+      },
+      {
+        "path": "src/modules/approvals/ApprovalsPage.test.tsx",
+        "bytes": 3043,
+        "sha256": "71dec4702f1503cbab35bd6b649de1ad2bd38efd64f8b70f2df51373addeddd5",
+        "exports": []
+      },
+      {
+        "path": "src/modules/approvals/ApprovalsPage.tsx",
+        "bytes": 8467,
+        "sha256": "cec8d2c12d681212ca958dde64ca2d8e7143379dca002b5b493ab7d8aa2fc82a",
+        "exports": [
+          "ApprovalsPage"
+        ]
+      },
+      {
+        "path": "src/modules/approvals/module.config.tsx",
+        "bytes": 705,
+        "sha256": "587c3fa61c8c40158bcaf58c2386f2d8df35f445dea0e5dcbb0804ac5f95831f",
+        "exports": [
+          "approvalsModule"
+        ],
+        "routes": [
+          "/approvals"
+        ]
+      },
+      {
+        "path": "src/modules/auth/next.ts",
+        "bytes": 209,
+        "sha256": "0397564db2e605ab2c7ff031d0ab40bd0a5d985eef6f14b5f8510c393ed4e54f",
+        "exports": [
+          "safeNext"
+        ]
+      },
+      {
+        "path": "src/modules/auth/pages/JivoIdentity.test.tsx",
+        "bytes": 3274,
+        "sha256": "60ba9800539e3079d8a4d7c4ab69d42e0c3184a08840097db1cd7eed06d69227",
+        "exports": []
+      },
+      {
+        "path": "src/modules/auth/pages/LoginPage.test.tsx",
+        "bytes": 8034,
+        "sha256": "e12909f350815b7a2f20d7a05918c2dbc21fba2767534c5921018b8b99cc7953",
+        "exports": []
+      },
+      {
+        "path": "src/modules/auth/pages/LoginPage.tsx",
+        "bytes": 9946,
+        "sha256": "ba6d749946ae7ba06c0bd7dd9baab4c66389f5e7fe7ee18c0934088c946508c0",
+        "exports": [
+          "LoginPage"
+        ]
+      },
+      {
+        "path": "src/modules/auth/pages/TokenPasswordPage.tsx",
+        "bytes": 5735,
+        "sha256": "a04270c40f500d8f6ba610f505339e34520675b2a578cd34c4f2cc7810cd9e68",
+        "exports": [
+          "TokenPasswordPage"
+        ]
+      },
+      {
+        "path": "src/modules/home/LandingRedirect.test.tsx",
+        "bytes": 1037,
+        "sha256": "50052f596c292087bc7599056033d2a374262c52aa76dcb8de379d62c4982f57",
+        "exports": []
+      },
+      {
+        "path": "src/modules/home/LandingRedirect.tsx",
+        "bytes": 328,
+        "sha256": "7447f6c55b4562a219cc9259131edd71dc6b62d296461862647f6561b538c3ac",
+        "exports": [
+          "LandingRedirect"
+        ]
+      },
+      {
+        "path": "src/modules/home/module.config.tsx",
+        "bytes": 634,
+        "sha256": "d0e41bfe45360cd0413fee25fe76a0d1052dc657959fec15e392b661db73d38c",
+        "exports": [
+          "homeModule"
+        ],
+        "routes": [
+          "/",
+          "/home"
+        ]
+      },
+      {
+        "path": "src/modules/home/pages/HomePage.test.tsx",
+        "bytes": 1342,
+        "sha256": "f714fff6f6cfd3b4ed307c5ebd36e545e5d6d6c2d59edd9fc4398b9af5ed775d",
+        "exports": []
+      },
+      {
+        "path": "src/modules/home/pages/HomePage.tsx",
+        "bytes": 5063,
+        "sha256": "50fc1ad9c873f2c9af7f682e6a50f351633a641a91752d606d7ee34e296a5b46",
+        "exports": [
+          "HomePage"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/__tests__/groupPermissions.test.tsx",
+        "bytes": 5024,
+        "sha256": "4e349263088124c55f12f5777b259eb6f13835fbe6c964ca4c9c2f958aa61c41",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/__tests__/outbox.test.ts",
+        "bytes": 3125,
+        "sha256": "7276109107067fa421aec84379678c287c2a633aa9ece34c0fc94fb0f7e0c6bb",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/__tests__/uploadLimits.test.ts",
+        "bytes": 984,
+        "sha256": "fe63c5fdbf75cd0176a8ccf35205186ee7671a3c7ed404da0ae0bd947a483ee5",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/api.ts",
+        "bytes": 19941,
+        "sha256": "c62defee6b50f9ba871c3e6112de14d0bcec72b1e2e0e1191dcabd5ccdd4ef83",
+        "exports": [
+          "PersonCard",
+          "Attachment",
+          "ReplyPreview",
+          "ReactionSummary",
+          "DeliveryStatus",
+          "PollOption",
+          "PollData",
+          "LocationData",
+          "EventAnswer",
+          "EventData",
+          "Message",
+          "MessageWindow",
+          "SendMode",
+          "SendBlock",
+          "NotifyPreview",
+          "PreviewMedia",
+          "ConversationItem",
+          "ConversationDetail",
+          "Member",
+          "CursorPage",
+          "ConversationFilter",
+          "SendPayload",
+          "searchPeople",
+          "listConversations",
+          "getConversation",
+          "openDirect",
+          "createGroup",
+          "updateGroup",
+          "listMembers",
+          "addMembers",
+          "setMemberRole",
+          "removeMember",
+          "leaveConversation",
+          "setSendMode",
+          "updateSettings",
+          "setDisappearing",
+          "clearChat",
+          "markRead",
+          "markDelivered",
+          "WindowQuery",
+          "getWindow",
+          "sendMessage",
+          "editMessage",
+          "deleteMessage",
+          "setReaction",
+          "ReactionGroup",
+          "listReactions",
+          "clearReaction",
+          "ReceiptPerson",
+          "MessageInfo",
+          "messageInfo",
+          "forwardMessage",
+          "SearchHit",
+          "searchMessages",
+          "createPoll",
+          "votePoll",
+          "pollVoters",
+          "sendContact",
+          "sendLocation",
+          "EventInput",
+          "createEvent",
+          "updateEvent",
+          "Place",
+          "MAP_TILES",
+          "searchPlaces",
+          "placeAt",
+          "answerEvent",
+          "eventAnswers",
+          "SharedKind",
+          "SharedItem",
+          "getShared",
+          "PersonProfile",
+          "getPerson",
+          "getUpload",
+          "waitUntilReady",
+          "uploadFile",
+          "discardUpload",
+          "Appearance",
+          "appearanceKey",
+          "getAppearance",
+          "setAppearance",
+          "removeAppearanceImage",
+          "LinkPreview",
+          "getLinkPreview"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/admin/appearance/"
+          ],
+          [
+            "'",
+            "/appearance/"
+          ],
+          [
+            "'",
+            "/link-preview/"
+          ],
+          [
+            "'",
+            "/maps/reverse/"
+          ],
+          [
+            "'",
+            "/maps/search/"
+          ],
+          [
+            "'",
+            "/uploads/"
+          ],
+          [
+            "'",
+            "/users/"
+          ],
+          [
+            "`",
+            "${C}/"
+          ],
+          [
+            "`",
+            "${C}/${conversationId}/events/"
+          ],
+          [
+            "`",
+            "${C}/${conversationId}/locations/"
+          ],
+          [
+            "`",
+            "${C}/${id}/"
+          ],
+          [
+            "`",
+            "${C}/${id}/clear/"
+          ],
+          [
+            "`",
+            "${C}/${id}/delivered/"
+          ],
+          [
+            "`",
+            "${C}/${id}/disappearing/"
+          ],
+          [
+            "`",
+            "${C}/${id}/leave/"
+          ],
+          [
+            "`",
+            "${C}/${id}/members/"
+          ],
+          [
+            "`",
+            "${C}/${id}/members/${userId}/"
+          ],
+          [
+            "`",
+            "${C}/${id}/messages/"
+          ],
+          [
+            "`",
+            "${C}/${id}/read/"
+          ],
+          [
+            "`",
+            "${C}/${id}/settings/"
+          ],
+          [
+            "`",
+            "${C}/direct/"
+          ],
+          [
+            "`",
+            "/conversations/${conversationId}/messages/"
+          ],
+          [
+            "`",
+            "/conversations/${conversationId}/polls/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/event-response/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/event/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/forward/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/info/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/poll-vote/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/reaction/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/reactions/"
+          ],
+          [
+            "`",
+            "/uploads/${id}/"
+          ],
+          [
+            "`",
+            "/users/${id}/"
+          ]
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/Blurhash.tsx",
+        "bytes": 735,
+        "sha256": "27b140ba652140952ef54aa8f70d4cc598e90a1e41c592a327aad35dea2e9248",
+        "exports": [
+          "useBlurhashUrl"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/ChatExtras.test.tsx",
+        "bytes": 7523,
+        "sha256": "98858767d453257efc0c9669ca4a6cb9f5cfda3299ca8417df7aedf8a442dbb0",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/components/ChatListActions.tsx",
+        "bytes": 9363,
+        "sha256": "287f4fb3c608a8700a0dd74cca03ec0fce5e4917a4a7c725e6c127d9281efd21",
+        "exports": [
+          "ChatListActions",
+          "ChatPhotoPreview"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/ChatSearch.test.tsx",
+        "bytes": 2989,
+        "sha256": "e7a98acdae2b0e38174aad3cf5511e66a95883dcae2378a305f56272e0eee0be",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/components/ChatSearch.tsx",
+        "bytes": 4663,
+        "sha256": "f83434e8a9aa270e20a6621698c2250a7a5db34ddb4f09bc53194709b0153d9a",
+        "exports": [
+          "ChatSearch"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/ChatSkeleton.tsx",
+        "bytes": 1691,
+        "sha256": "528c0403419c68f53031cb3aeb703f07100bd3c405db0f6e912061fcf094d8d0",
+        "exports": [
+          "ChatSkeleton"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/ChatView.tsx",
+        "bytes": 28475,
+        "sha256": "844104118c48852564cc9866996ec91a99513cc262e62c6e1d1ebae020eef429",
+        "exports": [
+          "ChatView"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/Composer.tsx",
+        "bytes": 21386,
+        "sha256": "391208fa46f18d1b15f9bfb601c64fea7a9de81b03bb562980e5e5e21acbad8a",
+        "exports": [
+          "Composer"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/ComposerExtras.test.tsx",
+        "bytes": 3696,
+        "sha256": "2835776a81a00ed8c6d092757af72f22422f1cbae517adccbc4635eaff1b2935",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/components/ComposerExtras.tsx",
+        "bytes": 18935,
+        "sha256": "b46f4fcc3201e4a3f89b1c0178c66e9b13faabd414fe7714efe5256a86eb9b1a",
+        "exports": [
+          "AttachMenu",
+          "PollDialog",
+          "ContactDialog",
+          "CameraDialog",
+          "RecordingBar",
+          "VoiceReview"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/ConversationList.tsx",
+        "bytes": 16561,
+        "sha256": "ebb13b8939a8acecc7e8abb2878060585865015c1d049b5aca31b958a9d65a22",
+        "exports": [
+          "ConversationList"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/Dialogs.tsx",
+        "bytes": 13023,
+        "sha256": "39a931c7a9e2f427e76564ed83ae3778b54999db552b90bf7fac7a297256dc64",
+        "exports": [
+          "ImageViewer",
+          "DeleteDialog",
+          "InfoDialog",
+          "ForwardDialog"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/GroupInfo.tsx",
+        "bytes": 20553,
+        "sha256": "3f489ab052f291c39d7be3c05dd3a4e423b9e7ce41bf91caddf3e97dfafa80d7",
+        "exports": [
+          "GroupInfo"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/LocationEvent.test.tsx",
+        "bytes": 17295,
+        "sha256": "3e93df88be816c3d2b1566652c334d1aa394026251d5bf732bff97442de33dcd",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/components/LocationEvent.tsx",
+        "bytes": 32410,
+        "sha256": "3021182f10896d313132586c9e5445adab3488755e4b45c5f5fe8210275b29f7",
+        "exports": [
+          "LocationCard",
+          "PickedLocation",
+          "LocationPicker",
+          "EventCard",
+          "EventDialog"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/MapView.tsx",
+        "bytes": 3346,
+        "sha256": "d6b83ac72bd2cd6bbb9d69f17c9b269aa76701e3ff813b2b9f0f245868c8082b",
+        "exports": [
+          "LatLng",
+          "MapView"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/MediaPreview.test.tsx",
+        "bytes": 1658,
+        "sha256": "51cd1dee33312deb43ba96d220eab09a691a55eac9c2be0cd46402288ae9a70d",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/components/MediaPreview.tsx",
+        "bytes": 8865,
+        "sha256": "47989535a21f82b6a65e34f20e81c100fead8e2351d1a72982964eaa2215b58c",
+        "exports": [
+          "PreviewItem",
+          "MediaPreview"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/MessageBubble.test.tsx",
+        "bytes": 7907,
+        "sha256": "65d48d88880f4b9d5b4ceb02c9421073a4f9015c2f9f367a17a9661d1b5c4330",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/components/MessageBubble.tsx",
+        "bytes": 18222,
+        "sha256": "dbafc210bbed0b081e2f17a4233bf10ef214eabb797d810da22d050ae594811f",
+        "exports": [
+          "BubbleAction",
+          "BubbleArg",
+          "Attachments",
+          "MessageBubble",
+          "PendingBubble"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/MessageList.tsx",
+        "bytes": 12715,
+        "sha256": "a8e9b29f80665a15740aa1f285aa640607924c67fdb2937ccd2401407b7b39be",
+        "exports": [
+          "MessageList"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/MessageSheets.tsx",
+        "bytes": 9854,
+        "sha256": "67119defc1fcc9f3998700dbd954144fdf94ce0d2f7a7d7db220b05ed46d40b6",
+        "exports": [
+          "Sheet",
+          "SheetRow",
+          "MessageActionSheet",
+          "ReactionsSheet"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/NewChatDialog.tsx",
+        "bytes": 4760,
+        "sha256": "44aa5c5b0e5328fda0b82abcf9bbeb3e54ec72a73ea91732eb473f712a88e7b2",
+        "exports": [
+          "NewChatDialog"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/PeoplePicker.tsx",
+        "bytes": 3598,
+        "sha256": "b75de3ddaa5e44be5664f760b0e034df2190800494410063b059d04b557b1a42",
+        "exports": [
+          "PeoplePicker"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/PhotoViewer.tsx",
+        "bytes": 1787,
+        "sha256": "ea11e6f332966b6a44bfe1ee0b2ed17e13f457334c8c0cfe49a4a9f893fd7226",
+        "exports": [
+          "PhotoViewer"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/PreviewText.tsx",
+        "bytes": 1162,
+        "sha256": "69a6565336a6756bbb36e3d2d6c16143969c0fcd4dfea5593d4a59c47ec01c74",
+        "exports": [
+          "PreviewText"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/ProfilePanel.test.tsx",
+        "bytes": 2738,
+        "sha256": "89f75f680c8f0521a64f80a499e0f6e54b719efaa4d806b444cf8d3ed1356eec",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/components/ProfilePanel.tsx",
+        "bytes": 7465,
+        "sha256": "f48c5406d60bce7632a022c9d2f7544017dac55110579b2dfe2e58c9fe9b9c38",
+        "exports": [
+          "ProfilePanel"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/RealtimeBridge.tsx",
+        "bytes": 10888,
+        "sha256": "0d25552db8868e3858269300c11566c537c6f84dc1c5159d91311c9c5de35964",
+        "exports": [
+          "RealtimeBridge"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/RichContent.test.tsx",
+        "bytes": 5017,
+        "sha256": "051ca9dfece86bbe6e000ee73f07e5059cab33b0738946c5c408c3103faeab80",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/components/RichContent.tsx",
+        "bytes": 19694,
+        "sha256": "49b5b03c73e29c3511e74f9a3d44ec0cc1a0f497336fd2a3ed7b62960cd704f9",
+        "exports": [
+          "VideoPlayer",
+          "VideoViewer",
+          "AudioPlayer",
+          "PollCard",
+          "ContactCard",
+          "PhoneContactCard",
+          "LinkPreviewCard"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/SharedMedia.tsx",
+        "bytes": 6898,
+        "sha256": "8a5b517799435121f2037cefc6976d1d4d267ea220be72d0dcdb4776b22d9c9e",
+        "exports": [
+          "SharedMedia"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/UnreadBadge.tsx",
+        "bytes": 509,
+        "sha256": "e11ec872c8dc282c2d87ba8d2d1720ef6075eb735219b272e63e6d0dcdc686af",
+        "exports": [
+          "UnreadBadge"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/hooks.ts",
+        "bytes": 14248,
+        "sha256": "f4c8fdcf6bb88936b049054e5b04f57e2d8f05f52bb862b4c997bdbe7ca22af4",
+        "exports": [
+          "LIST_FALLBACK_MS",
+          "CHAT_FALLBACK_MS",
+          "acknowledgeDelivered",
+          "msgKeys",
+          "useVisible",
+          "useConversations",
+          "useConversation",
+          "useChatWindow"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/chatLock.ts",
+        "bytes": 892,
+        "sha256": "55b0da8537b196b7a25cb84a349fd6152971550abacc7668b3af0f696e23a461",
+        "exports": [
+          "useChatLock"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/events.ts",
+        "bytes": 3166,
+        "sha256": "363c2e102f1396e6955ddc9b18622b7ce71411c421cbcbd5c33d678f7dba2290",
+        "exports": [
+          "eventWhen",
+          "icsFor",
+          "REMINDERS",
+          "reminderLabel",
+          "isMeetingLink"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/hold.ts",
+        "bytes": 1510,
+        "sha256": "14f999ba6ce2d2d7161cec746d08071961493f726e0285b8fba44e961bbaabb3",
+        "exports": [
+          "useHold"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/scroll.ts",
+        "bytes": 1412,
+        "sha256": "b7b4f89d6dfb0eb70a234844e7da0abbf04a4d6203e40c2317b72a8918c3ab0e",
+        "exports": [
+          "preservedScrollTop",
+          "isNearBottom",
+          "imageBox"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/swipe.ts",
+        "bytes": 2890,
+        "sha256": "22ef459b062262309897fba04d9eca1e60ed628b842e925840f8bdb9c4006312",
+        "exports": [
+          "SWIPE_REPLY_AT",
+          "useSwipeReply"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/text.test.ts",
+        "bytes": 5740,
+        "sha256": "974e0e5deb7c30a7470e6060d46d15b769a4d42d3aa1b48d04993e65f40f7f89",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/lib/text.ts",
+        "bytes": 9228,
+        "sha256": "3f0fcad85aa31aca655c60ad538d5cc7e760a524afe410d4d74e4e7a71d7139d",
+        "exports": [
+          "Segment",
+          "segments",
+          "clockTime",
+          "sameDay",
+          "dayLabel",
+          "listTime",
+          "mentionToken",
+          "withMentionTokens",
+          "isMuted",
+          "formatBytes",
+          "QUICK_REACTIONS",
+          "MORE_REACTIONS",
+          "firstEmoji",
+          "highlightParts",
+          "lastSeenLabel",
+          "typingLabel",
+          "clock",
+          "markParts",
+          "firstLink",
+          "DISAPPEARING_CHOICES",
+          "disappearingLabel",
+          "callDuration",
+          "isExpired"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/uploadLimits.ts",
+        "bytes": 962,
+        "sha256": "1af2f86a6ef989bfd8f20d0031fa6195d90d3c824611f439a393dc27580c845a",
+        "exports": [
+          "MAX_IMAGE_BYTES",
+          "MAX_VIDEO_BYTES",
+          "uploadKind",
+          "uploadLimitError"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/vcard.test.ts",
+        "bytes": 1328,
+        "sha256": "cc78c2a68edeff4b274f699ba7d75524eee01802eaa3cd4afddbaf2328c050b8",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/lib/vcard.ts",
+        "bytes": 3261,
+        "sha256": "906de133e7fe9a9df8177229e6d3863e9d6a8b6532a0289cd9917849e54e5c5b",
+        "exports": [
+          "PhoneContact",
+          "buildVCard",
+          "parseVCard",
+          "vcardFile",
+          "isVCard",
+          "phoneContactsSupported",
+          "pickPhoneContacts"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/voice.test.ts",
+        "bytes": 3323,
+        "sha256": "7df754a980024728c42b8f3597968e5a7b35d1ad8f8c656bba2352ab0636fe48",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/lib/voice.ts",
+        "bytes": 4007,
+        "sha256": "d655769f65b5b1d5ff1b12e0c880a49a9c8d016f8ab652322d1a491aea254505",
+        "exports": [
+          "voiceSupported",
+          "RecorderState",
+          "useVoiceRecorder"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/window.test.ts",
+        "bytes": 5210,
+        "sha256": "dfd2de59c70af4b89cb5406c68582049a81de2548c214712117c13d056bed12d",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/lib/window.ts",
+        "bytes": 6183,
+        "sha256": "a4078917623a8140838b8cede5e99d43fc3bacaaefd1c85c4cdf3b2af62374e5",
+        "exports": [
+          "WindowState",
+          "MAX_MESSAGES",
+          "emptyWindow",
+          "mergeBySeq",
+          "fromWindow",
+          "prepend",
+          "append",
+          "applyChanges",
+          "upsert",
+          "removeHidden",
+          "hasGap",
+          "oldestSeq",
+          "newestSeq",
+          "statusFor",
+          "patchMessage",
+          "tombstone",
+          "advanceReceipts"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/live.ts",
+        "bytes": 5348,
+        "sha256": "0402d19f4d5071c5ad23d7e3d1bc08b533250703335ee28a738a6563d86350cf",
+        "exports": [
+          "MessageCreated",
+          "MessageUpdated",
+          "MessageDeleted",
+          "MessageHidden",
+          "EventUpdated",
+          "PollUpdated",
+          "ReactionUpdated",
+          "ReceiptMoved",
+          "TypingEvent",
+          "PresenceEvent",
+          "ConversationSettings",
+          "Presence",
+          "useLiveStore",
+          "typingIn",
+          "fetchPresence",
+          "useTyping",
+          "useTypingSignal"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/MessengerPage.tsx",
+        "bytes": 1512,
+        "sha256": "3a505991c17a4b4cd8aab35f37047ef68fdf2f904d23fc442549cfc251e96791",
+        "exports": [
+          "MessengerPage"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/module.config.tsx",
+        "bytes": 1131,
+        "sha256": "044449a7272bec90e50f3e821464b408fc4dd7508f899c00517bcb66bc170578",
+        "exports": [
+          "messengerModule"
+        ],
+        "routes": [
+          "/messenger",
+          "/messenger/:conversationId",
+          "/share"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/outbox.ts",
+        "bytes": 2425,
+        "sha256": "d464eb4c804442777ffafb491531cebf91b6acbaa3737f66a5ee7e2285b92b68",
+        "exports": [
+          "isNetworkError",
+          "OUTBOX_SENT",
+          "OutboxSent",
+          "deliverPending",
+          "flushOutbox"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/share.test.ts",
+        "bytes": 2860,
+        "sha256": "5d9e4a20e4b58d2d404f542521841fd679abc7a0be6a779f00af990f4387c196",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/share.ts",
+        "bytes": 2450,
+        "sha256": "b76a6f6bad24de8fd4ad0f4d78f5f3ea8a0f706d8333c0f4e1748db4ad583f4e",
+        "exports": [
+          "SHARE_KEY",
+          "SharedItems",
+          "readShared",
+          "saveShared",
+          "clearShared",
+          "sharedCaption",
+          "canShareOut",
+          "shareOut"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/SharePage.test.tsx",
+        "bytes": 4592,
+        "sha256": "f97799067fc55b57106f0593636fc59fdd9e6ee8331dc0bb677648c5305ae20e",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/SharePage.tsx",
+        "bytes": 9331,
+        "sha256": "b1868885e6392cfdc1ae269242ec8fef43da36c192c71294d055574ffdd56045",
+        "exports": [
+          "SharePage"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/store.ts",
+        "bytes": 4316,
+        "sha256": "c2f7725663cca8bed9284cd127d3494eeb1a61616fa753df5ec4030938914322",
+        "exports": [
+          "PendingMessage",
+          "useMessengerStore",
+          "newClientId"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/__tests__/AlertBanner.test.tsx",
+        "bytes": 2624,
+        "sha256": "9942c114c89737b2f7f92f1b664e2b9eb57f4a80a7c410add3a6f815136fcd3a",
+        "exports": []
+      },
+      {
+        "path": "src/modules/notifications/__tests__/AlertPopup.test.tsx",
+        "bytes": 2941,
+        "sha256": "c5570ba6c20d9f8b8cea59cbf06cdc1e2a8cc8c6d0dab7848b943125ce4e79d1",
+        "exports": []
+      },
+      {
+        "path": "src/modules/notifications/__tests__/NotificationsPage.test.tsx",
+        "bytes": 3437,
+        "sha256": "dc751ae0716856cc7da9547618fd4d759f2e280df8d269c65f5ac81d87e33978",
+        "exports": []
+      },
+      {
+        "path": "src/modules/notifications/api.ts",
+        "bytes": 5330,
+        "sha256": "714bb5b03b6d1ce28edfc746013c56d009e119d20252396021222ee7a0d808b5",
+        "exports": [
+          "AppNotification",
+          "Preferences",
+          "notificationKeys",
+          "AlertSeverity",
+          "JmAlert",
+          "AdminAlert",
+          "NewAlert",
+          "AlertPerson",
+          "activeAlerts",
+          "alertHistory",
+          "dismissAlert",
+          "adminAlerts",
+          "createAlert",
+          "cancelAlert",
+          "deleteAlert",
+          "alertPeople",
+          "ReadFilter",
+          "KindFilter",
+          "listNotifications",
+          "deleteNotifications",
+          "markNotificationsRead",
+          "getPreferences",
+          "updatePreferences",
+          "updatePrivacy",
+          "getVapidKey",
+          "saveSubscription",
+          "deleteCurrentSubscription",
+          "sendTestPush"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/admin/alerts/"
+          ],
+          [
+            "'",
+            "/alerts/active/"
+          ],
+          [
+            "'",
+            "/me/"
+          ],
+          [
+            "'",
+            "/me/notification-preferences/"
+          ],
+          [
+            "'",
+            "/notifications/delete/"
+          ],
+          [
+            "'",
+            "/notifications/read/"
+          ],
+          [
+            "'",
+            "/push/subscriptions/"
+          ],
+          [
+            "'",
+            "/push/subscriptions/current/"
+          ],
+          [
+            "'",
+            "/push/test/"
+          ],
+          [
+            "`",
+            "/admin/alerts/${id}/"
+          ],
+          [
+            "`",
+            "/admin/alerts/${id}/cancel/"
+          ],
+          [
+            "`",
+            "/alerts/${id}/dismiss/"
+          ]
+        ]
+      },
+      {
+        "path": "src/modules/notifications/components/AlertBanner.tsx",
+        "bytes": 5148,
+        "sha256": "21205f24613251806d69317073d6c53f7d8b64c063137d1401d2681a456b97cf",
+        "exports": [
+          "SeverityIcon",
+          "AlertBanner"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/components/AlertPopup.tsx",
+        "bytes": 6479,
+        "sha256": "17c9a29ae4e98ad68afaaa06448f14539691b0d4a5af1ffb66a2972911ecf254",
+        "exports": [
+          "AlertPopup"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/components/NotificationBell.tsx",
+        "bytes": 6582,
+        "sha256": "a4127a7e147607f257a57e4a3f13618f0b9858893d27c59d181f87f25f2addb5",
+        "exports": [
+          "NotificationBell"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/components/NotificationsBackground.tsx",
+        "bytes": 4577,
+        "sha256": "1557de21ebee57c3c5cd7640cbcfedae504b7fe8cd58c8c26f183b14fc66cdc5",
+        "exports": [
+          "NotificationsBackground"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/components/PushPrompt.test.tsx",
+        "bytes": 2494,
+        "sha256": "bd914733668037142fccd7ae5114fe48d94eb7c0b4c053f3e154cd9484cd954c",
+        "exports": []
+      },
+      {
+        "path": "src/modules/notifications/components/PushPrompt.tsx",
+        "bytes": 2800,
+        "sha256": "185492a3a5d186fc033f8a5afa89b2b40b1c85863e2cff87b4843fdfb731141d",
+        "exports": [
+          "ASK_AGAIN_MS",
+          "PushPrompt"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/module.config.tsx",
+        "bytes": 910,
+        "sha256": "a016a5e83e577d9b6817750559bb2b03da883811cb8c1da18396b023a051b0e8",
+        "exports": [
+          "notificationsModule"
+        ],
+        "routes": [
+          "/notifications"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/pages/NotificationsPage.tsx",
+        "bytes": 20709,
+        "sha256": "845c09330244469441c2d38439551c689855de7eaffcc232aca297bf9590afeb",
+        "exports": [
+          "NotificationsPage"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/push.ts",
+        "bytes": 4459,
+        "sha256": "03859a791ee82a2de48e427a9b82b4d669e9aba28125568d63e613bccb2df97d",
+        "exports": [
+          "PushSupport",
+          "pushSupport",
+          "currentSubscription",
+          "enablePush",
+          "disablePush",
+          "wantsPush",
+          "syncPush"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/severity.ts",
+        "bytes": 777,
+        "sha256": "816399debd8eb1eb51b194a8e4242500358a5e981cd97df76e9729b2fabe4726",
+        "exports": [
+          "SEVERITY_RANK",
+          "SEVERITY_TONE",
+          "SEVERITY_LABEL"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/__tests__/EntryFormDialog.test.tsx",
+        "bytes": 3422,
+        "sha256": "45513e2018cef27a59cc43bf2874fcf0745d9c8edec93e8fb3cf3379a895f7a5",
+        "exports": []
+      },
+      {
+        "path": "src/modules/passwords/__tests__/generator.test.ts",
+        "bytes": 1354,
+        "sha256": "82bc6796d2679cd52091a423a2b5510ea4107867402aaee11c6d21754839e138",
+        "exports": []
+      },
+      {
+        "path": "src/modules/passwords/__tests__/SecretField.test.tsx",
+        "bytes": 6117,
+        "sha256": "39101f1f757d5647d3739f7bf5330c7a0bd0dddc02ec254f47f4707955f322ce",
+        "exports": []
+      },
+      {
+        "path": "src/modules/passwords/api.ts",
+        "bytes": 13411,
+        "sha256": "aa8f93e3e96d98b2e7d86b7790261c29e1afaf955ba0d86da8cc288690d038ce",
+        "exports": [
+          "Person",
+          "VaultRole",
+          "OwnerType",
+          "EntryKind",
+          "Vault",
+          "Folder",
+          "Member",
+          "EntryCan",
+          "Entry",
+          "Share",
+          "EntryDetail",
+          "SecretInput",
+          "EntryInput",
+          "AuditRow",
+          "BreakGlass",
+          "AdminVault",
+          "jpKeys",
+          "listVaults",
+          "getVault",
+          "createTeamVault",
+          "updateVault",
+          "archiveVault",
+          "listAdminVaults",
+          "listMembers",
+          "OwnerRequest",
+          "MemberResult",
+          "isPending",
+          "addMember",
+          "changeMember",
+          "listOwnerRequests",
+          "decideOwnerRequest",
+          "removeMember",
+          "listPendingOwnerRequests",
+          "VaultFile",
+          "VaultFiles",
+          "listVaultFiles",
+          "uploadVaultFile",
+          "downloadVaultFile",
+          "previewVaultFile",
+          "renameVaultFile",
+          "deleteVaultFile",
+          "listFolders",
+          "createFolder",
+          "renameFolder",
+          "deleteFolder",
+          "listEntries",
+          "getEntry",
+          "createEntry",
+          "updateEntry",
+          "trashEntry",
+          "restoreEntry",
+          "moveEntry",
+          "listShared",
+          "revealField",
+          "reportCopy",
+          "unlock",
+          "shareEntry",
+          "revokeShare",
+          "listAudit",
+          "listBreakGlass",
+          "requestBreakGlass",
+          "actBreakGlass",
+          "searchPeople",
+          "listCompanyDirectory"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/admin/vaults/"
+          ],
+          [
+            "'",
+            "/break-glass/"
+          ],
+          [
+            "'",
+            "/entries/"
+          ],
+          [
+            "'",
+            "/owner-requests/pending/"
+          ],
+          [
+            "'",
+            "/people/"
+          ],
+          [
+            "'",
+            "/shared-with-me/"
+          ],
+          [
+            "'",
+            "/vaults/"
+          ],
+          [
+            "`",
+            "/break-glass/${id}/${decision}/"
+          ],
+          [
+            "`",
+            "/entries/${id}/"
+          ],
+          [
+            "`",
+            "/entries/${id}/copy-event/"
+          ],
+          [
+            "`",
+            "/entries/${id}/move/"
+          ],
+          [
+            "`",
+            "/entries/${id}/restore/"
+          ],
+          [
+            "`",
+            "/entries/${id}/shares/"
+          ],
+          [
+            "`",
+            "/entries/${id}/shares/${share}/"
+          ],
+          [
+            "`",
+            "/entries/${id}/trash/"
+          ],
+          [
+            "`",
+            "/files/${id}/"
+          ],
+          [
+            "`",
+            "/files/${id}/download/"
+          ],
+          [
+            "`",
+            "/owner-requests/${id}/${decision}/"
+          ],
+          [
+            "`",
+            "/vaults/${id}/"
+          ],
+          [
+            "`",
+            "/vaults/${id}/archive/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/files/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/folders/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/folders/${id}/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/members/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/members/${user}/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/owner-requests/"
+          ]
+        ]
+      },
+      {
+        "path": "src/modules/passwords/clipboard.ts",
+        "bytes": 638,
+        "sha256": "c04cc08497356d64760038ca796b4c7c1ddc364e84e057961f18b60719812b87",
+        "exports": [
+          "clearClipboardSoon"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/components/EntryFormDialog.tsx",
+        "bytes": 10730,
+        "sha256": "c30ea2012c802867c879a6972eb1367059c47df7fdb36182c908be132f49711e",
+        "exports": [
+          "EntryFormDialog"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/components/FilesPanel.tsx",
+        "bytes": 10626,
+        "sha256": "b11e03d0eef9f0e25e3a637bded3854554ee0c0c612c39719211216672c022a1",
+        "exports": [
+          "FilesPanel"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/components/JpBackground.tsx",
+        "bytes": 430,
+        "sha256": "f1ef87d0f397a7b1052ca4bca763b999d470baa625f12180ab5a4494df7dc1be",
+        "exports": [
+          "JpBackground"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/components/LockGate.tsx",
+        "bytes": 2844,
+        "sha256": "9f29a98eb6955b39e88a83651ee94812c8067480d393c61e6968b2694309d635",
+        "exports": [
+          "LockGate"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/components/MembersPanel.tsx",
+        "bytes": 8547,
+        "sha256": "4fdce3ed16d09f6fd6490b6654c3483e649b512e7d58697a5872228a551f23e9",
+        "exports": [
+          "MembersPanel"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/components/Nav.tsx",
+        "bytes": 3550,
+        "sha256": "04e640ddb3e0273b2f19ee3a8ee18b0bcca66ba3c6230b639b02113c9fd22243",
+        "exports": [
+          "JpSection",
+          "JpNav"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/components/OwnerRequests.tsx",
+        "bytes": 3274,
+        "sha256": "dead776da41b1fa303067265e7b34b6be1dd87afe6216bd68fbf710c7fb3691e",
+        "exports": [
+          "OwnerRequests"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/components/PersonPicker.tsx",
+        "bytes": 2202,
+        "sha256": "b9cefb64dab64b015e7422321f1e010abe0390df38f489b4bdde79d7fe367d4a",
+        "exports": [
+          "PersonPicker"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/components/SecretField.tsx",
+        "bytes": 4422,
+        "sha256": "41f2e8430217b79671da9864537bb81bc8544d06296fe5830f45b1158d44491c",
+        "exports": [
+          "SecretField"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/generator.ts",
+        "bytes": 3770,
+        "sha256": "08678ac1da22e0b12f7e9e60aaa524e290372abe42957e5dcfca0e7736af935a",
+        "exports": [
+          "SETS",
+          "SetName",
+          "randomInt",
+          "generatePassword",
+          "WORD_COUNT",
+          "generatePassphrase"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/labels.ts",
+        "bytes": 286,
+        "sha256": "bea84a6407a23dbcf5be79fc94dc3150a456735fc0bb622fc289b2fcafd19326",
+        "exports": [
+          "KIND_LABEL",
+          "FIELD_LABELS"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/lock.ts",
+        "bytes": 1016,
+        "sha256": "01223616039db4264d16a5018fb5cd71a8feb2d996df03cabd6bb5b9c9e19d59",
+        "exports": [
+          "IDLE_MS",
+          "useJpLock",
+          "lockNow",
+          "idleExpired"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/module.config.tsx",
+        "bytes": 1820,
+        "sha256": "8e14abf9e498d5cd3e30175e9eb8978807a7eebc42f06401c03342868a5e4c18",
+        "exports": [
+          "passwordsModule"
+        ],
+        "routes": [
+          "/passwords",
+          "/passwords/admin",
+          "/passwords/break-glass",
+          "/passwords/entries/:id",
+          "/passwords/shared",
+          "/passwords/vaults/:id",
+          "/passwords/vaults/:id/activity"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/pages/AdminVaultsPage.tsx",
+        "bytes": 7148,
+        "sha256": "58e427ff077e325ea3475c5a3ae24f853bf4900ab669131fcc9763bf35f55254",
+        "exports": [
+          "AdminVaultsPage"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/pages/BreakGlassPage.tsx",
+        "bytes": 8113,
+        "sha256": "7d2c37d57d2636d10e759801cd213dc5fa8f46467d7dab986e55cf063d520d61",
+        "exports": [
+          "BreakGlassPage"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/pages/EntryPage.tsx",
+        "bytes": 16059,
+        "sha256": "3efd1b002a0c926f77b29c697baeae01d5ba70eb4bdbd379f0ad0fde4eb99b99",
+        "exports": [
+          "EntryPage"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/pages/PasswordsHome.tsx",
+        "bytes": 3656,
+        "sha256": "34b3cd5cd11ce4974dc910c4a79136302a4ac2c47b92bdf2ed09a7b76c6c3bf0",
+        "exports": [
+          "VaultCard",
+          "PasswordsHome"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/pages/SharedPage.tsx",
+        "bytes": 2939,
+        "sha256": "dce65fa630a37a00ad9cffbaf7a8d9fea36a0d7b9ed98209a6fa8dc513319822",
+        "exports": [
+          "SharedPage"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/pages/VaultPage.tsx",
+        "bytes": 17421,
+        "sha256": "9ad67b348396fc425d4c11be03f6b38e3651151bc669ef45702a0bb4a05bfeaf",
+        "exports": [
+          "Activity",
+          "VaultPage"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/useCanOwnVaults.ts",
+        "bytes": 314,
+        "sha256": "07095fe6e475fa49f98b46fbc6d53b94bf2fc0024c50ca17b8cc8d0893dee932",
+        "exports": [
+          "useCanOwnVaults"
+        ]
+      },
+      {
+        "path": "src/modules/profile/api.ts",
+        "bytes": 1431,
+        "sha256": "cb90467437d001f617b8904700975ec74aff3547ec0e9ec751bde1c7ede94523",
+        "exports": [
+          "DeviceSession",
+          "profileKeys",
+          "updateMe",
+          "setMyPhoto",
+          "removeMyPhoto",
+          "requestEmailChange",
+          "cancelEmailChange",
+          "changePassword",
+          "listSessions",
+          "revokeSession",
+          "revokeOtherSessions"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/auth/password/change/"
+          ],
+          [
+            "'",
+            "/auth/sessions/"
+          ],
+          [
+            "'",
+            "/auth/sessions/revoke-others/"
+          ],
+          [
+            "'",
+            "/me/"
+          ],
+          [
+            "'",
+            "/me/avatar/"
+          ],
+          [
+            "'",
+            "/me/email/"
+          ],
+          [
+            "`",
+            "/auth/sessions/${id}/"
+          ]
+        ]
+      },
+      {
+        "path": "src/modules/profile/components/AppSection.tsx",
+        "bytes": 5236,
+        "sha256": "635f36025fbd9561d1b564818515e30106527f8f1f449433ef99c5ce8f42555f",
+        "exports": [
+          "AppSection"
+        ]
+      },
+      {
+        "path": "src/modules/profile/components/ChatAppearanceSection.tsx",
+        "bytes": 9974,
+        "sha256": "34fe5494517ab86af8013eeb558a4463681c9f92eebbd88bc6211d4bb68c8ccf",
+        "exports": [
+          "ChatAppearanceSection"
+        ]
+      },
+      {
+        "path": "src/modules/profile/components/DetailsSection.test.tsx",
+        "bytes": 6051,
+        "sha256": "c2d420d2d90fd6ba35035b483e312baeb107d64678fde4caffecd1f85eafa05f",
+        "exports": []
+      },
+      {
+        "path": "src/modules/profile/components/DetailsSection.tsx",
+        "bytes": 12183,
+        "sha256": "49a4958101554c930f23b6a94cfbdf88a35e83506d69e87ec9aeee9a22aac72a",
+        "exports": [
+          "PhotoChange",
+          "DetailsSection"
+        ]
+      },
+      {
+        "path": "src/modules/profile/components/SecurityNotices.test.tsx",
+        "bytes": 1680,
+        "sha256": "c87ed58b3b0c74954e4a35a840d9b06b48261d2b022b56542e3be236f33b1442",
+        "exports": []
+      },
+      {
+        "path": "src/modules/profile/components/SecurityNotices.tsx",
+        "bytes": 2016,
+        "sha256": "3d9332bc1b4838693a3fcdf5b704f0c293dfc37dea3aa01280a3b66f0d8feb2f",
+        "exports": [
+          "SecurityNotices"
+        ]
+      },
+      {
+        "path": "src/modules/profile/components/TwoStepSection.test.tsx",
+        "bytes": 2107,
+        "sha256": "a3ac841f034b98f958a215a34f25ef9f7b0543398a8509fd3d0cb249ed3cbe62",
+        "exports": []
+      },
+      {
+        "path": "src/modules/profile/components/TwoStepSection.tsx",
+        "bytes": 10251,
+        "sha256": "0ca639be5b709ae848a8ed1dce53f9bbbac43b501ad9bedc633b84fa13d8c91e",
+        "exports": [
+          "RecoveryCodesDialog",
+          "TwoStepSection"
+        ]
+      },
+      {
+        "path": "src/modules/profile/module.config.tsx",
+        "bytes": 562,
+        "sha256": "25254273fe05110e59d9816d845781acde83acc62186bac179a68f334833bdc6",
+        "exports": [
+          "profileModule"
+        ],
+        "routes": [
+          "/profile"
+        ]
+      },
+      {
+        "path": "src/modules/profile/pages/ProfilePage.tsx",
+        "bytes": 7747,
+        "sha256": "7f94468a403d500f89ce349ce5688e81f2254631afb30fb22b639db309df21c0",
+        "exports": [
+          "ProfilePage"
+        ]
+      },
+      {
+        "path": "src/shared/components/Breadcrumbs.tsx",
+        "bytes": 1527,
+        "sha256": "246c76c829b31832cba9839b6ad06b0aa90eb822f5cf79a24b0469f3a82ef495",
+        "exports": [
+          "Crumb",
+          "Breadcrumbs"
+        ]
+      },
+      {
+        "path": "src/shared/components/ChoiceDialog.test.tsx",
+        "bytes": 1892,
+        "sha256": "5949b55f3de6fb239e7ae89109c1a98b2d9dfd0c81a95795d5a0c8956d07ebe8",
+        "exports": []
+      },
+      {
+        "path": "src/shared/components/ChoiceDialog.tsx",
+        "bytes": 3839,
+        "sha256": "17df1c2b221e8968d351ad559672864dbe2058aea1b93b1c9fd71dc33b03a0f8",
+        "exports": [
+          "Choice",
+          "ChoiceDialog"
+        ]
+      },
+      {
+        "path": "src/shared/components/ConfirmDialog.tsx",
+        "bytes": 1038,
+        "sha256": "be02511b56fce9dbef1c07caf2c0138cdc5a0c18b643c00b9e10aa361157a7ab",
+        "exports": [
+          "ConfirmDialog"
+        ]
+      },
+      {
+        "path": "src/shared/components/CopyField.tsx",
+        "bytes": 1199,
+        "sha256": "c90f6b5d8f19b007a8a74fcf5d0311fa7fb653c3e9e9abb5490ec065adb8cc20",
+        "exports": [
+          "CopyField"
+        ]
+      },
+      {
+        "path": "src/shared/components/DataState.tsx",
+        "bytes": 2580,
+        "sha256": "2fb3f172405bc8f3e073981a394fd85890aab51135b63f36c92b707c3a0af89b",
+        "exports": [
+          "EmptyState",
+          "ListSkeleton",
+          "DataState"
+        ]
+      },
+      {
+        "path": "src/shared/components/ImageEditor.test.tsx",
+        "bytes": 2347,
+        "sha256": "e14d826f9d82eefb137c35e055d6c83fc282d8ba449dcb21f9886ff15552dd56",
+        "exports": []
+      },
+      {
+        "path": "src/shared/components/ImageEditor.tsx",
+        "bytes": 22440,
+        "sha256": "bd300441e47769d9fc2f0ec980df5abf60cee943f479cb1feb2235d3a5181106",
+        "exports": [
+          "EditedImage",
+          "ImageEditor"
+        ]
+      },
+      {
+        "path": "src/shared/components/PageHeader.tsx",
+        "bytes": 1024,
+        "sha256": "b53a74e8f3d54cc73eb4b6d9f14e46c9f58ad5bcb1fc31df1742eb5763ab94cb",
+        "exports": [
+          "PageHeader"
+        ]
+      },
+      {
+        "path": "src/shared/components/Pagination.tsx",
+        "bytes": 1098,
+        "sha256": "83a52c4b1f4a62a769556369a270747ae7459766d7d616d6d9fdbcb999b05b85",
+        "exports": [
+          "Pagination"
+        ]
+      },
+      {
+        "path": "src/shared/components/PullToRefresh.test.tsx",
+        "bytes": 1088,
+        "sha256": "e879273c0a746850397c876b38df5af6e2a298d8e03c5678f5722b07f90c1a0e",
+        "exports": []
+      },
+      {
+        "path": "src/shared/components/PullToRefresh.tsx",
+        "bytes": 2510,
+        "sha256": "d1c2be10cb08c4513294eabd288959256bd299494539d0981aba90b3e21754b8",
+        "exports": [
+          "PullToRefresh"
+        ]
+      },
+      {
+        "path": "src/shared/components/SearchInput.tsx",
+        "bytes": 1151,
+        "sha256": "01346e6c3ccd8c38644310d61f3eeee796a5558a4abb24f0915d256fc7bffa8b",
+        "exports": [
+          "SearchInput"
+        ]
+      },
+      {
+        "path": "src/shared/components/Skeletons.tsx",
+        "bytes": 4900,
+        "sha256": "ab1a1e54a3988470e4e85992ec2cb551c4d1e2c8c4274dad080e531226b6c5f7",
+        "exports": [
+          "Skel",
+          "ChatRowsSkeleton",
+          "PersonRowsSkeleton",
+          "TableSkeleton",
+          "DetailsSkeleton",
+          "MessageBubblesSkeleton"
+        ]
+      },
+      {
+        "path": "src/shared/components/SwipeToDelete.test.tsx",
+        "bytes": 2024,
+        "sha256": "45fce8a1dffdebf67127def0548c17de608fd3bc4f9620a2e363243a2f943a71",
+        "exports": []
+      },
+      {
+        "path": "src/shared/components/SwipeToDelete.tsx",
+        "bytes": 3722,
+        "sha256": "1d9f477b2c96b3571d36f73bc7fcd92e2ebfd44f485cb966248439c5a962babe",
+        "exports": [
+          "SwipeToDelete"
+        ]
+      },
+      {
+        "path": "src/shared/hooks/useDebounced.ts",
+        "bytes": 327,
+        "sha256": "41023a1cdb1931ce3e29dca3c9141a7839875ddbb4dde2fd837cf152418b1725",
+        "exports": [
+          "useDebounced"
+        ]
+      },
+      {
+        "path": "src/shared/hooks/useMediaQuery.ts",
+        "bytes": 548,
+        "sha256": "313fd8e6d8128b9cb1f2ba397e4e991a08198a18a0d36b9da59abca13b34af47",
+        "exports": [
+          "useMediaQuery",
+          "usePhone"
+        ]
+      },
+      {
+        "path": "src/shared/ui/Avatar.tsx",
+        "bytes": 1244,
+        "sha256": "e9759700ba1b6225656b461cf132b5add53ebdb805fe2966ad884fbe50dd10c4",
+        "exports": [
+          "Avatar"
+        ]
+      },
+      {
+        "path": "src/shared/ui/Badge.tsx",
+        "bytes": 1226,
+        "sha256": "3bc3b70be0ce53b5e5180f8d8c36cafc63f15801d8ceadb21adc1f34f896cacb",
+        "exports": [
+          "Tone",
+          "Badge",
+          "CompanyBadge"
+        ]
+      },
+      {
+        "path": "src/shared/ui/Button.tsx",
+        "bytes": 1722,
+        "sha256": "f6ba2e7998fe6c0be784484f39ed40286863484c2cd4486f39fbe2d20649558b",
+        "exports": [
+          "ButtonProps",
+          "Button"
+        ]
+      },
+      {
+        "path": "src/shared/ui/Card.tsx",
+        "bytes": 524,
+        "sha256": "0c9fbe1e6898ccc982a81180a0c369da9fcf35968890b1f73244a2548d7e6763",
+        "exports": [
+          "Card",
+          "Surface"
+        ]
+      },
+      {
+        "path": "src/shared/ui/DateTimePicker.test.tsx",
+        "bytes": 4615,
+        "sha256": "b17e57981843d4bf5486eb9482034b7535717348abed936be15aeca8805cd2d3",
+        "exports": []
+      },
+      {
+        "path": "src/shared/ui/DateTimePicker.tsx",
+        "bytes": 15034,
+        "sha256": "a761da8a84bedba93fdf703585614f879940339bf4092962ca60fff1790a4c13",
+        "exports": [
+          "DatePicker",
+          "TimePicker",
+          "DateTimeField"
+        ]
+      },
+      {
+        "path": "src/shared/ui/Dialog.tsx",
+        "bytes": 2332,
+        "sha256": "803cb6100f84be501fb10d1120746529baf65649760d865caab7cbf561ac4f6b",
+        "exports": [
+          "Dialog"
+        ]
+      },
+      {
+        "path": "src/shared/ui/Input.tsx",
+        "bytes": 3515,
+        "sha256": "ca7cd16e4713220f1598c6f390b504a359bf71591000c4bf37271c0173c13ce7",
+        "exports": [
+          "Input",
+          "PasswordInput",
+          "Field",
+          "Checkbox"
+        ]
+      },
+      {
+        "path": "src/shared/ui/Logo.tsx",
+        "bytes": 980,
+        "sha256": "88ade917ab2f0fb2ff14e1a43ae854681e2c62f8bcc4336931a37b7842ab7132",
+        "exports": [
+          "LogoMark",
+          "Logo"
+        ]
+      },
+      {
+        "path": "src/shared/ui/Menu.tsx",
+        "bytes": 1660,
+        "sha256": "6b8284b21a4b1fa833c09c420e4085aae3d80e3837603a3bf42ef0aa4ac455c3",
+        "exports": [
+          "Menu",
+          "MenuItem",
+          "MenuLabel",
+          "MenuSeparator"
+        ]
+      },
+      {
+        "path": "src/shared/ui/PasswordInput.test.tsx",
+        "bytes": 716,
+        "sha256": "117f757c2f88de8947abf2f0b4bf9858bc3560621962df18c45231bac82a4252",
+        "exports": []
+      },
+      {
+        "path": "src/shared/ui/Select.test.tsx",
+        "bytes": 1668,
+        "sha256": "0b33093c40accfa3487d802d99cd0cc6fea15e802e42653eac58b9e537a66450",
+        "exports": []
+      },
+      {
+        "path": "src/shared/ui/Select.tsx",
+        "bytes": 4540,
+        "sha256": "36380e642640ec8ba4b8930dcaa7cf0fb5d27677f66c7db31306ea044f31aa5e",
+        "exports": [
+          "SelectProps",
+          "Select"
+        ]
+      },
+      {
+        "path": "src/shared/ui/sidebarRow.ts",
+        "bytes": 881,
+        "sha256": "98cd5a3ea4247b75b7e8586d29113c1fbb72bf672adcdd7fc76719a85e08aa29",
+        "exports": [
+          "sidebarRow",
+          "tabbarItem"
+        ]
+      },
+      {
+        "path": "src/shared/ui/Spinner.tsx",
+        "bytes": 431,
+        "sha256": "4e9e0629593331f827b7081c4bf538e18e62b4af86c6aabdee05198949191bda",
+        "exports": [
+          "Spinner",
+          "FullPageSpinner"
+        ]
+      },
+      {
+        "path": "src/shared/utils/cn.ts",
+        "bytes": 166,
+        "sha256": "e46429536f43f5910f5b2b0c50bb2769b510a4558bb4b5d20a3b0a9091dbf7c3",
+        "exports": [
+          "cn"
+        ]
+      },
+      {
+        "path": "src/shared/utils/format.test.ts",
+        "bytes": 843,
+        "sha256": "70d522c1491e3ddbffd8442b0b9d4151f952a209269f7a2cb8ccbef0f417786d",
+        "exports": []
+      },
+      {
+        "path": "src/shared/utils/format.ts",
+        "bytes": 1612,
+        "sha256": "e8f1d78b30d0d79438eb2b1b5abae3b93b53ef49e2d3f37c183188810a077c64",
+        "exports": [
+          "formatDate",
+          "formatDateTime",
+          "formatRelative",
+          "initials"
+        ]
+      },
+      {
+        "path": "src/shared/utils/greeting.ts",
+        "bytes": 247,
+        "sha256": "c3b24dd08bab85f89f7febe74066b5ce3dfee925a8be3b58ebca8c2c4a812995",
+        "exports": [
+          "greeting"
+        ]
+      },
+      {
+        "path": "src/shared/utils/idb.ts",
+        "bytes": 2480,
+        "sha256": "09f56c204717ab3360af261815cfdc69487b92319f4c6680bfd20554445c6a79",
+        "exports": [
+          "StoreName",
+          "idbGet",
+          "idbSet",
+          "idbDelete",
+          "idbAll",
+          "idbClear"
+        ]
+      },
+      {
+        "path": "src/shared/utils/imageFile.ts",
+        "bytes": 2935,
+        "sha256": "4a42b8fa93c8cd6891ae6b4e14a1991ff332ca3768d50c5c51899e8a5d0a43b2",
+        "exports": [
+          "WEB_IMAGE_TYPES",
+          "isImageFile",
+          "toWebImage",
+          "editedFile"
+        ]
+      },
+      {
+        "path": "src/shared/utils/phone.test.ts",
+        "bytes": 858,
+        "sha256": "ec30241f09979404e1739d412370dfb0d7b846601fccfed7dd257608e3b060d7",
+        "exports": []
+      },
+      {
+        "path": "src/shared/utils/phone.ts",
+        "bytes": 1439,
+        "sha256": "3d4f3e905ba95c9aff0a54d7198f8e4f0944aa5a6a3e3b003ba8166d2ae4366a",
+        "exports": [
+          "mobileError",
+          "telHref"
+        ]
+      },
+      {
+        "path": "src/shared/utils/toast.ts",
+        "bytes": 459,
+        "sha256": "a571de26317fe984007e3a3745e14369d0968fa1095e9913be62fa0e58b97299",
+        "exports": [
+          "toast"
+        ]
+      },
+      {
+        "path": "src/sw.ts",
+        "bytes": 5564,
+        "sha256": "636ea1cfbf2dd0a93ccbfaf5435db01276587e3569d934a6d25b94574d2f3e6f",
+        "exports": []
+      },
+      {
+        "path": "src/test/render.tsx",
+        "bytes": 552,
+        "sha256": "dba32244ff8d63deb54dfc1f790b899ffacc6b55729186316b84db9d13aa2f0f",
+        "exports": [
+          "renderWithProviders"
+        ]
+      },
+      {
+        "path": "src/test/setup.ts",
+        "bytes": 536,
+        "sha256": "4abee1bfa46e03aa1b33482a7acf8742dae8af9b9323cccbf17576bf2bc8d8ac",
+        "exports": []
+      }
+    ],
+    "dependencies": {
+      "@fontsource-variable/inter": "^5.3.0",
+      "@radix-ui/react-dialog": "^1.1.23",
+      "@radix-ui/react-dropdown-menu": "^2.1.24",
+      "@radix-ui/react-popover": "1.1.23",
+      "@simplewebauthn/browser": "^14.0.0",
+      "@tanstack/react-query": "^5.104.1",
+      "axios": "^1.20.0",
+      "blurhash": "^2.0.5",
+      "clsx": "^2.1.1",
+      "leaflet": "1.9.4",
+      "lucide-react": "^1.52.0",
+      "react": "^19.2.8",
+      "react-dom": "^19.2.8",
+      "react-router-dom": "^7.18.4",
+      "sonner": "^2.0.8",
+      "tailwind-merge": "^3.7.0",
+      "zustand": "^5.0.15"
+    },
+    "devDependencies": {
+      "@tailwindcss/vite": "^4.3.3",
+      "@testing-library/jest-dom": "^7.0.1",
+      "@testing-library/react": "^16.3.3",
+      "@testing-library/user-event": "^14.6.7",
+      "@types/leaflet": "1.9.21",
+      "@types/node": "^24.13.3",
+      "@types/react": "^19.2.18",
+      "@types/react-dom": "^19.2.7",
+      "@vitejs/plugin-react": "^6.1.1",
+      "jsdom": "^30.1.2",
+      "oxlint": "^1.81.0",
+      "tailwindcss": "^4.3.3",
+      "typescript": "~6.0.2",
+      "vite": "^8.3.0",
+      "vite-plugin-pwa": "^2.0.0",
+      "vitest": "^5.0.3",
+      "workbox-core": "^7.4.1",
+      "workbox-precaching": "^7.4.1",
+      "workbox-routing": "^7.4.1",
+      "workbox-window": "^7.4.1"
+    }
+  },
+  "universal": {
+    "files": [
+      {
+        "path": "public/favicon-32.png",
+        "bytes": 1503,
+        "sha256": "8181e23e5d93acafa465dd1078a82cf7dcf9303944fffa800da723c2485e4388"
+      },
+      {
+        "path": "public/icons/apple-touch-icon.png",
+        "bytes": 11894,
+        "sha256": "3e12a0b30f0de87de19a363ae95276c6e1568e31b19bd281a1bf18e51c1d996c"
+      },
+      {
+        "path": "public/icons/icon-192.png",
+        "bytes": 17294,
+        "sha256": "3a97623fb3725cf6f9549ac5b00f8d7b088636acc70c2d1cd67a205d19d9f6f3"
+      },
+      {
+        "path": "public/icons/icon-512.png",
+        "bytes": 81533,
+        "sha256": "182458f57a93fdd1cb05a8be18fa0169cca61a84b0e743d9792edd463f5ac3fa"
+      },
+      {
+        "path": "public/icons/maskable-512.png",
+        "bytes": 61412,
+        "sha256": "27bcd9686f8554e4a6ffdcf4ad8aa5f9e64b84ef62289506aef0a9f5888577ce"
+      },
+      {
+        "path": "public/manifest.webmanifest",
+        "bytes": 1141,
+        "sha256": "e52868bd4d63a3c43255b3da88a9b810b0736f5aff2fe46a9516f7fcef315ee2"
+      },
+      {
+        "path": "src/app/+native-intent.ts",
+        "bytes": 210,
+        "sha256": "45bb88851e8d8d738f85837cc0438ddb59209500d25a41c059fab49da4197166",
+        "exports": [
+          "redirectSystemPath"
+        ]
+      },
+      {
+        "path": "src/app/_layout.tsx",
+        "bytes": 1655,
+        "sha256": "0a9c06c7e2cd8c0e286f9ca2bd5065c33a828bdd2f370e2e012c13de7a70e0c9",
+        "exports": [
+          "Layout"
+        ]
+      },
+      {
+        "path": "src/app/admin.tsx",
+        "bytes": 458,
+        "sha256": "780f47d494c6048996c79554aeff56b6be4ce8a84873cf265356705b775b52d9",
+        "exports": [
+          "Screen"
+        ]
+      },
+      {
+        "path": "src/app/home.tsx",
+        "bytes": 3948,
+        "sha256": "0e7412c841a676b6caaa61c7eaf011837495933a9867cefcc4d6dda46cb8de24",
+        "exports": [
+          "Home"
+        ]
+      },
+      {
+        "path": "src/app/index.tsx",
+        "bytes": 425,
+        "sha256": "74f248e35b8c70caa97cb867eaff68ce692140994e88bbe4f0e3de97a954dede",
+        "exports": [
+          "Index"
+        ]
+      },
+      {
+        "path": "src/app/invite/[token].tsx",
+        "bytes": 143,
+        "sha256": "f4c6c38b00a253e99f4c135161a0ab6cecbd5ebf19b59176b2cedf889d134690",
+        "exports": [
+          "Screen"
+        ]
+      },
+      {
+        "path": "src/app/login.tsx",
+        "bytes": 5169,
+        "sha256": "3ed213099d5e0dad484867db6fcd7b6b0fb13d3a4b9ab290f58894d410a7f4ef",
+        "exports": [
+          "Login"
+        ]
+      },
+      {
+        "path": "src/app/messenger.tsx",
+        "bytes": 509,
+        "sha256": "ff4584ab422bbc68560f84eefd401082b4b6d55cbe720f5fd93067f0cf58ed4a",
+        "exports": [
+          "Screen"
+        ]
+      },
+      {
+        "path": "src/app/notifications.tsx",
+        "bytes": 376,
+        "sha256": "cca918dbc131723ffc29a5dd2fbeb9d20aefcd772a1ae8671decef62c277f36a",
+        "exports": [
+          "Screen"
+        ]
+      },
+      {
+        "path": "src/app/passwords.tsx",
+        "bytes": 632,
+        "sha256": "357f63ac81fc649c5284bb75e783f6870eea3edbb8fb1f957ba8dbe17922d599",
+        "exports": [
+          "Screen"
+        ]
+      },
+      {
+        "path": "src/app/preview.tsx",
+        "bytes": 201,
+        "sha256": "ac39304312c095fd35e0c632611598e7b30a625199ef61e50e79ee31b4a5f764",
+        "exports": [
+          "Screen"
+        ]
+      },
+      {
+        "path": "src/app/profile.tsx",
+        "bytes": 194,
+        "sha256": "5c33ead4f856fcc5e9355179c3de9f074806b217b937cc10df382443935af6a8",
+        "exports": [
+          "Screen"
+        ]
+      },
+      {
+        "path": "src/app/reset-password/[token].tsx",
+        "bytes": 142,
+        "sha256": "3e3a2af41d7c3600fd49eec5f8ed2cdfd84ac1d2337685a2c76fb67567292882",
+        "exports": [
+          "Screen"
+        ]
+      },
+      {
+        "path": "src/app/share.tsx",
+        "bytes": 8059,
+        "sha256": "b805a2161eb032870f78b4a41ed5bb74ad2f1475fae1f183c0bc3f7a93fedb81",
+        "exports": [
+          "SharePage"
+        ]
+      },
+      {
+        "path": "src/components/ActivityPanel.tsx",
+        "bytes": 6902,
+        "sha256": "e4f7ea5366c4a8eb61a0795582200d0635c2f6665fca0a89e44fddf83e186adb",
+        "exports": [
+          "ActivityPanel"
+        ]
+      },
+      {
+        "path": "src/components/AdminManagement.tsx",
+        "bytes": 20258,
+        "sha256": "31c8a30426448ca4a9bf5c00ae7ac99e27da82481ca9510225884b62acd10304",
+        "exports": [
+          "useAdminOperation",
+          "AdminFeedback",
+          "CreatePerson",
+          "PersonManagement",
+          "SecurityPolicyPanel",
+          "GroupManagement"
+        ]
+      },
+      {
+        "path": "src/components/AdminPanel.tsx",
+        "bytes": 11806,
+        "sha256": "a49ab0baf6007cb81360dac240d1f41ddf15949b69543bbab83087d45fd3db7b",
+        "exports": [
+          "AdminPanel"
+        ]
+      },
+      {
+        "path": "src/components/AdminPassword.tsx",
+        "bytes": 3063,
+        "sha256": "11fbc42d24b631a987fd754491857b974da329f0481896daa0fb471925ff629f",
+        "exports": [
+          "AdminPassword"
+        ]
+      },
+      {
+        "path": "src/components/AlertsPanel.tsx",
+        "bytes": 7718,
+        "sha256": "47c910dfbc95edbe17bcab660e53f8c3972b2efd357f0902da27fd5db9f31265",
+        "exports": [
+          "AlertsPanel"
+        ]
+      },
+      {
+        "path": "src/components/AppLock.tsx",
+        "bytes": 3756,
+        "sha256": "8aabc6cc38f7dcfa6301a5ff5334e9310275c983fa955193abe886ad0d06fd37",
+        "exports": [
+          "AppLock",
+          "AppLockSetting"
+        ]
+      },
+      {
+        "path": "src/components/AppLock.web.tsx",
+        "bytes": 6085,
+        "sha256": "d4bd79eba35a5db212d42592fb8107c7ab30bd7e997ca7c6477c534aac324e64",
+        "exports": [
+          "AppLock",
+          "AppLockSetting"
+        ]
+      },
+      {
+        "path": "src/components/AttachmentExport.tsx",
+        "bytes": 2965,
+        "sha256": "e6ff1c814477440c285727f4049569e88a6047685e05444e8b2121a2c1d61374",
+        "exports": [
+          "AttachmentExport"
+        ]
+      },
+      {
+        "path": "src/components/AttachmentExportStatus.tsx",
+        "bytes": 737,
+        "sha256": "639447858ef8d87085df4cb7eb5c5b875d3a34e87a7c0df354dfa6d2ebb958f7",
+        "exports": [
+          "AttachmentExportStatus"
+        ]
+      },
+      {
+        "path": "src/components/Brand.tsx",
+        "bytes": 974,
+        "sha256": "8fabcf840c818572abcea7529cd26002d9943180184984fa75489b4f4e8bd830",
+        "exports": [
+          "Brand",
+          "AuthBackdrop"
+        ]
+      },
+      {
+        "path": "src/components/CapturePanel.tsx",
+        "bytes": 6468,
+        "sha256": "1ee0e1eed58da975a839157193ac7d2bd37aff6b75beaa37fd7e112fe9c32f12",
+        "exports": [
+          "CapturePanel"
+        ]
+      },
+      {
+        "path": "src/components/ChatAppearance.tsx",
+        "bytes": 1278,
+        "sha256": "a297b1c612b22ed6ea76f26737a59d444a49968a0e385a3bf7594509e36f995c",
+        "exports": [
+          "useChatAppearance",
+          "ChatAppearance"
+        ]
+      },
+      {
+        "path": "src/components/ChatAvatar.tsx",
+        "bytes": 1250,
+        "sha256": "9c31e68c62fdea5dd6befd838904980b0a74ab9b780785bdf0054aa10ce03c81",
+        "exports": [
+          "ChatAvatar"
+        ]
+      },
+      {
+        "path": "src/components/ChatComposer.tsx",
+        "bytes": 1179,
+        "sha256": "bd3d6f693e18977a0f2ff77c8d7a01bb33d260a0d1cc0a34b52fdadbb9c2ee0b",
+        "exports": [
+          "ChatComposer"
+        ]
+      },
+      {
+        "path": "src/components/ComposerPreview.tsx",
+        "bytes": 1066,
+        "sha256": "5bea0b141535df2a023f17adae0bda64c118c55b975dbf5389226d56e3ba7b20",
+        "exports": [
+          "ComposerPreview"
+        ]
+      },
+      {
+        "path": "src/components/ConnectionStatus.tsx",
+        "bytes": 895,
+        "sha256": "24a2a358146750be77effd7321b5b6cb2ec3e8af8948df777350994714b97056",
+        "exports": [
+          "ConnectionStatus"
+        ]
+      },
+      {
+        "path": "src/components/ConversationDetails.tsx",
+        "bytes": 8250,
+        "sha256": "a2a584d9bb69b7e321d8fe3e34be694e2de7a3b6c6f7f1439aea748e69e0ebb2",
+        "exports": [
+          "ConversationDetails"
+        ]
+      },
+      {
+        "path": "src/components/ConversationPicker.tsx",
+        "bytes": 2877,
+        "sha256": "cff0ad7ea4e0141704e8c729396d0581a94abebfa5002de94feda0d1e7f9513d",
+        "exports": [
+          "ConversationPicker"
+        ]
+      },
+      {
+        "path": "src/components/ConversationWorkspace.tsx",
+        "bytes": 41504,
+        "sha256": "2d919c54c193ef487304a419a35320a6b77f8a5e8bfbfd1a227d187d54783005",
+        "exports": [
+          "Messenger"
+        ]
+      },
+      {
+        "path": "src/components/CropSurface.tsx",
+        "bytes": 3064,
+        "sha256": "b79b77df95aa04da7a59e366e21639d9288d3d284b35a17c428d400f425e0fcc",
+        "exports": [
+          "CropSurface"
+        ]
+      },
+      {
+        "path": "src/components/EventComposer.tsx",
+        "bytes": 5756,
+        "sha256": "b07e01f0db2344bb6f7104fd88f92454fc9e45742f9feeb128d24bd9e3177b18",
+        "exports": [
+          "EventComposer",
+          "EventEditor"
+        ]
+      },
+      {
+        "path": "src/components/EventDateTime.tsx",
+        "bytes": 6519,
+        "sha256": "d1155d449aa629d3eb3993da6facb3e90f530c41b69707f771c6f9cd4065cb28",
+        "exports": [
+          "EventDateTime"
+        ]
+      },
+      {
+        "path": "src/components/GroupPhoto.tsx",
+        "bytes": 4170,
+        "sha256": "4e923c4cffce001c7a3ac9d7083eaf62d8aa5fd1c20ce4998a5e2a47124b162a",
+        "exports": [
+          "GroupPhoto"
+        ]
+      },
+      {
+        "path": "src/components/Icon.tsx",
+        "bytes": 2449,
+        "sha256": "12e82b6e6915c34f22ddd4e7bc349cee0bf715ca1f2ec5c210914326bddeed36",
+        "exports": [
+          "IconName",
+          "Icon",
+          "IconButton"
+        ]
+      },
+      {
+        "path": "src/components/ImageFrame.tsx",
+        "bytes": 2606,
+        "sha256": "db90b3f57897b5ec721fd48743ab929cf3ab076c21d198aaf3426c26db321353",
+        "exports": [
+          "ImageFrameProps",
+          "ImageFrame"
+        ]
+      },
+      {
+        "path": "src/components/ImageFrame.web.tsx",
+        "bytes": 57,
+        "sha256": "e7d60061cddb36555bc29ea2f07c612049896f70501255d62f19c65e4a30e22e",
+        "exports": [
+          "ImageFrame"
+        ]
+      },
+      {
+        "path": "src/components/ImageViewer.tsx",
+        "bytes": 2420,
+        "sha256": "a35c63e3dee165afd4c5809849e8e3adb30e46c8ed6ea4d352a3dfeefb47ed83",
+        "exports": [
+          "ImageViewer"
+        ]
+      },
+      {
+        "path": "src/components/IncomingShareBridge.tsx",
+        "bytes": 1153,
+        "sha256": "9dfe55ca6ea5b4970bc525c418e34cbaa6a0ff53f83dd24f45bcd42c0b527eb6",
+        "exports": [
+          "IncomingShareBridge"
+        ]
+      },
+      {
+        "path": "src/components/InstallApp.tsx",
+        "bytes": 43,
+        "sha256": "f16e40401c9aa206f09bf7e00deab73dfaa4ad2d09a0e10164ff1f87e1a83aa6",
+        "exports": [
+          "InstallApp"
+        ]
+      },
+      {
+        "path": "src/components/InstallApp.web.tsx",
+        "bytes": 1838,
+        "sha256": "d2131117fe7447de7ac755a12df879371d3de73fc13ab3a84de05a994758d527",
+        "exports": [
+          "InstallApp"
+        ]
+      },
+      {
+        "path": "src/components/LiveFeedback.tsx",
+        "bytes": 2507,
+        "sha256": "405ccd576e26bf554b6653336e0a148c9c8278272d68e304cc4657a637f80d16",
+        "exports": [
+          "LiveFeedback"
+        ]
+      },
+      {
+        "path": "src/components/LiveUpdates.tsx",
+        "bytes": 5758,
+        "sha256": "984885c3ab83a80b8afb61044124c397bb3943373f4fc041d18e2f6e6efb01e7",
+        "exports": [
+          "useLiveUpdates",
+          "LiveUpdates",
+          "LiveAlertBanner"
+        ]
+      },
+      {
+        "path": "src/components/LocationMap.tsx",
+        "bytes": 4539,
+        "sha256": "63e95a40b6cecf1097e2e5199f690acddd9ecb64104445ca85638f65ebea544f",
+        "exports": [
+          "LocationMap"
+        ]
+      },
+      {
+        "path": "src/components/LocationPicker.tsx",
+        "bytes": 8903,
+        "sha256": "e9817564940f5940c13ad044f23494382989b61a4c4915d862b3d45a85b07166",
+        "exports": [
+          "LocationPicker",
+          "LocationComposer"
+        ]
+      },
+      {
+        "path": "src/components/MediaPlayback.tsx",
+        "bytes": 4265,
+        "sha256": "755fb6df32d1cc2516cbf57807254b28b1198ef768343dcd967437469438fcea",
+        "exports": [
+          "MediaPlayback"
+        ]
+      },
+      {
+        "path": "src/components/MessageDetails.tsx",
+        "bytes": 1561,
+        "sha256": "e17cde544f47d93933403dc7ed4922e2daac88933544c6c7b74b775a0387bd33",
+        "exports": [
+          "MessageDetails"
+        ]
+      },
+      {
+        "path": "src/components/MessagePresentation.tsx",
+        "bytes": 2305,
+        "sha256": "70398de1bc219d8a958a38e38e73bc850a4b7e02f4aa9d967f15706a4e07ce5d",
+        "exports": [
+          "MessageDelivery",
+          "MessageTicks",
+          "MessageMeta",
+          "MessageDay"
+        ]
+      },
+      {
+        "path": "src/components/MessageTools.tsx",
+        "bytes": 7309,
+        "sha256": "4641b53461084307835d4eb205e32982a77d896032bf787e7bb944780e2c2be0",
+        "exports": [
+          "SearchMessages",
+          "ForwardMessage",
+          "CreatePoll",
+          "ShareContact",
+          "FullImage"
+        ]
+      },
+      {
+        "path": "src/components/Messenger.tsx",
+        "bytes": 1333,
+        "sha256": "162d00840b72b1aedda3527af1762f0d4d886eb7c9b973e7d3f3d2c0eb061901",
+        "exports": [
+          "Messenger"
+        ]
+      },
+      {
+        "path": "src/components/PasswordField.tsx",
+        "bytes": 991,
+        "sha256": "42a91e1af6c93d47ef6deb0bba2a24ff8062dff754762a40310cbfa009bdd83c",
+        "exports": [
+          "PasswordField"
+        ]
+      },
+      {
+        "path": "src/components/PasswordGenerator.tsx",
+        "bytes": 1794,
+        "sha256": "4d8130108c4283a5d603b4ccad81d2d89f46b8a7d8c71c9a32abee052f0ddba1",
+        "exports": [
+          "PasswordGenerator"
+        ]
+      },
+      {
+        "path": "src/components/PeerCallButton.tsx",
+        "bytes": 2234,
+        "sha256": "f8ed9b14a399f0f0a25366d806133e323d849dc1d6ca231ae0e5f9fb98c44863",
+        "exports": [
+          "ProfileCallButton",
+          "PeerCallButton"
+        ]
+      },
+      {
+        "path": "src/components/PersonDetails.tsx",
+        "bytes": 2255,
+        "sha256": "97fee573e661d4a1db09852ca6c409c6d6482469696877d3990e8aa8006a6816",
+        "exports": [
+          "PersonDetails"
+        ]
+      },
+      {
+        "path": "src/components/PhotoEditor.tsx",
+        "bytes": 4091,
+        "sha256": "009a34b964ca6e2d67892f1741852ac7829ad028c88b057c70282c9c791cf76b",
+        "exports": [
+          "PhotoEditor"
+        ]
+      },
+      {
+        "path": "src/components/PollVoters.tsx",
+        "bytes": 1470,
+        "sha256": "736836078eecd0cdb4cb24cb3a45401c18074a810e6d1dec4076090ecf4155a7",
+        "exports": [
+          "PollVoters"
+        ]
+      },
+      {
+        "path": "src/components/ProfileImages.tsx",
+        "bytes": 6588,
+        "sha256": "aa4e429b0e4336e4a3c0fc9cdfa94c4d268f189f4a4de882435c7b188995993f",
+        "exports": [
+          "ProfileImages"
+        ]
+      },
+      {
+        "path": "src/components/ProfilePanel.tsx",
+        "bytes": 8388,
+        "sha256": "c96729ae8d07d32c631f79064a68c3f59d49765e63be1aee84884d28e9cb4108",
+        "exports": [
+          "ProfilePanel"
+        ]
+      },
+      {
+        "path": "src/components/PushSettings.tsx",
+        "bytes": 205,
+        "sha256": "5cf3d5bef33de441e369ae02d921ca433231c10d276d369aec4501b6c1b051f8",
+        "exports": [
+          "PushSettings"
+        ]
+      },
+      {
+        "path": "src/components/PushSettings.web.tsx",
+        "bytes": 1828,
+        "sha256": "78b883391e14663f0c318a8a5294490ca7b49a0a84a966a44de144ab5365010a",
+        "exports": [
+          "PushSettings"
+        ]
+      },
+      {
+        "path": "src/components/PwaSupport.tsx",
+        "bytes": 135,
+        "sha256": "c66fe8be8886a81475798c5524a30e5ec004711298c7a742722b72df6f1a4ba0",
+        "exports": [
+          "PwaSupport"
+        ]
+      },
+      {
+        "path": "src/components/PwaSupport.web.tsx",
+        "bytes": 6974,
+        "sha256": "e3d237f4fe0f19f5402d3bb630f3404f09ba6eca3bf9bdd95d461f6e92bea784",
+        "exports": [
+          "PwaSupport"
+        ]
+      },
+      {
+        "path": "src/components/ResourceList.tsx",
+        "bytes": 1291,
+        "sha256": "41c309984397b6df8246a1405e27de6ff712005730e6beb3c47f8f4f6c2d3244",
+        "exports": [
+          "ResourceList"
+        ]
+      },
+      {
+        "path": "src/components/RichMessage.tsx",
+        "bytes": 1429,
+        "sha256": "f16761215ee373008a16903167b362dd75b0c323c272d0647188ea042674e5fb",
+        "exports": [
+          "RichMessage"
+        ]
+      },
+      {
+        "path": "src/components/SecretCopy.tsx",
+        "bytes": 1207,
+        "sha256": "4e5de3d11b87c4547f408f3a58671808b263e3fb001a4065ba2773679385cf14",
+        "exports": [
+          "SecretCopy"
+        ]
+      },
+      {
+        "path": "src/components/SecretCopy.web.tsx",
+        "bytes": 1179,
+        "sha256": "d3869c441e765f425546a2d40a98ab81d8bb39472e1534381f98ad0042b30b1e",
+        "exports": [
+          "SecretCopy"
+        ]
+      },
+      {
+        "path": "src/components/SelectedSenders.tsx",
+        "bytes": 2037,
+        "sha256": "ad0de51b0f776d38671b7d88d5dc604e1f62d5c5734c2caeec84163770f63abd",
+        "exports": [
+          "SelectedSenders"
+        ]
+      },
+      {
+        "path": "src/components/SharedMedia.tsx",
+        "bytes": 4736,
+        "sha256": "c28741dd875686d4aeaaf2e7d03465ede2c218aa483b0ff5f618381449c177b9",
+        "exports": [
+          "SharedMedia"
+        ]
+      },
+      {
+        "path": "src/components/Sheet.tsx",
+        "bytes": 1291,
+        "sha256": "ed7772765933a9b4c446b88e36ebd3442b5d8c567591fe9d0692faa24ce7005d",
+        "exports": [
+          "Sheet"
+        ]
+      },
+      {
+        "path": "src/components/SpecialMessage.tsx",
+        "bytes": 8213,
+        "sha256": "297156bfbe295d37907d6b6e4ae51027abfb502268b31419f8f45e9eba3cf45d",
+        "exports": [
+          "SpecialMessage"
+        ]
+      },
+      {
+        "path": "src/components/StepUp.tsx",
+        "bytes": 2142,
+        "sha256": "7d4fec4cf5953c28d29456ea312741b443a94cf52a3a9acfbcfa4f7711366626",
+        "exports": [
+          "StepUp"
+        ]
+      },
+      {
+        "path": "src/components/ThemeControls.tsx",
+        "bytes": 2479,
+        "sha256": "33a7a80f39202e934ec4e4c7b779d21290442d7bc4b2b2612a3495334d5fb1e4",
+        "exports": [
+          "ThemeToggle",
+          "ThemeSettings"
+        ]
+      },
+      {
+        "path": "src/components/TokenPassword.tsx",
+        "bytes": 3223,
+        "sha256": "e1440ba0fbde0f5c5f3437a33ce3c64ab57c1cc11a10a16c2b3a196b6e8b391a",
+        "exports": [
+          "TokenPassword"
+        ]
+      },
+      {
+        "path": "src/components/VaultExportStatus.tsx",
+        "bytes": 787,
+        "sha256": "f72d4af6c4108642a3d79ce3f88517d03c162e71e5346b120cb51b863aab0e44",
+        "exports": [
+          "VaultExportStatus"
+        ]
+      },
+      {
+        "path": "src/components/VaultFiles.tsx",
+        "bytes": 7676,
+        "sha256": "d59053a57a63e7b0b4129e7246e7c5f1e3ed7d435f39522e78798863f5d98d72",
+        "exports": [
+          "VaultFiles"
+        ]
+      },
+      {
+        "path": "src/components/VaultGate.tsx",
+        "bytes": 1621,
+        "sha256": "3726b5bbf2570fd62bb0c2932d1260d48823cf16635fd105fc069d50be89a607",
+        "exports": [
+          "VaultGate"
+        ]
+      },
+      {
+        "path": "src/components/VaultManagement.tsx",
+        "bytes": 19367,
+        "sha256": "3dfa9fb12f64c56824c7f034d663c7ff17a167f960cbb39a9c4c140a62978919",
+        "exports": [
+          "VaultPersonPicker",
+          "OwnerRequests",
+          "VaultMembers",
+          "VaultWorkspace",
+          "TeamVaults",
+          "EmergencyAccess"
+        ]
+      },
+      {
+        "path": "src/components/VaultPanel.tsx",
+        "bytes": 18793,
+        "sha256": "653d35854045fee141b3e4232840322394b350f0b2303836f87d6cb7b016c423",
+        "exports": [
+          "VaultPanel"
+        ]
+      },
+      {
+        "path": "src/components/VaultTools.tsx",
+        "bytes": 7903,
+        "sha256": "7535d83ba2e3b0a59dc2aac50dbed0cf861eee4cf0087990909956d0388e19b6",
+        "exports": [
+          "EntryAccess",
+          "FolderManager"
+        ]
+      },
+      {
+        "path": "src/components/Workspace.tsx",
+        "bytes": 6442,
+        "sha256": "ee24a0b44593e05fb7c7303f821857f199a50d3298a7c26a6d7b9f616ef15828",
+        "exports": [
+          "Workspace"
+        ]
+      },
+      {
+        "path": "src/components/WorkspaceChrome.tsx",
+        "bytes": 610,
+        "sha256": "e1a018a7801990e5d66c92c9244ad20e99bc1bc0cf263dffd93e2d96e9fa3bd8",
+        "exports": [
+          "WorkspaceChrome",
+          "useChatImmersive"
+        ]
+      },
+      {
+        "path": "src/config/capabilities.test.ts",
+        "bytes": 577,
+        "sha256": "793601b419ef80cc4fc7e862e4375d42fa1ba2b6a1dd0868472a6bef6539d58b",
+        "exports": []
+      },
+      {
+        "path": "src/config/capabilities.ts",
+        "bytes": 1166,
+        "sha256": "d3335d2d2a28e83dd849b2e18d4357acc980dd023d83c465046d4392d4bde418",
+        "exports": [
+          "CAPABILITIES",
+          "Capability",
+          "CapabilityRule",
+          "ADMIN_ACCESS",
+          "allows"
+        ]
+      },
+      {
+        "path": "src/core/api/client.ts",
+        "bytes": 604,
+        "sha256": "6efa8c64b5eaec3d9721a955d02062bd1dfb8c3b1faad2a51f39519436e19f46",
+        "exports": [
+          "origin"
+        ]
+      },
+      {
+        "path": "src/core/api/cookies.native.ts",
+        "bytes": 525,
+        "sha256": "3b3750d75f734d7ecd693e2960652f9d58aa4dc227849e08b2739bc08434c50f",
+        "exports": [
+          "csrfCookie",
+          "clearNativeCookies"
+        ]
+      },
+      {
+        "path": "src/core/api/cookies.ts",
+        "bytes": 455,
+        "sha256": "31c7f7ea6e1235b74ec58e5fc3b24a2f31d969c771c2cbe054e04bbeba324c9d",
+        "exports": [
+          "csrfCookie",
+          "clearNativeCookies"
+        ]
+      },
+      {
+        "path": "src/core/api/events.ts",
+        "bytes": 211,
+        "sha256": "f742121115316917ce6649144e13135d01c83a329b5bcc04ea1c5727408a769e",
+        "exports": [
+          "onSessionLost",
+          "sessionLost"
+        ]
+      },
+      {
+        "path": "src/core/api/origin.test.ts",
+        "bytes": 1045,
+        "sha256": "e37558689a9a8b7494528aea75510ebec7fc03959101287a9bf526125a34c904",
+        "exports": []
+      },
+      {
+        "path": "src/core/api/origin.ts",
+        "bytes": 367,
+        "sha256": "3e92369075d4306c661f9727e5c636ea89155585b071049150c492c0036e0d61",
+        "exports": [
+          "resolveApiOrigin"
+        ]
+      },
+      {
+        "path": "src/core/api/session-boundary.test.ts",
+        "bytes": 1792,
+        "sha256": "4f4b967d588a9d647266e3b6511e432864a15512c1e09e99d990ccf5bf35b02b",
+        "exports": []
+      },
+      {
+        "path": "src/core/api/transport.test.ts",
+        "bytes": 7557,
+        "sha256": "548d7c14602dbddb0650993c6991f047ad5bc4daf76269b24f30c5a46acfb561",
+        "exports": []
+      },
+      {
+        "path": "src/core/api/transport.ts",
+        "bytes": 5335,
+        "sha256": "ceb4a876631b48f21bb60149a2b09f1c9c5dc1666e058986fca20e243b3fa065",
+        "exports": [
+          "TransportOptions",
+          "normalizeOrigin",
+          "StepUpHandler",
+          "createTransport",
+          "errorMessage"
+        ]
+      },
+      {
+        "path": "src/core/api/types.ts",
+        "bytes": 342,
+        "sha256": "86b14e22e85c78d6dcc8f3b5f819dda609afd44251acfc10b10857a84d3cda33",
+        "exports": [
+          "Page",
+          "Person"
+        ]
+      },
+      {
+        "path": "src/core/auth/appLockAttempt.test.ts",
+        "bytes": 2532,
+        "sha256": "d415d605b7df62f5af0b5a78f45e4943a0137fec92f9a493d92e9ae858390ae2",
+        "exports": []
+      },
+      {
+        "path": "src/core/auth/appLockAttempt.ts",
+        "bytes": 1738,
+        "sha256": "85f298b3ec5f384eda000573c3b5cd0726bd85952a65f2eb99c607fa4b3f725a",
+        "exports": [
+          "AppLockAttempt"
+        ]
+      },
+      {
+        "path": "src/core/auth/appLockModel.test.ts",
+        "bytes": 2819,
+        "sha256": "ba786837b65f55148630289dac43afdae8efa0ffeb40cbbbb9dabf2b79751020",
+        "exports": []
+      },
+      {
+        "path": "src/core/auth/appLockModel.ts",
+        "bytes": 1650,
+        "sha256": "fdf5382d8f0b374b2926388fbc51e2474e6cde5badf5ea4fef18826674773034",
+        "exports": [
+          "AppLockState",
+          "AppLockModel"
+        ]
+      },
+      {
+        "path": "src/core/auth/controller.test.ts",
+        "bytes": 9164,
+        "sha256": "efd081abbd8490eed8e636c25da46456a85fdca99519f6cfd09d943ca2f48714",
+        "exports": []
+      },
+      {
+        "path": "src/core/auth/controller.ts",
+        "bytes": 5633,
+        "sha256": "88d5c62be9c14c7d3d09b9cd12435941e597834f3697a39e8f7287f856301066",
+        "exports": [
+          "SessionState",
+          "SessionDependencies",
+          "SessionController"
+        ]
+      },
+      {
+        "path": "src/core/auth/nativeAppLock.test.ts",
+        "bytes": 3089,
+        "sha256": "51f9503ee319fa456f8e7ab392c8bd4b7cc404e2edb428cee7ed0dab4c0bada4",
+        "exports": []
+      },
+      {
+        "path": "src/core/auth/nativeAppLock.ts",
+        "bytes": 2698,
+        "sha256": "61ebd24fb8239a7b2e5e6dd1a9f477d4307a53431a309d363be81be3b776ab76",
+        "exports": [
+          "NativeLockState",
+          "NativeAppLock"
+        ]
+      },
+      {
+        "path": "src/core/auth/security.ts",
+        "bytes": 1075,
+        "sha256": "954b29089ff388228b908596cb4643e322dece2e5df4e3671420ab3c6242a06f",
+        "exports": [
+          "passkeysSupported",
+          "signInWithPasskey",
+          "confirmPasskey",
+          "addPasskey",
+          "confirmPassword",
+          "isPasskeyCancel"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/auth/step-up/"
+          ]
+        ]
+      },
+      {
+        "path": "src/core/auth/security.web.test.ts",
+        "bytes": 2100,
+        "sha256": "8851b4dc9da4953bd9546cb50dfb7685fe6bc791aa9e208a197fb25c2322f50d",
+        "exports": [],
+        "apiPathLiterals": []
+      },
+      {
+        "path": "src/core/auth/security.web.ts",
+        "bytes": 2502,
+        "sha256": "fc74b45cab45d05db59f4e6c7b927a0704d3a886dc9d45f132f5d05818a67197",
+        "exports": [
+          "passkeysSupported",
+          "signInWithPasskey",
+          "isPasskeyCancel",
+          "confirmPasskey",
+          "addPasskey",
+          "confirmPassword"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/auth/csrf/"
+          ],
+          [
+            "'",
+            "/auth/login/passkey/"
+          ],
+          [
+            "'",
+            "/auth/passkeys/"
+          ],
+          [
+            "'",
+            "/auth/step-up/"
+          ]
+        ]
+      },
+      {
+        "path": "src/core/auth/securityTypes.ts",
+        "bytes": 947,
+        "sha256": "32650dbde4f551554cb999675a944a93510359104a9f5768e39f35fcd402283a",
+        "exports": [
+          "SecondFactor",
+          "StepUpScope",
+          "StepUpMethod",
+          "PasskeyInfo",
+          "SecurityStatus",
+          "LoginResponse"
+        ],
+        "apiPathLiterals": []
+      },
+      {
+        "path": "src/core/auth/Session.tsx",
+        "bytes": 4983,
+        "sha256": "93426462cbe3254e18115b8e43d5cac4d1bf35a40777f0469d218315897ed5b0",
+        "exports": [
+          "SessionProvider",
+          "useSession"
+        ]
+      },
+      {
+        "path": "src/core/auth/sessionCoordination.ts",
+        "bytes": 205,
+        "sha256": "05c22bbb458d87230090ded79c647125c61bdbf8fa5dcf01f68ab20721bf39bd",
+        "exports": [
+          "withSessionLock",
+          "announceSessionBoundary",
+          "onOtherSessionBoundary"
+        ]
+      },
+      {
+        "path": "src/core/auth/sessionCoordination.web.ts",
+        "bytes": 689,
+        "sha256": "ae6c1099e1fb7c91744bff752fb01344afed2d171d2f981e8083ec2c9920b6c9",
+        "exports": [
+          "withSessionLock",
+          "announceSessionBoundary",
+          "onOtherSessionBoundary"
+        ]
+      },
+      {
+        "path": "src/core/auth/stepUpFlow.test.ts",
+        "bytes": 3067,
+        "sha256": "41fd89695d5228d9e14b0c2495ab6797ffec2abfed93d858be424ba72debd63c",
+        "exports": []
+      },
+      {
+        "path": "src/core/auth/stepUpFlow.ts",
+        "bytes": 3442,
+        "sha256": "73506ece3b6668eee5c7672e2008580a113f45d1b300242c7ae20cc6024fc8b6",
+        "exports": [
+          "StepUpState",
+          "StepUpFlow"
+        ]
+      },
+      {
+        "path": "src/core/auth/types.ts",
+        "bytes": 1229,
+        "sha256": "d2260a9222b8fa3c58c581768c607d2a3f07a2bf0145195a17f834b155fbc248",
+        "exports": [
+          "Membership",
+          "Me"
+        ]
+      },
+      {
+        "path": "src/core/realtime/client.test.ts",
+        "bytes": 4486,
+        "sha256": "7d34511791be68848b2f2526abf75f296d2398997e938c71f5030f5ccc67adb6",
+        "exports": []
+      },
+      {
+        "path": "src/core/realtime/client.ts",
+        "bytes": 5603,
+        "sha256": "d4552747a6911cdc594f517d674cfea8c7031e04cdb67e270c03c33a27055ae7",
+        "exports": [
+          "Frame",
+          "Socket",
+          "ConnectionStatus",
+          "RealtimeClient"
+        ]
+      },
+      {
+        "path": "src/core/realtime/lifecycle.native.ts",
+        "bytes": 913,
+        "sha256": "ff67de35aa7a9fef43bcce622416a5c6ce1525401b73d7aa7798947866ac0f96",
+        "exports": [
+          "subscribeLifecycle"
+        ]
+      },
+      {
+        "path": "src/core/realtime/lifecycle.ts",
+        "bytes": 545,
+        "sha256": "53dec4f505d30f190ce9e880d56e61b083509220241bcaca6cbb9bf82a7e2ba1",
+        "exports": [
+          "subscribeLifecycle"
+        ]
+      },
+      {
+        "path": "src/core/realtime/socket.ts",
+        "bytes": 296,
+        "sha256": "159934ff23c5a5b51736ad960a8e6784b776f5c045be9b68333f5b4ccdda1bce",
+        "exports": [
+          "realtime"
+        ]
+      },
+      {
+        "path": "src/core/storage/secureSnapshot.test.ts",
+        "bytes": 2190,
+        "sha256": "445edbd4f9d03a76d4255be96d78a7a5b6892da87193a95652352a1f7fc5bd0a",
+        "exports": []
+      },
+      {
+        "path": "src/core/storage/secureSnapshot.ts",
+        "bytes": 3673,
+        "sha256": "307a408fadc2849192ecbe037ad562b014b37540a4deb8efb55b2780dcf81a96",
+        "exports": [
+          "SecureValues",
+          "SecureSnapshot"
+        ]
+      },
+      {
+        "path": "src/core/theme/model.test.ts",
+        "bytes": 3597,
+        "sha256": "0c08b9911be00fc4d7b0dc748210a92917047ba7d89c62c7f0c96a6d99e2426b",
+        "exports": []
+      },
+      {
+        "path": "src/core/theme/model.ts",
+        "bytes": 2426,
+        "sha256": "a63ba31f5a00832ac1d5bd2e34d813ec738d8f6e35446c9688aa73299638dc86",
+        "exports": [
+          "ThemeChoice",
+          "ThemeStorage",
+          "ThemeState",
+          "initialTheme",
+          "parseTheme",
+          "isDarkTheme",
+          "ThemeController"
+        ]
+      },
+      {
+        "path": "src/core/theme/platform.native.ts",
+        "bytes": 228,
+        "sha256": "e2aff74639b8dae65c3e66fe2b1d397ff07796540c6b7583064592b3a4d5a9dd",
+        "exports": [
+          "applyPlatformTheme"
+        ]
+      },
+      {
+        "path": "src/core/theme/platform.ts",
+        "bytes": 402,
+        "sha256": "2c9081c5716cac74f225b08f6b8863913f2ba53013ae6ff41dcb72b5267a0443",
+        "exports": [
+          "applyPlatformTheme"
+        ]
+      },
+      {
+        "path": "src/core/theme/storage.native.ts",
+        "bytes": 432,
+        "sha256": "c472c27d8c1e9079846c92884f60d352d449412659b15e7d90f4b54c93ba4c50",
+        "exports": [
+          "themeStorage"
+        ]
+      },
+      {
+        "path": "src/core/theme/storage.ts",
+        "bytes": 802,
+        "sha256": "48521ba3f29b207093ebba9dfe867135771647954114809b85dcfe547ded92a2",
+        "exports": [
+          "themeStorage"
+        ]
+      },
+      {
+        "path": "src/core/theme/ThemeProvider.tsx",
+        "bytes": 795,
+        "sha256": "a64d69390976b6359a165ef2920e292df8f7859cf9b3db5447b0e26a45691541",
+        "exports": [
+          "ThemeProvider"
+        ]
+      },
+      {
+        "path": "src/core/theme/useTheme.ts",
+        "bytes": 523,
+        "sha256": "c79ace7c073bcf4f169af61be9a1a2b5fc73b5ce8bd128dbd085261a1ae500e8",
+        "exports": [
+          "theme",
+          "useTheme"
+        ]
+      },
+      {
+        "path": "src/modules/admin/api.ts",
+        "bytes": 11653,
+        "sha256": "cbef70069170211a3eb3742dac222c2074c33b6247c5e6b093362e9890f66448",
+        "exports": [
+          "UserStatus",
+          "AdminUser",
+          "AdminCompany",
+          "EffectivePermission",
+          "GroupInfo",
+          "CapabilityInfo",
+          "GroupMember",
+          "GroupInput",
+          "GroupOption",
+          "UserFilters",
+          "Approval",
+          "ApprovalPending",
+          "listApprovals",
+          "decideApproval",
+          "adminKeys",
+          "listUsers",
+          "getUser",
+          "createUser",
+          "setUserPassword",
+          "updateUser",
+          "userAction",
+          "deleteUser",
+          "inviteLink",
+          "resetLink",
+          "resetUserMfa",
+          "decideEmailChange",
+          "unlockUser",
+          "UserDevice",
+          "listUserDevices",
+          "revokeUserDevice",
+          "revokeUserSessions",
+          "setUserGroups",
+          "groupOptions",
+          "addMembership",
+          "updateMembership",
+          "removeMembership",
+          "listCompanies",
+          "saveCompany",
+          "deleteCompany",
+          "restoreCompany",
+          "listGroups",
+          "listCapabilities",
+          "createGroup",
+          "updateGroup",
+          "deleteGroup",
+          "listGroupMembers",
+          "changeGroupMembers",
+          "SecurityPolicy",
+          "getSecurityPolicy",
+          "setTwoStepEnforced",
+          "ChatAccess",
+          "ChatPerson",
+          "getChatAccess",
+          "setChatAccess",
+          "listChatAllowed",
+          "changeChatAllowed"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/admin/approvals/"
+          ],
+          [
+            "'",
+            "/admin/capabilities/"
+          ],
+          [
+            "'",
+            "/admin/companies/"
+          ],
+          [
+            "'",
+            "/admin/groups/"
+          ],
+          [
+            "'",
+            "/admin/memberships/"
+          ],
+          [
+            "'",
+            "/admin/security-policy/"
+          ],
+          [
+            "'",
+            "/admin/users/"
+          ],
+          [
+            "'",
+            "/admin/users/group-options/"
+          ],
+          [
+            "`",
+            "${chatAccessUrl(id)}allowed/"
+          ],
+          [
+            "`",
+            "/admin/companies/${company.id}/"
+          ],
+          [
+            "`",
+            "/admin/companies/${id}/"
+          ],
+          [
+            "`",
+            "/admin/companies/${id}/restore/"
+          ],
+          [
+            "`",
+            "/admin/groups/${id}/"
+          ],
+          [
+            "`",
+            "/admin/memberships/${id}/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/${action}/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/email-change/${decision}/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/groups/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/invite-link/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/reset-link/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/reset-mfa/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/revoke-sessions/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/sessions/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/sessions/${sessionId}/revoke/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/set-password/"
+          ],
+          [
+            "`",
+            "/admin/users/${id}/unlock/"
+          ]
+        ]
+      },
+      {
+        "path": "src/modules/admin/approvalReview.test.ts",
+        "bytes": 822,
+        "sha256": "dbb82b449bb9ea36087ab412e4ca910980c47d23bead67c09b8308f1a1b6c879",
+        "exports": []
+      },
+      {
+        "path": "src/modules/admin/approvalReview.ts",
+        "bytes": 1058,
+        "sha256": "037ed523bc0eced85d9ae7fea4b1642adeb0c0a50e9bcdcb753ee6148ccbe9d6",
+        "exports": [
+          "approvalConsequence"
+        ]
+      },
+      {
+        "path": "src/modules/images/edit.native.test.ts",
+        "bytes": 2068,
+        "sha256": "7e22748721d48399f9d74c005a96db6c53126154fde454083df582fd68837b85",
+        "exports": []
+      },
+      {
+        "path": "src/modules/images/edit.ts",
+        "bytes": 1736,
+        "sha256": "9c9310a049ae5f737696f25492932371918b13e065b6f582c586ed787e212ddc",
+        "exports": [
+          "imageFramesSupported",
+          "framesNeedRender",
+          "editImage"
+        ]
+      },
+      {
+        "path": "src/modules/images/edit.web.ts",
+        "bytes": 2594,
+        "sha256": "3b160eae6e70b936affaa6e93629087b83a804f2c8c04a1a86f789bdcf884a8a",
+        "exports": [
+          "imageFramesSupported",
+          "framesNeedRender",
+          "editImage"
+        ]
+      },
+      {
+        "path": "src/modules/images/frameCapture.ts",
+        "bytes": 765,
+        "sha256": "c69f4beb2c045de82dc3dadf4e057b295096ba16f394c131857b9280ab687906",
+        "exports": [
+          "captureOwnedFrame"
+        ]
+      },
+      {
+        "path": "src/modules/images/interaction.test.ts",
+        "bytes": 2169,
+        "sha256": "8dcfac1208cce7cc8f026dfdb52d62a65eeb54d604b22ec5a08ed038c43ab3dc",
+        "exports": []
+      },
+      {
+        "path": "src/modules/images/interaction.ts",
+        "bytes": 1224,
+        "sha256": "796e1ffd9ed1a2650a09137d4ba54cebe9031bb7493442105a443df82200e321",
+        "exports": [
+          "CropHandle",
+          "dragCrop",
+          "aspectCrop",
+          "CropGesture"
+        ]
+      },
+      {
+        "path": "src/modules/images/model.test.ts",
+        "bytes": 803,
+        "sha256": "f8fc2fea8e492ec6d6ced9a62299f35466f1c1b961222a1d97e323dff085f52d",
+        "exports": []
+      },
+      {
+        "path": "src/modules/images/model.ts",
+        "bytes": 1332,
+        "sha256": "8684f2d59aad0af191e4ed270bbd27da50aa0a2163b670c9aa94f73a00776bf4",
+        "exports": [
+          "ImageEdit",
+          "defaultEdit",
+          "cropPixels"
+        ]
+      },
+      {
+        "path": "src/modules/images/viewer.test.ts",
+        "bytes": 670,
+        "sha256": "261f6bbac027790997776826871641d2d714b673db27b38593b46a1f65e84a49",
+        "exports": []
+      },
+      {
+        "path": "src/modules/images/viewer.ts",
+        "bytes": 1605,
+        "sha256": "c993078b2116dba145a44debc6ed39487870033b8bb15657d76f34625f25e0d6",
+        "exports": [
+          "TouchPoint",
+          "ZoomState",
+          "ImageZoom"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/access.ts",
+        "bytes": 339,
+        "sha256": "2093e9b4cf146f669e43451e58a4ce7c1b46588178a07da4b65c13ff7fb7545d",
+        "exports": [
+          "confirmedAccessLoss"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/api.contract.test.ts",
+        "bytes": 3070,
+        "sha256": "78950d1c16112ca330cf83d13724a2999136d3d7b26788f6a8789dcd1e541a63",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/api.ts",
+        "bytes": 20227,
+        "sha256": "ddde593976334674220b670c050e17302b4603bae80b50d0bb3fc60c4edd1607",
+        "exports": [
+          "PersonCard",
+          "Attachment",
+          "ReplyPreview",
+          "ReactionSummary",
+          "DeliveryStatus",
+          "PollOption",
+          "PollData",
+          "LocationData",
+          "EventAnswer",
+          "EventData",
+          "Message",
+          "MessageWindow",
+          "SendMode",
+          "SendBlock",
+          "NotifyPreview",
+          "PreviewMedia",
+          "ConversationItem",
+          "ConversationDetail",
+          "Member",
+          "CursorPage",
+          "ConversationFilter",
+          "SendPayload",
+          "searchPeople",
+          "listConversations",
+          "getConversation",
+          "openDirect",
+          "createGroup",
+          "updateGroup",
+          "listMembers",
+          "addMembers",
+          "setMemberRole",
+          "removeMember",
+          "leaveConversation",
+          "setSendMode",
+          "updateSettings",
+          "clearChat",
+          "markRead",
+          "markDelivered",
+          "WindowQuery",
+          "getWindow",
+          "sendMessage",
+          "editMessage",
+          "deleteMessage",
+          "setReaction",
+          "ReactionGroup",
+          "listReactions",
+          "clearReaction",
+          "ReceiptPerson",
+          "MessageInfo",
+          "messageInfo",
+          "forwardMessage",
+          "SearchHit",
+          "searchMessages",
+          "createPoll",
+          "votePoll",
+          "pollVoters",
+          "sendContact",
+          "sendLocation",
+          "EventInput",
+          "createEvent",
+          "updateEvent",
+          "Place",
+          "MAP_TILES",
+          "searchPlaces",
+          "placeAt",
+          "SharedKind",
+          "SharedItem",
+          "getShared",
+          "PersonProfile",
+          "getPerson",
+          "getUpload",
+          "waitUntilReady",
+          "uploadFile",
+          "discardUpload",
+          "Appearance",
+          "appearanceKey",
+          "getAppearance",
+          "setAppearance",
+          "removeAppearanceImage",
+          "LinkPreview",
+          "getLinkPreview",
+          "setDisappearing",
+          "answerEvent",
+          "eventAnswers"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/admin/appearance/"
+          ],
+          [
+            "'",
+            "/appearance/"
+          ],
+          [
+            "'",
+            "/link-preview/"
+          ],
+          [
+            "'",
+            "/maps/reverse/"
+          ],
+          [
+            "'",
+            "/maps/search/"
+          ],
+          [
+            "'",
+            "/uploads/"
+          ],
+          [
+            "'",
+            "/users/"
+          ],
+          [
+            "`",
+            "${C}/"
+          ],
+          [
+            "`",
+            "${C}/${conversationId}/events/"
+          ],
+          [
+            "`",
+            "${C}/${conversationId}/locations/"
+          ],
+          [
+            "`",
+            "${C}/${id}/"
+          ],
+          [
+            "`",
+            "${C}/${id}/clear/"
+          ],
+          [
+            "`",
+            "${C}/${id}/delivered/"
+          ],
+          [
+            "`",
+            "${C}/${id}/disappearing/"
+          ],
+          [
+            "`",
+            "${C}/${id}/leave/"
+          ],
+          [
+            "`",
+            "${C}/${id}/members/"
+          ],
+          [
+            "`",
+            "${C}/${id}/members/${userId}/"
+          ],
+          [
+            "`",
+            "${C}/${id}/messages/"
+          ],
+          [
+            "`",
+            "${C}/${id}/read/"
+          ],
+          [
+            "`",
+            "${C}/${id}/settings/"
+          ],
+          [
+            "`",
+            "${C}/direct/"
+          ],
+          [
+            "`",
+            "/conversations/${conversationId}/messages/"
+          ],
+          [
+            "`",
+            "/conversations/${conversationId}/polls/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/event-response/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/event/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/forward/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/info/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/poll-vote/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/reaction/"
+          ],
+          [
+            "`",
+            "/messages/${messageId}/reactions/"
+          ],
+          [
+            "`",
+            "/uploads/${id}/"
+          ],
+          [
+            "`",
+            "/users/${id}/"
+          ]
+        ]
+      },
+      {
+        "path": "src/modules/messenger/chatLock.ts",
+        "bytes": 312,
+        "sha256": "b67682989dffb7d1c4bd2cdb4b0f2d292467f3c433774bc5bfa3437a82a689c8",
+        "exports": [
+          "chatLock"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/chatLockApi.ts",
+        "bytes": 712,
+        "sha256": "6c0612d94754d5df526f5d9ffb5c4545715317eb330992226b326935871a1550",
+        "exports": [
+          "verifyLockedChats",
+          "setConversationLock"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/chatLockController.test.ts",
+        "bytes": 5917,
+        "sha256": "d1d78e110bed92aa20e0715f01947b846067aca0d2e2b10add95758c07f2e44e",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/chatLockController.ts",
+        "bytes": 3911,
+        "sha256": "f80d9c0195a7b6c94e70bd98b642fb43cc4eb4de2091f405e60b74d0a4314d2a",
+        "exports": [
+          "CHAT_LOCK_BACKGROUND_MS",
+          "ChatLockState",
+          "ChatLockController"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/chatLockVisibility.native.ts",
+        "bytes": 395,
+        "sha256": "f80a325d327b16f1100a44042226451119fdb0159dfdd7c83cac5574c00656e8",
+        "exports": [
+          "subscribeChatLockVisibility"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/chatLockVisibility.ts",
+        "bytes": 441,
+        "sha256": "f3a2b9ee335f2d9da4926a2496bff8b5b25201be622e7a9508ae6a6844e9d2e1",
+        "exports": [
+          "subscribeChatLockVisibility"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/components/LockedChatsGate.tsx",
+        "bytes": 1486,
+        "sha256": "4e703c5c63d90bcd4d90c63e7b58c1e1f95002ae0e486134d70da7b8d140c6d2",
+        "exports": [
+          "LockedChatsGate"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/composer.test.ts",
+        "bytes": 758,
+        "sha256": "1fdec8760299109f5db65ddd619f94155d866545446ab6ebc1da6bc45f50bc8d",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/composer.ts",
+        "bytes": 1167,
+        "sha256": "0374ea128decaadcf88074cb1a3fe6216ded0751a43c8efcc300a961a658ded4",
+        "exports": [
+          "Caret",
+          "caretAfterEdit",
+          "mentionAt",
+          "insertMention"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/conversationCache.ts",
+        "bytes": 220,
+        "sha256": "daca01a1583dd1af59619d5ff8f62320b6b0bd19f6bce88b1257b8e22ee7d65f",
+        "exports": [
+          "conversationCache"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/conversationCacheController.test.ts",
+        "bytes": 12628,
+        "sha256": "f944f4747ae7fce2667fa479dd260d45f85abda2f283c4b1e3f768164a29d79f",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/conversationCacheController.ts",
+        "bytes": 9411,
+        "sha256": "d5f3c794208e7014787b23a8aaf4afcb593802162484765c939345b43803c8ab",
+        "exports": [
+          "CachedHistory",
+          "HistoryCache",
+          "CacheStorage",
+          "ConversationCache"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/conversationCacheStorage.native.ts",
+        "bytes": 634,
+        "sha256": "f80036895738a2f167a7c09b4cf8f81129d71fa828ec07d4f546551794d32a4d",
+        "exports": [
+          "conversationCacheStorage"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/conversationCacheStorage.ts",
+        "bytes": 433,
+        "sha256": "9657e5e17ff5e964345082d9354c28bd750b86bc8e56efb774ecc1b1dc7262b3",
+        "exports": [
+          "conversationCacheStorage"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/drafts.test.ts",
+        "bytes": 677,
+        "sha256": "efc5337f1b137d901a768ea79cfa8e8ad9b877dd80d88b6a0f50b612fb4ef7ec",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/drafts.ts",
+        "bytes": 771,
+        "sha256": "9c02124e67e07d1e029a0f7d77148927a26d04f03c97469b76d0c2d096f76094",
+        "exports": [
+          "ConversationDrafts",
+          "conversationDrafts"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/eventForm.test.ts",
+        "bytes": 2146,
+        "sha256": "1051236ee5fb8589b35e250a0a8938708724a8a915e54bc3b61f79f10967dd9f",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/eventForm.ts",
+        "bytes": 3107,
+        "sha256": "77d138648f991c482aac7d41a3e1cb7c1a283a211cf6deec2228f82a885eadab",
+        "exports": [
+          "EventForm",
+          "localDate",
+          "localTime",
+          "parseLocal",
+          "initialEventForm",
+          "eventInput"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/history.test.ts",
+        "bytes": 16194,
+        "sha256": "89f22cc38bebf84ffd3dd561d287554b0c0dc54e583328078515aff44184ebf1",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/history.ts",
+        "bytes": 12972,
+        "sha256": "6cfaab0b2c9c76bcbed18d79b07d9c1d0f07967614d3f57f54a648ff81fc4bc7",
+        "exports": [
+          "HistoryState",
+          "HistoryController"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/events.test.ts",
+        "bytes": 1714,
+        "sha256": "78028a38eb333cf40110be0168ad97a92dde3c47ba376d80a90a149ed5ab0ba4",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/lib/events.ts",
+        "bytes": 3660,
+        "sha256": "29bddaae6fd2f40d1f4b03cbf4d28692126abc544517c539e0eacbb97d41976d",
+        "exports": [
+          "eventWhen",
+          "icsFor",
+          "REMINDERS",
+          "reminderLabel",
+          "isMeetingLink"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/scroll.ts",
+        "bytes": 1412,
+        "sha256": "b7b4f89d6dfb0eb70a234844e7da0abbf04a4d6203e40c2317b72a8918c3ab0e",
+        "exports": [
+          "preservedScrollTop",
+          "isNearBottom",
+          "imageBox"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/text.test.ts",
+        "bytes": 4656,
+        "sha256": "070af195a5ddf849aae0b96eb6f5070384af2acdcc1dc484caf6658a00cca299",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/lib/text.ts",
+        "bytes": 8105,
+        "sha256": "561141d12ace45716bd45e353bf7b166702b77cfd0d672367aa617e266fd8386",
+        "exports": [
+          "Segment",
+          "segments",
+          "clockTime",
+          "sameDay",
+          "dayLabel",
+          "listTime",
+          "mentionToken",
+          "withMentionTokens",
+          "isMuted",
+          "formatBytes",
+          "QUICK_REACTIONS",
+          "MORE_REACTIONS",
+          "firstEmoji",
+          "highlightParts",
+          "lastSeenLabel",
+          "typingLabel",
+          "clock",
+          "markParts",
+          "firstLink"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/vcard.test.ts",
+        "bytes": 1328,
+        "sha256": "cc78c2a68edeff4b274f699ba7d75524eee01802eaa3cd4afddbaf2328c050b8",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/lib/vcard.ts",
+        "bytes": 3261,
+        "sha256": "906de133e7fe9a9df8177229e6d3863e9d6a8b6532a0289cd9917849e54e5c5b",
+        "exports": [
+          "PhoneContact",
+          "buildVCard",
+          "parseVCard",
+          "vcardFile",
+          "isVCard",
+          "phoneContactsSupported",
+          "pickPhoneContacts"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/lib/window.test.ts",
+        "bytes": 5309,
+        "sha256": "f21c17e19fe1b6a51c2f9ff7ea92346b3e4a8307d5ae584b21146e24fc5818a2",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/lib/window.ts",
+        "bytes": 6369,
+        "sha256": "235cc0a735195e129d3fa3fc84c4e181cb7872a5f756f94898d31bfef498db8a",
+        "exports": [
+          "WindowState",
+          "MAX_MESSAGES",
+          "emptyWindow",
+          "mergeBySeq",
+          "fromWindow",
+          "prepend",
+          "append",
+          "applyChanges",
+          "upsert",
+          "removeHidden",
+          "hasGap",
+          "oldestSeq",
+          "newestSeq",
+          "statusFor",
+          "patchMessage",
+          "tombstone",
+          "advanceReceipts"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/location/device.native.test.ts",
+        "bytes": 1477,
+        "sha256": "afe2ff8a2d325242917fb6b3f9630d33eb2fbdf68b64af690dfb5c7ef483e8f6",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/location/device.native.ts",
+        "bytes": 952,
+        "sha256": "6dc5bfbbdcc2464dff56c8c6db65da350a58bf696ef1ac05d53e53d0058e4fe7",
+        "exports": [
+          "currentLocation"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/location/device.ts",
+        "bytes": 204,
+        "sha256": "6a468c8b4469475fba36be32177747d6af4a50a57b01931241010a1241681345",
+        "exports": [
+          "currentLocation"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/location/device.web.ts",
+        "bytes": 786,
+        "sha256": "366172faaabd0b28e66bb8d3279b1753e4fc26c14e6eb7eea24faa3c6e6da6fa",
+        "exports": [
+          "currentLocation"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/location/model.test.ts",
+        "bytes": 1629,
+        "sha256": "8352779387d5fd71c48c667b3cb9dfaf65d425c5bce8bb0edfdccef637289651",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/location/model.ts",
+        "bytes": 2537,
+        "sha256": "6bf731dc3e6d2f8e23b3d04a51eb6d4f2b844ef5b1af134c74fcf2b038c72866",
+        "exports": [
+          "LatLng",
+          "PickedLocation",
+          "DEFAULT_CENTER",
+          "MAX_LATITUDE",
+          "validPoint",
+          "validLocation",
+          "worldPoint",
+          "pointAt",
+          "MapTile",
+          "mapTiles",
+          "mapsUrl"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/location/tileHeaders.native.ts",
+        "bytes": 443,
+        "sha256": "d8e37a15f31eadd5fd0f6756bde021dd14b20ece07d2990d03b602a68754c689",
+        "exports": [
+          "tileHeaders"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/location/tileHeaders.ts",
+        "bytes": 102,
+        "sha256": "bc92c68414a434ba7ace8780507afa65a39a1066a61f3463fb3fc5e8a74649f2",
+        "exports": [
+          "tileHeaders"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/attachmentExport.test.ts",
+        "bytes": 2631,
+        "sha256": "66c03ddc4e8e2f7dd83323cc0cb19cc3acd779f79adbf6185569082a0b3aa582",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/media/attachmentExport.ts",
+        "bytes": 1296,
+        "sha256": "9f9962ee51d5e5eec516de3504c80dee7aa7715531f850fa19e9422b977af202",
+        "exports": [
+          "attachmentDownloadPath",
+          "exportMessageAttachment"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/capture.native.test.ts",
+        "bytes": 3196,
+        "sha256": "9befe5d35daa96b5b80d8cb59aa4d9b2da7ed8c445595a3bb4b3d2f4b824072c",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/media/capture.ts",
+        "bytes": 2266,
+        "sha256": "ca2e58be3b1e7224e9cf246db6dfe8ca8c8c1ee8b74f02aab0ac088454847b7c",
+        "exports": [
+          "pickPhoneContact",
+          "capturePhoto",
+          "contactFile",
+          "readPickedText"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/capture.web.ts",
+        "bytes": 1892,
+        "sha256": "43d79e1d84bcd7f635538c29154883db21da7f7e7c5040c6b9d86d2c6a7643e0",
+        "exports": [
+          "pickPhoneContact",
+          "capturePhoto",
+          "contactFile",
+          "readPickedText"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/contactModel.test.ts",
+        "bytes": 756,
+        "sha256": "875791f958315964441690e56302daadd4f1944654705ac028d1e4764399d518",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/media/contactModel.ts",
+        "bytes": 1277,
+        "sha256": "f981242b087f02aa56fe2dacc9098c4e5ed8e92d749a15a113498939d7ea5942",
+        "exports": [
+          "PhoneContact",
+          "buildVCard",
+          "parseVCard"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/export.ts",
+        "bytes": 1356,
+        "sha256": "41d31740644844f5d8b582eb2ea74c463c377f34a7c1b1b76b0bc6929e8dd883",
+        "exports": [
+          "validateAttachmentExportSize",
+          "saveAttachment",
+          "cancelAttachmentExports",
+          "retryAttachmentCleanup",
+          "watchAttachmentCleanup",
+          "attachmentExportNotice"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/export.web.ts",
+        "bytes": 899,
+        "sha256": "a9049687bb5f5be8bb2ab14c24ca482ca5c3709217ace1b3b1fa5c4845d26660",
+        "exports": [
+          "validateAttachmentExportSize",
+          "saveAttachment",
+          "cancelAttachmentExports",
+          "retryAttachmentCleanup",
+          "watchAttachmentCleanup",
+          "attachmentExportNotice"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/form.native.ts",
+        "bytes": 439,
+        "sha256": "840b90ce006309b6e09b5da930882b550ed22c67e153a98312cb95a2ef0766de",
+        "exports": [
+          "uploadForm"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/form.ts",
+        "bytes": 365,
+        "sha256": "1cc71ffefaaa0a99cecdad0f258315ad5421540a548727527923fd5584faa13c",
+        "exports": [
+          "uploadForm"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/model.ts",
+        "bytes": 584,
+        "sha256": "b86f356c73e0215eb32522e9082b33d00685badf9dc7a4ea7e80af4982037fb7",
+        "exports": [
+          "PickedFile",
+          "uploadLimitError"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/picker.native.test.ts",
+        "bytes": 2314,
+        "sha256": "f6570deff86d9fd5778d78f845e9e396418ef5ef4fa06e9822f814cccb924e2d",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/media/picker.native.ts",
+        "bytes": 1264,
+        "sha256": "f740bf58dbdb6b0b181505317de73ef56b843a7240dbbfda6154a7d627eab14e",
+        "exports": [
+          "pickDocument"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/picker.ts",
+        "bytes": 742,
+        "sha256": "731262d79349406085aa4c6507cfa32cda466428a1dfed6c1163da91a57c0b81",
+        "exports": [
+          "pickDocument"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/scan.test.ts",
+        "bytes": 2292,
+        "sha256": "ff25c59edc29959b0cc4cf76083ed2843779f5c339dc2d87dcbc3a3df7757711",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/media/scan.ts",
+        "bytes": 1647,
+        "sha256": "d1c34bdf4530d4c878e506745a0d8e514da4b81f0d269ad5b5d7aaf5779f1ee0",
+        "exports": [
+          "awaitScan"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/source.native.ts",
+        "bytes": 778,
+        "sha256": "c12228105ecb500201beaa8ea39f67d7225c4fa43aebc2e283fdf9046bb43ca1",
+        "exports": [
+          "MediaSource",
+          "authenticatedMediaSource"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/source.ts",
+        "bytes": 263,
+        "sha256": "e788b0004e73dbf3574afea2825aaf6d55ccda1c438c4d53a55dd2cb8862cbcb",
+        "exports": [
+          "MediaSource",
+          "authenticatedMediaSource"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/sourcePolicy.test.ts",
+        "bytes": 571,
+        "sha256": "761a76cc382e638e5b4deaa9079237476e8fedbc0bd854f363fef8cac64d8ff1",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/media/sourcePolicy.ts",
+        "bytes": 294,
+        "sha256": "26ae22246c6b316d10a7ab79cf7afa34181eec03bd7375adf45134b72d6a752f",
+        "exports": [
+          "trustedMediaUri"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/upload.ts",
+        "bytes": 1266,
+        "sha256": "f0197f5114086e88fb8ca853c15dcffb3fb259de90ad36fcd3b49d44d86297ac",
+        "exports": [
+          "uploadAttachment"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/url.test.ts",
+        "bytes": 519,
+        "sha256": "b65549fb7f36d3e09a0b37db6e7f4f0fc73385d3b17a704b5fd2587c399c18a5",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/media/url.ts",
+        "bytes": 427,
+        "sha256": "331bb0fbf7517cd475f7025ddd1a3b6d8e00cf9b9c94f3b66532a746f7e9e9fe",
+        "exports": [
+          "mediaUrl"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/voice.native.test.ts",
+        "bytes": 2144,
+        "sha256": "8e3ec79398ffb784cdcac684b9014a5e0b40b0e9f7931862c11607c3b89a20d7",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/media/voice.ts",
+        "bytes": 1886,
+        "sha256": "231b5ef4d8a2a96241da77920c82170136d9d6e3cedcfbbe656aa7b387035946",
+        "exports": [
+          "createVoicePort"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/voice.web.ts",
+        "bytes": 1558,
+        "sha256": "eaa6c5b7fd56848a093163173362fc466ddf618adef2e029911855b5f3771dab",
+        "exports": [
+          "createVoicePort"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/media/voiceController.test.ts",
+        "bytes": 3108,
+        "sha256": "7a2125fc94f805b35885855d48f0f2de8088146bc2d1e7f5b0c1896f7a15ea39",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/media/voiceController.ts",
+        "bytes": 2546,
+        "sha256": "2ce9a6c575ca408cfc5eca4aa7a24b126ffe975f0ecd7506dce767876e7b3b17",
+        "exports": [
+          "VoicePort",
+          "VoiceController"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/outbox.ts",
+        "bytes": 1494,
+        "sha256": "06493e2b0ca092e35a8352ea5f28329c6e826b51f218e8f56c13606f0ab7b566",
+        "exports": [
+          "onOutboxSent",
+          "outbox"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/outboxController.test.ts",
+        "bytes": 11021,
+        "sha256": "54569b30b730b90727e930dfa1faef5ec7bb5beb4e5f8665b209317fcb3cbed0",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/outboxController.ts",
+        "bytes": 9322,
+        "sha256": "0d5c9879879f0614987f2eafb8e1670b52736ca823a4c57a71c2124514e6328b",
+        "exports": [
+          "PendingSend",
+          "OutboxStorage",
+          "retryDelay",
+          "OutboxController"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/outboxStorage.native.ts",
+        "bytes": 2219,
+        "sha256": "ddad8940d24479b1450a005aac980c681664290a3753c27e1b99ff4bfacf8c31",
+        "exports": [
+          "outboxStorage",
+          "outboxStorageNotice"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/outboxStorage.ts",
+        "bytes": 693,
+        "sha256": "dd6eca1e76d63b8f5b47622a8dce196e58d61eed991e925c97dbf54b1d7fa5b1",
+        "exports": [
+          "outboxStorage",
+          "outboxStorageNotice"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/outboxStorage.web.ts",
+        "bytes": 3198,
+        "sha256": "e90caa02b557a44530d325fe496be9f06a23eaab28b5af98e3642648a3f3581e",
+        "exports": [
+          "outboxStorage",
+          "outboxStorageNotice"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/ownedDelivery.ts",
+        "bytes": 645,
+        "sha256": "26f61032adf3d6e691bc3dfb74e39616b996762fe76c2dbbe67928b14c5514a5",
+        "exports": [
+          "deliverOwned"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/performance.test.ts",
+        "bytes": 3247,
+        "sha256": "2f0f0b13216758fbbfb1557b4d6cc4064411ead42663deb1bbd1fd49c3fa82db",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/reader.test.ts",
+        "bytes": 876,
+        "sha256": "17598ffbf9a520c7956ed9c12509d000c76bccae90fe4294f28c53ad66afd879",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/reader.ts",
+        "bytes": 217,
+        "sha256": "71aced7aaff0295b64f6cd0b7e05ca2c2c68a24f7f47016325b1c1e6a74d2bd3",
+        "exports": [
+          "arrivalBehavior"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/sharedMedia.test.ts",
+        "bytes": 1183,
+        "sha256": "5472ff4bfce0d48096d2f01b346f3a2e0b5176bfd64f115186934ce5f9afd96c",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/sharedMedia.ts",
+        "bytes": 921,
+        "sha256": "0d210ba002973c1a2e7ad92aa0de8a7d9412057cdaee685f8773572aac8a7a0c",
+        "exports": [
+          "sharedKey",
+          "mergeShared",
+          "safeSharedLink",
+          "sharedTabs"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/specialContent.test.ts",
+        "bytes": 659,
+        "sha256": "57e14b8e01092ece8737cd8c44c68702363b4c33c1d06ffb80e90879e67ec03b",
+        "exports": []
+      },
+      {
+        "path": "src/modules/messenger/specialContent.ts",
+        "bytes": 615,
+        "sha256": "a4d16a8f13896ece6d0e9145daf19f28a4699015a71e90136333fd85ffe2e8fd",
+        "exports": [
+          "locationLink",
+          "eventAnswers"
+        ]
+      },
+      {
+        "path": "src/modules/messenger/useConversationLive.ts",
+        "bytes": 3612,
+        "sha256": "14e8369e54bde862adbd5a500f82d5b90c74dcbf3f2408e2417d4379d82f7e1a",
+        "exports": [
+          "useConversationLive"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/api.ts",
+        "bytes": 5701,
+        "sha256": "5926ecc584e1c743eeed3edfda9fe8300646223818f2c7904ac56df19ce13848",
+        "exports": [
+          "AppNotification",
+          "Preferences",
+          "notificationKeys",
+          "AlertSeverity",
+          "JmAlert",
+          "AdminAlert",
+          "NewAlert",
+          "AlertPerson",
+          "activeAlerts",
+          "alertHistory",
+          "dismissAlert",
+          "adminAlerts",
+          "createAlert",
+          "cancelAlert",
+          "deleteAlert",
+          "alertPeople",
+          "ReadFilter",
+          "KindFilter",
+          "listNotifications",
+          "deleteNotifications",
+          "markNotificationsRead",
+          "getPreferences",
+          "onPreferencesChanged",
+          "updatePreferences",
+          "updatePrivacy",
+          "getVapidKey",
+          "saveSubscription",
+          "deleteCurrentSubscription",
+          "sendTestPush"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/admin/alerts/"
+          ],
+          [
+            "'",
+            "/alerts/active/"
+          ],
+          [
+            "'",
+            "/me/"
+          ],
+          [
+            "'",
+            "/me/notification-preferences/"
+          ],
+          [
+            "'",
+            "/notifications/delete/"
+          ],
+          [
+            "'",
+            "/notifications/read/"
+          ],
+          [
+            "'",
+            "/push/subscriptions/"
+          ],
+          [
+            "'",
+            "/push/subscriptions/current/"
+          ],
+          [
+            "'",
+            "/push/test/"
+          ],
+          [
+            "`",
+            "/admin/alerts/${id}/"
+          ],
+          [
+            "`",
+            "/admin/alerts/${id}/cancel/"
+          ],
+          [
+            "`",
+            "/alerts/${id}/dismiss/"
+          ]
+        ]
+      },
+      {
+        "path": "src/modules/notifications/feedback.test.ts",
+        "bytes": 624,
+        "sha256": "2a85912a12ad074f5a3c44bb15fdfa9b8c919a61152e690ef06f9d801569984b",
+        "exports": []
+      },
+      {
+        "path": "src/modules/notifications/feedback.ts",
+        "bytes": 900,
+        "sha256": "c623bac04808f2fdd6d2c42572ade1021013fb87fb2141d02d09747266b45a45",
+        "exports": [
+          "quietHours",
+          "FeedbackGate"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/live.test.ts",
+        "bytes": 672,
+        "sha256": "de3607cc89183b395e153636fc78076e5ca023d85cee77bd2ccc850c9bdd3ba1",
+        "exports": []
+      },
+      {
+        "path": "src/modules/notifications/live.ts",
+        "bytes": 687,
+        "sha256": "bc6cce9b084fcbb1e71c11c08bab72950e30d48f5ccb66a0c56c7b1cad1431c3",
+        "exports": [
+          "UnreadSummary",
+          "emptySummary",
+          "visibleAlerts"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/pushController.test.ts",
+        "bytes": 5363,
+        "sha256": "a412814e8ab251aade7d78ec6d6d4c641a17a160f3548a23e811af9f75740a91",
+        "exports": []
+      },
+      {
+        "path": "src/modules/notifications/pushController.ts",
+        "bytes": 5195,
+        "sha256": "4d887a1a004125c919355dd6bf6b54a5ab3106f9624fcefa045a1d34d7612381",
+        "exports": [
+          "PushSupport",
+          "PushState",
+          "PushDependencies",
+          "PushController"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/webPush.test.ts",
+        "bytes": 4120,
+        "sha256": "6e636875afaff354302e573bc8c84da42c18feb65fa949f0d79e487c21daa0f2",
+        "exports": []
+      },
+      {
+        "path": "src/modules/notifications/webPush.ts",
+        "bytes": 191,
+        "sha256": "98c2a0d5359aa5e6307f8d921a8de78d0f06086ec583ceed9ebf63fb001ec36e",
+        "exports": [
+          "webPush"
+        ]
+      },
+      {
+        "path": "src/modules/notifications/webPush.web.ts",
+        "bytes": 6019,
+        "sha256": "07c4b84fbf1ca65012acd621c52385e0f51085ecfa42e09cac58421123907010",
+        "exports": [
+          "pushSupport",
+          "webPush"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/activity.ts",
+        "bytes": 254,
+        "sha256": "8fa9b00245a3abdbcc82fa9628cc0d57096f67725066ce0eaf01bd68c485e708",
+        "exports": [
+          "watchVaultActivity"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/activity.web.ts",
+        "bytes": 533,
+        "sha256": "9ed03d4453c617023587c60b9f1e4ff0f31e8bbf054671137a1d159dafae5942",
+        "exports": [
+          "watchVaultActivity"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/api.ts",
+        "bytes": 13693,
+        "sha256": "8a2f8dd7693e979a0c3ba1a14563c3ab325850dbea7038f195c4bba267b3885c",
+        "exports": [
+          "Person",
+          "VaultRole",
+          "OwnerType",
+          "EntryKind",
+          "Vault",
+          "Folder",
+          "Member",
+          "EntryCan",
+          "Entry",
+          "Share",
+          "EntryDetail",
+          "SecretInput",
+          "EntryInput",
+          "AuditRow",
+          "BreakGlass",
+          "AdminVault",
+          "jpKeys",
+          "listVaults",
+          "getVault",
+          "createTeamVault",
+          "updateVault",
+          "archiveVault",
+          "listAdminVaults",
+          "listMembers",
+          "OwnerRequest",
+          "MemberResult",
+          "isPending",
+          "addMember",
+          "changeMember",
+          "listOwnerRequests",
+          "decideOwnerRequest",
+          "removeMember",
+          "listPendingOwnerRequests",
+          "VaultFile",
+          "VaultFiles",
+          "listVaultFiles",
+          "uploadVaultFile",
+          "downloadVaultFile",
+          "previewVaultFile",
+          "renameVaultFile",
+          "deleteVaultFile",
+          "listFolders",
+          "createFolder",
+          "renameFolder",
+          "deleteFolder",
+          "listEntries",
+          "getEntry",
+          "createEntry",
+          "updateEntry",
+          "trashEntry",
+          "restoreEntry",
+          "moveEntry",
+          "listShared",
+          "revealField",
+          "reportCopy",
+          "unlock",
+          "shareEntry",
+          "revokeShare",
+          "listAudit",
+          "listBreakGlass",
+          "requestBreakGlass",
+          "actBreakGlass",
+          "searchPeople",
+          "listCompanyDirectory"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/admin/vaults/"
+          ],
+          [
+            "'",
+            "/break-glass/"
+          ],
+          [
+            "'",
+            "/entries/"
+          ],
+          [
+            "'",
+            "/owner-requests/pending/"
+          ],
+          [
+            "'",
+            "/people/"
+          ],
+          [
+            "'",
+            "/shared-with-me/"
+          ],
+          [
+            "'",
+            "/vaults/"
+          ],
+          [
+            "`",
+            "/break-glass/${id}/${decision}/"
+          ],
+          [
+            "`",
+            "/entries/${id}/"
+          ],
+          [
+            "`",
+            "/entries/${id}/copy-event/"
+          ],
+          [
+            "`",
+            "/entries/${id}/move/"
+          ],
+          [
+            "`",
+            "/entries/${id}/restore/"
+          ],
+          [
+            "`",
+            "/entries/${id}/shares/"
+          ],
+          [
+            "`",
+            "/entries/${id}/shares/${share}/"
+          ],
+          [
+            "`",
+            "/entries/${id}/trash/"
+          ],
+          [
+            "`",
+            "/files/${id}/"
+          ],
+          [
+            "`",
+            "/files/${id}/download/"
+          ],
+          [
+            "`",
+            "/owner-requests/${id}/${decision}/"
+          ],
+          [
+            "`",
+            "/vaults/${id}/"
+          ],
+          [
+            "`",
+            "/vaults/${id}/archive/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/files/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/folders/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/folders/${id}/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/members/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/members/${user}/"
+          ],
+          [
+            "`",
+            "/vaults/${vault}/owner-requests/"
+          ]
+        ]
+      },
+      {
+        "path": "src/modules/passwords/copyController.test.ts",
+        "bytes": 2271,
+        "sha256": "561b8ffb16ce67e2fbd201128afbf48505e0ef1e6be237fc8a40f1e89a35028e",
+        "exports": []
+      },
+      {
+        "path": "src/modules/passwords/copyController.ts",
+        "bytes": 1297,
+        "sha256": "b0cc5df4bd3788412d05b472a8f8eadbe8697a10115eb764b4fe05039070cf4f",
+        "exports": [
+          "SecretCopyController"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/files/exportController.test.ts",
+        "bytes": 5563,
+        "sha256": "27a6dc5e592ce73be7a8316c7f955480899103ccb6a1c8d1d5b7315488faba9d",
+        "exports": []
+      },
+      {
+        "path": "src/modules/passwords/files/exportController.ts",
+        "bytes": 3593,
+        "sha256": "950b2b58593fd4f754b9e0637b40d9be34a10fe7b640b580f1f7cef2e61b63b8",
+        "exports": [
+          "EXPORT_LIFETIME_MS",
+          "MAX_NATIVE_EXPORT_BYTES",
+          "validateNativeExportSize",
+          "exportFilename",
+          "ExportIO",
+          "NativeExportController"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/files/model.test.ts",
+        "bytes": 884,
+        "sha256": "7d00b25c723c3225f62a2e65efec00d16e1b48cd81375f00ded8c2011a19263a",
+        "exports": []
+      },
+      {
+        "path": "src/modules/passwords/files/model.ts",
+        "bytes": 543,
+        "sha256": "dfd64f9ba36674a0af1bcb56e65d797bceb0e63662fc5a9a8f4fe909b3a939ba",
+        "exports": [
+          "validateVaultFile",
+          "previewDuration"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/files/nativeExport.test.ts",
+        "bytes": 3156,
+        "sha256": "a9eefd62038b64ad0a94d064defb2c0c9cc11483864894be0198ee63e0c740ae",
+        "exports": []
+      },
+      {
+        "path": "src/modules/passwords/files/nativeExport.ts",
+        "bytes": 2789,
+        "sha256": "95d5b03e7a9da8b52c0450388f44b28b02d569079dde1f1ba3ee7246c94acd76",
+        "exports": [
+          "createNativeExporter",
+          "nativeExports",
+          "watchVaultExportCleanup",
+          "cancelVaultExports",
+          "retryVaultExportCleanup"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/files/transfer.ts",
+        "bytes": 1475,
+        "sha256": "0c6d743e5f130ae12a57b481c82a01147fc26359959c1154d9a90f405a80aaa7",
+        "exports": [
+          "canSaveVaultFile",
+          "pickVaultFile",
+          "saveVaultFile",
+          "vaultExportNotice"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/files/transfer.web.ts",
+        "bytes": 1396,
+        "sha256": "a83e6163e6a25b40de81da220728e8bc3a8dbe14360b05093d4b157876dfb904",
+        "exports": [
+          "canSaveVaultFile",
+          "pickVaultFile",
+          "saveVaultFile",
+          "watchVaultExportCleanup",
+          "cancelVaultExports",
+          "retryVaultExportCleanup",
+          "validateVaultExportSize",
+          "vaultExportNotice"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/generator.test.ts",
+        "bytes": 2845,
+        "sha256": "3698e19e48d115651664e5a04d55d4596b9d60a1e53173501af7926298eae5c2",
+        "exports": []
+      },
+      {
+        "path": "src/modules/passwords/generator.ts",
+        "bytes": 4129,
+        "sha256": "fe56cff56b146541093b991a0772fc07d6c1362a830d64e29f993a560a3a5bcf",
+        "exports": [
+          "SETS",
+          "SetName",
+          "randomInt",
+          "generatePassword",
+          "WORD_COUNT",
+          "generatePassphrase"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/lock.test.ts",
+        "bytes": 2061,
+        "sha256": "82e84b217b64fe19e9687b2b01a5298286d8fc48b4557533ecae9877669c472e",
+        "exports": []
+      },
+      {
+        "path": "src/modules/passwords/lock.ts",
+        "bytes": 1723,
+        "sha256": "e049e83aac99e4bbd914ddb29ab9acafff5d63a9378f5041142e404ff53c9958",
+        "exports": [
+          "VAULT_IDLE_MS",
+          "VaultLock"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/permission.ts",
+        "bytes": 329,
+        "sha256": "814b8e0d44847ab825d420fe29ee7d82945be66656d11330ab7d3eed051f10f2",
+        "exports": [
+          "requireEntryPermission"
+        ]
+      },
+      {
+        "path": "src/modules/passwords/secretInput.test.ts",
+        "bytes": 873,
+        "sha256": "8ab36b2e83e420d6d4938cce3284c383fd4fc3e01f5cd2e0585c1c14b7651c85",
+        "exports": []
+      },
+      {
+        "path": "src/modules/passwords/secretInput.ts",
+        "bytes": 403,
+        "sha256": "4e35b0a5995608f715e088bf8fdb0a9efed88fe514f701ef7ee13e67bfcdc8ac",
+        "exports": [
+          "customSecretFields"
+        ]
+      },
+      {
+        "path": "src/modules/profile/api.ts",
+        "bytes": 1497,
+        "sha256": "56d1d3cc3ca3b817861e9e51551c59c7ccf0fb0600c837309c89f095aad0a3cb",
+        "exports": [
+          "DeviceSession",
+          "profileKeys",
+          "updateMe",
+          "setMyPhoto",
+          "removeMyPhoto",
+          "requestEmailChange",
+          "cancelEmailChange",
+          "changePassword",
+          "listSessions",
+          "revokeSession",
+          "revokeOtherSessions"
+        ],
+        "apiPathLiterals": [
+          [
+            "'",
+            "/auth/password/change/"
+          ],
+          [
+            "'",
+            "/auth/sessions/"
+          ],
+          [
+            "'",
+            "/auth/sessions/revoke-others/"
+          ],
+          [
+            "'",
+            "/me/"
+          ],
+          [
+            "'",
+            "/me/avatar/"
+          ],
+          [
+            "'",
+            "/me/email/"
+          ],
+          [
+            "`",
+            "/auth/sessions/${id}/"
+          ]
+        ]
+      },
+      {
+        "path": "src/modules/profile/imagePolicy.test.ts",
+        "bytes": 831,
+        "sha256": "7d9133ecb02788b520263e1e1d53ddd7c8730de408edf3c11107bc64fca9b199",
+        "exports": []
+      },
+      {
+        "path": "src/modules/profile/imagePolicy.ts",
+        "bytes": 481,
+        "sha256": "1258c4fb12a667c820a10a0996a5be75a33188f975d20e24255e32e51996cb8f",
+        "exports": [
+          "validateProfileImage"
+        ]
+      },
+      {
+        "path": "src/modules/sharing/controller.ts",
+        "bytes": 2766,
+        "sha256": "42420d058718091b59ef5a86b78bca59326ffd48b83bc11beeb494b33fd29e09",
+        "exports": [
+          "ShareDependencies",
+          "ShareController"
+        ]
+      },
+      {
+        "path": "src/modules/sharing/incoming.ts",
+        "bytes": 1696,
+        "sha256": "9f9aefb7100405e26575a48dd972cc36c93f670bd4f1a7fc40aecf7b2fc1fa99",
+        "exports": [
+          "incomingShareGeneration",
+          "shareController",
+          "incomingShareBoundary"
+        ]
+      },
+      {
+        "path": "src/modules/sharing/model.ts",
+        "bytes": 2968,
+        "sha256": "cd99ff829ad23b0e5e255e94bd04b4f2690b29d603aede64d86a35b7f1ffef55",
+        "exports": [
+          "SHARE_TTL",
+          "SHARE_MAX_FILES",
+          "SHARE_MAX_BYTES",
+          "ShareJob",
+          "SharePlan",
+          "IncomingShare",
+          "compatibleSharePlan",
+          "sharedCaption",
+          "validateIncoming",
+          "shareable",
+          "makeSharePlan"
+        ]
+      },
+      {
+        "path": "src/modules/sharing/nativePayload.ts",
+        "bytes": 1392,
+        "sha256": "5f53181ffbf1c27168847bb0daa3be644f71393f182cd2848f26863420888b28",
+        "exports": [
+          "localShareUri",
+          "mayResolveNative",
+          "nativeShareParts"
+        ]
+      },
+      {
+        "path": "src/modules/sharing/sharing.test.ts",
+        "bytes": 6783,
+        "sha256": "09d99a09d197addc1c58e4ebc3b42f9b4ed21621a109dc0e1f51bb8fb89c284b",
+        "exports": []
+      },
+      {
+        "path": "src/modules/sharing/storage.native.test.ts",
+        "bytes": 6119,
+        "sha256": "c02a8fedcf5c8989f7171702af7372caf326f66d9a55395921df8c050404a45a",
+        "exports": []
+      },
+      {
+        "path": "src/modules/sharing/storage.native.ts",
+        "bytes": 4286,
+        "sha256": "43d6c71ef5f0fc491b75a0fbc1fa6011d4a2ba39042c9968c20e51fab3acc8b1",
+        "exports": [
+          "incomingStorage"
+        ]
+      },
+      {
+        "path": "src/modules/sharing/storage.ts",
+        "bytes": 460,
+        "sha256": "da209b8b06c0f8d9fc2ea75c337b3bad34d19539a1ae2a6181110dc73e8bf2b9",
+        "exports": [
+          "IncomingStorage",
+          "incomingStorage"
+        ]
+      },
+      {
+        "path": "src/modules/sharing/storage.web.ts",
+        "bytes": 3086,
+        "sha256": "81f687670447ddba74220fbcfaebc0d2827c87d3d6cb8f545524a26fcc931ea9",
+        "exports": [
+          "SHARE_DB",
+          "incomingStorage"
+        ]
+      },
+      {
+        "path": "src/shared/authNavigation.test.ts",
+        "bytes": 1252,
+        "sha256": "7ea3aa6ad84a465c9cb4c9362a722f00defb005c06c6a17c33ef42a39df68923",
+        "exports": []
+      },
+      {
+        "path": "src/shared/authNavigation.ts",
+        "bytes": 1429,
+        "sha256": "0eeacd60e7edc4c4d34c091bfebe42918f1e2dedf3bd05cf60fd796811565085",
+        "exports": [
+          "landingRoute",
+          "safeNext",
+          "greeting"
+        ]
+      },
+      {
+        "path": "src/shared/cursor.test.ts",
+        "bytes": 1603,
+        "sha256": "9a2ca51c922784436ec9cb0d891903305e9fb9cda276b3a998f94f692113c505",
+        "exports": []
+      },
+      {
+        "path": "src/shared/cursor.ts",
+        "bytes": 2043,
+        "sha256": "810e1479f8fc0b6a70839290a6030c1388af99cf90069936aaee5d722e33dc75",
+        "exports": [
+          "CursorPage",
+          "CursorState",
+          "CursorController"
+        ]
+      },
+      {
+        "path": "src/shared/homeTiles.test.ts",
+        "bytes": 1328,
+        "sha256": "85f3240d3f302d9c80f229b9e79a4b6eb187f413563811b651bc50ffc6b727fc",
+        "exports": []
+      },
+      {
+        "path": "src/shared/homeTiles.ts",
+        "bytes": 1405,
+        "sha256": "7caee4f0ba0fad6985b1f171572c09bc9e4b775c0ae34a708fc716a084a00af0",
+        "exports": [
+          "homeTiles"
+        ]
+      },
+      {
+        "path": "src/shared/notificationTarget.test.ts",
+        "bytes": 970,
+        "sha256": "f820025682851a8f8e92303a2064210436563d44990238964d62f8c7cf476464",
+        "exports": []
+      },
+      {
+        "path": "src/shared/notificationTarget.ts",
+        "bytes": 2980,
+        "sha256": "05dbb700fdae6694b0c5dcea9136014703328671c7b02443d295a4caa3704f81",
+        "exports": [
+          "Target",
+          "notificationTarget"
+        ]
+      },
+      {
+        "path": "src/shared/phone.test.ts",
+        "bytes": 1147,
+        "sha256": "c6ff67b6234b4e2926b4de0dea841992e7ee55d2653b659c5e6025d732748ae2",
+        "exports": []
+      },
+      {
+        "path": "src/shared/phone.ts",
+        "bytes": 1703,
+        "sha256": "e2878014ef62c1de68dd111fe30695c665359ca743906bff4c115719cf04d5f7",
+        "exports": [
+          "mobileError",
+          "telHref",
+          "safeTelHref"
+        ]
+      },
+      {
+        "path": "src/shared/pushPolicy.test.ts",
+        "bytes": 2762,
+        "sha256": "6468c5c45b4202d795ffcd43a7642be2292389b1a057e31c2a759aca2960e77a",
+        "exports": []
+      },
+      {
+        "path": "src/shared/pushPolicy.ts",
+        "bytes": 1986,
+        "sha256": "8c4fdc70a4d5533d62c9779210437b40c95483269cacc8181b9cd78092272185",
+        "exports": [
+          "notificationPath",
+          "pushNotification",
+          "focusedPushTarget"
+        ]
+      },
+      {
+        "path": "src/shared/pushWorker.test.ts",
+        "bytes": 4169,
+        "sha256": "b49b571fddca599e4b08a0d84c0c086b4ef33902781f959225ff004251fc7329",
+        "exports": []
+      },
+      {
+        "path": "src/shared/selectionLease.test.ts",
+        "bytes": 1504,
+        "sha256": "36568fedc796e858f21dbf7fad1bcf3187d2a14795a4e3c49356430a04dea82f",
+        "exports": []
+      },
+      {
+        "path": "src/shared/selectionLease.ts",
+        "bytes": 647,
+        "sha256": "9bd0b6e055283672fdd8a887b6a9dd6169bf3c5829ec5f1ba18438881f77c5f6",
+        "exports": [
+          "SelectionLease"
+        ]
+      },
+      {
+        "path": "src/shared/sensitive.test.ts",
+        "bytes": 1733,
+        "sha256": "9e1b7a1839fe5bd1cb5123ac7bd0a2a89afa213b5d5d8bd0473b6ba981abe702",
+        "exports": []
+      },
+      {
+        "path": "src/shared/sensitive.ts",
+        "bytes": 377,
+        "sha256": "481bf26a610e41bfa4df4ddc2c7a545e4dcbc41a4bc18543b8492da42cdbb2d6",
+        "exports": [
+          "SensitiveRequestGuard"
+        ]
+      },
+      {
+        "path": "src/shared/sensitiveLifecycle.ts",
+        "bytes": 90,
+        "sha256": "05bddedf6b3682940f6518e3ef8a6737834632bebf49555ac6e81f8fa734a4fc",
+        "exports": []
+      },
+      {
+        "path": "src/shared/sensitiveLifecycle.web.ts",
+        "bytes": 576,
+        "sha256": "1a6f939fb24a1f9386f148ffc40e2027c696734f46c39edcf37091e50c147e61",
+        "exports": [
+          "subscribeSensitiveView"
+        ]
+      },
+      {
+        "path": "src/shared/useCursor.ts",
+        "bytes": 654,
+        "sha256": "0820b6043009dcea26c81c9c5605cbda12c39d3a10414f3820ed7b5487429cae",
+        "exports": [
+          "useCursor"
+        ]
+      },
+      {
+        "path": "src/shared/useResource.ts",
+        "bytes": 867,
+        "sha256": "07c184a1cb23579606fe6c0349fa07d92157143d921c081f7862d7179aa4c1cb",
+        "exports": [
+          "useResource"
+        ]
+      },
+      {
+        "path": "src/shared/useSystemColorScheme.ts",
+        "bytes": 467,
+        "sha256": "c534c8ac3f7aad41eeaec71ed2fb34f3282f28a6cc15ee4b39d38be0fc372928",
+        "exports": [
+          "useSystemColorScheme"
+        ]
+      },
+      {
+        "path": "src/shared/utils/format.test.ts",
+        "bytes": 843,
+        "sha256": "70d522c1491e3ddbffd8442b0b9d4151f952a209269f7a2cb8ccbef0f417786d",
+        "exports": []
+      },
+      {
+        "path": "src/shared/utils/format.ts",
+        "bytes": 1612,
+        "sha256": "e8f1d78b30d0d79438eb2b1b5abae3b93b53ef49e2d3f37c183188810a077c64",
+        "exports": [
+          "formatDate",
+          "formatDateTime",
+          "formatRelative",
+          "initials"
+        ]
+      },
+      {
+        "path": "src/ui.tsx",
+        "bytes": 3782,
+        "sha256": "d9113efd9889d5eff665a81ea1a6ca6f2902a5a5363f658a252bed050be5a69f",
+        "exports": [
+          "palette",
+          "useColors",
+          "Label",
+          "Button",
+          "Field",
+          "Card",
+          "styles"
+        ]
+      }
+    ],
+    "dependencies": {
+      "@expo-google-fonts/inter": "^0.4.2",
+      "@preeternal/react-native-cookie-manager": "^7.0.0",
+      "@simplewebauthn/browser": "^14.0.0",
+      "axios": "^1.20.0",
+      "eslint": "^9.39.5",
+      "eslint-config-expo": "~58.0.4",
+      "expo": "~58.0.22",
+      "expo-audio": "~58.0.11",
+      "expo-clipboard": "~58.0.4",
+      "expo-constants": "~58.0.12",
+      "expo-contacts": "~58.0.10",
+      "expo-crypto": "~58.0.7",
+      "expo-document-picker": "~58.0.4",
+      "expo-file-system": "~58.0.13",
+      "expo-font": "~58.0.9",
+      "expo-image-manipulator": "~58.0.16",
+      "expo-image-picker": "~58.0.10",
+      "expo-linking": "~58.0.15",
+      "expo-local-authentication": "~58.0.2",
+      "expo-location": "~58.0.20",
+      "expo-network": "~58.0.4",
+      "expo-router": "~58.0.29",
+      "expo-secure-store": "~58.0.2",
+      "expo-sharing": "~58.0.21",
+      "expo-status-bar": "~58.0.4",
+      "expo-system-ui": "~58.0.7",
+      "expo-video": "~58.0.13",
+      "react": "19.3.0",
+      "react-dom": "19.3.0",
+      "react-native": "0.88.1",
+      "react-native-safe-area-context": "~5.10.1",
+      "react-native-screens": "~4.30.1",
+      "react-native-view-shot": "6.1.1",
+      "react-native-web": "^0.21.4"
+    },
+    "devDependencies": {
+      "@playwright/test": "^1.64.1",
+      "@types/http-proxy": "^1.17.17",
+      "@types/node": "^26.6.6",
+      "@types/react": "~19.3.0",
+      "http-proxy": "^1.18.1",
+      "tsx": "^4.23.15",
+      "typescript": "~6.0.3",
+      "vitest": "^5.0.5"
+    }
+  }
+}

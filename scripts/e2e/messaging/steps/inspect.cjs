@@ -1,0 +1,1 @@
+module.exports = async ({ P, out, OUT }) => { for (const u of ['alice','bob','carol']) { out(u, P[u].url()); await P[u].screenshot({ path: OUT + `/inspect-${u}.png` }); out((await P[u].locator('body').innerText()).slice(0, 300).replace(/\n/g,' | ')) } }
