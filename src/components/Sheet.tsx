@@ -13,8 +13,9 @@ const web = Platform.OS === 'web'
  * and a divider; `footer` adds the right-aligned button row under a divider.
  * `side` with a title is the reference contact Profile: a 384px full-height panel on the right, full screen on phones.
  * The overlay is the reference slate-900/30 with a light blur on web.
+ * `label` names an untitled sheet for assistive technology (the dialog and its dim backdrop, DEF-007).
  */
-export function Sheet({ visible, onClose, children, title, description, footer, closeLabel = 'Close', closeDisabled = false, wide = false, side = false, stableForm = false, bottomAligned = false }: { visible: boolean; onClose: () => void; children?: ReactNode; title?: string; description?: ReactNode; footer?: ReactNode; closeLabel?: string; closeDisabled?: boolean; wide?: boolean; side?: boolean; stableForm?: boolean; bottomAligned?: boolean }) {
+export function Sheet({ visible, onClose, children, title, description, footer, closeLabel = 'Close', closeDisabled = false, wide = false, side = false, stableForm = false, bottomAligned = false, label }: { label?: string; visible: boolean; onClose: () => void; children?: ReactNode; title?: string; description?: ReactNode; footer?: ReactNode; closeLabel?: string; closeDisabled?: boolean; wide?: boolean; side?: boolean; stableForm?: boolean; bottomAligned?: boolean }) {
   const c = useColors(); const { height, width } = useWindowDimensions(); const inset = useSafeAreaInsets()
   const panel = side && !!title; const phonePanel = panel && width < 768
   const bottom = !panel && (bottomAligned || width < 768)
@@ -45,8 +46,8 @@ export function Sheet({ visible, onClose, children, title, description, footer, 
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : stableForm || bottomAligned ? undefined : 'height'} style={[{ flex: 1, backgroundColor: web ? 'rgba(15,23,42,0.3)' : '#0008', ...(stableForm ? { justifyContent: 'flex-start', paddingTop: inset.top + 16, paddingBottom: Math.max(16, inset.bottom), paddingHorizontal: bottom ? 0 : 16 } : panel ? { justifyContent: 'center', alignItems: 'flex-end' } : bottom ? { justifyContent: 'flex-end' } : { justifyContent: 'center', paddingHorizontal: 16, paddingTop: Math.max(16, inset.top), paddingBottom: Math.max(16, inset.bottom) }) }, web && !panel ? ({ backdropFilter: 'blur(8px)' } as object) : null]}>
       {/* A tap on the dim overlay closes, like the reference Radix overlay. It is pointer-only (keyboard uses
           Escape / the Close button), so it stays out of the tab order and the accessibility tree (DEF-007). */}
-      <Pressable accessible={false} focusable={false} aria-hidden importantForAccessibility="no-hide-descendants" onPress={closeDisabled ? undefined : onClose} style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, web ? ({ cursor: 'default' } as object) : null]} />
-      <View accessibilityViewIsModal role="dialog" aria-label={title} style={surface}>
+      <Pressable accessible={false} focusable={false} aria-hidden aria-label={`Close ${title ?? label ?? 'dialog'}`} importantForAccessibility="no-hide-descendants" onPress={closeDisabled ? undefined : onClose} style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, web ? ({ cursor: 'default' } as object) : null]} />
+      <View accessibilityViewIsModal role="dialog" aria-modal aria-label={title ?? label} style={surface}>
         {!!title && (panel
           ? <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 12, paddingLeft: 12, paddingRight: 12, paddingVertical: 10 }}>
             <Text accessibilityRole="header" numberOfLines={1} style={{ flex: 1, color: c.text, fontFamily: 'Inter_600SemiBold', fontWeight: '600', fontSize: 16, lineHeight: 24 }}>{title}</Text>

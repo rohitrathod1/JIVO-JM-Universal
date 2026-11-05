@@ -87,7 +87,7 @@ function EntryDetails({ entry, onClose, onChanged }: { entry: vault.Entry; onClo
   const mono = Platform.select({ web: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace', ios: 'Menlo', default: 'monospace' })
   const close = () => { clear(); onClose() }
   const kv = (label: string, value: React.ReactNode) => <View style={{ gap: 4, marginBottom: 12 }}><Text numberOfLines={1} style={{ fontFamily: font.r, fontSize: 14, lineHeight: 20, color: c.muted }}>{label}</Text><View style={{ flex: 1, minWidth: 0 }}>{value}</View></View>
-  const plain = (value: string, monospace = false) => <Text selectable numberOfLines={1} style={{ fontFamily: monospace ? mono : font.r, fontSize: 14, lineHeight: 20, color: c.text }}>{value || 'â€”'}</Text>
+  const plain = (value: string, monospace = false) => <Text selectable numberOfLines={1} style={{ fontFamily: monospace ? mono : font.r, fontSize: 14, lineHeight: 20, color: c.text }}>{value || '—'}</Text>
   const fields = detail?.secret_fields ?? []
   return <Sheet visible onClose={close}>
     <View style={{ gap: 2 }}>
@@ -105,7 +105,7 @@ function EntryDetails({ entry, onClose, onChanged }: { entry: vault.Entry; onClo
         return <View key={field} style={{ marginTop: 12, borderTopWidth: 1, borderTopColor: c.border, paddingTop: 12, gap: 4 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <View style={{ flex: 1, minWidth: 0 }}><Text style={{ fontFamily: font.r, fontSize: 12, lineHeight: 16, color: c.muted }}>{field.charAt(0).toUpperCase() + field.slice(1)}</Text>
-              {shown ? <Text selectable style={{ fontFamily: mono, fontSize: 14, lineHeight: 20, color: c.text }}>{shown.value}</Text> : <Text style={{ fontFamily: mono, fontSize: 14, lineHeight: 20, letterSpacing: 2, color: c.text }}>{'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢'}</Text>}</View>
+              {shown ? <Text selectable style={{ fontFamily: mono, fontSize: 14, lineHeight: 20, color: c.text }}>{shown.value}</Text> : <Text style={{ fontFamily: mono, fontSize: 14, lineHeight: 20, letterSpacing: 2, color: c.text }}>{'•••••••••••'}</Text>}</View>
             {shown ? <EyeButton icon="eyeOff" label="Hide secret" busy={busy} onPress={clear} /> : <EyeButton icon="eye" label={`Reveal ${field}`} busy={busy} onPress={() => void reveal(field)} />}
           </View>
           {shown && <><SecretCopy key={entry.id + field} entryId={entry.id} field={field} value={shown.value} /><Muted>Hidden automatically within 30 seconds or when the app leaves the foreground.</Muted></>}
@@ -154,7 +154,7 @@ function VaultEntries({ selected, trash = false }: { selected: vault.Vault; tras
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 12, paddingVertical: 10 }}>
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text numberOfLines={1} style={{ fontFamily: font.m, fontWeight: '500', fontSize: 14, lineHeight: 20, color: c.text }}>{entry.title}</Text>
-              <Muted lines={1}>{[KIND_LABEL[entry.kind] ?? entry.kind, entry.username, entry.url].filter(Boolean).join(' Â· ')}</Muted>
+              <Muted lines={1}>{[KIND_LABEL[entry.kind] ?? entry.kind, entry.username, entry.url].filter(Boolean).join(' · ')}</Muted>
             </View>
             {width >= 640 && entry.tags.slice(0, 3).map(t => <Badge key={t}>{t}</Badge>)}
             <Muted>{entry.trashed_at ? `Trashed ${relative(entry.trashed_at)}` : relative(entry.updated_at)}</Muted>
@@ -179,7 +179,7 @@ function VaultCard({ v, wide, label, onPress }: { v: vault.Vault; wide: number; 
         <View style={{ marginTop: 2 }}><Icon name={v.owner_type === 'personal' ? 'lock' : 'users'} size={20} color={c.brand} /></View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text numberOfLines={1} style={{ fontFamily: font.s, fontWeight: '600', fontSize: 15, lineHeight: 22, color: c.text }}>{v.owner_type === 'personal' ? 'My vault' : v.name}</Text>
-          <Muted>{v.owner_type === 'company' ? v.company?.name : v.owner_type === 'shared' ? 'Team vault' : 'Only you'} Â· {v.entry_count} {v.entry_count === 1 ? 'entry' : 'entries'}</Muted>
+          <Muted>{v.owner_type === 'company' ? v.company?.name : v.owner_type === 'shared' ? 'Team vault' : 'Only you'} · {v.entry_count} {v.entry_count === 1 ? 'entry' : 'entries'}</Muted>
         </View>
         {!!v.my_role && <Badge tone={v.my_role === 'owner' ? 'brand' : 'neutral'}>{v.my_role}</Badge>}
       </View>
@@ -191,7 +191,7 @@ function SharedEntries({ hasVaults }: { hasVaults: boolean }) {
   const c = useColors(); const resource = useResource(vault.listShared); const [selected, setSelected] = useState<vault.Entry | null>(null)
   if (hasVaults && !resource.loading && !resource.error && !resource.value?.length) return null
   return <Surface>{resource.loading && <View style={{ padding: 24 }}><Spinner /></View>}{!!resource.error && <Text accessibilityRole="alert" style={{ color: c.danger, padding: 16 }}>{errorMessage(resource.error)}</Text>}
-    {resource.value?.map((entry, i) => <RowButton key={entry.id} label={`Open shared entry ${entry.title}`} onPress={() => setSelected(entry)} style={{ borderTopWidth: i ? 1 : 0, borderTopColor: c.border }}><View style={{ paddingHorizontal: 12, paddingVertical: 10 }}><Text numberOfLines={1} style={{ fontFamily: font.m, fontWeight: '500', fontSize: 14, color: c.text }}>{entry.title}</Text><Muted lines={1}>{entry.vault.name} Â· Shared by {entry.share.granted_by.name}</Muted></View></RowButton>)}
+    {resource.value?.map((entry, i) => <RowButton key={entry.id} label={`Open shared entry ${entry.title}`} onPress={() => setSelected(entry)} style={{ borderTopWidth: i ? 1 : 0, borderTopColor: c.border }}><View style={{ paddingHorizontal: 12, paddingVertical: 10 }}><Text numberOfLines={1} style={{ fontFamily: font.m, fontWeight: '500', fontSize: 14, color: c.text }}>{entry.title}</Text><Muted lines={1}>{entry.vault.name} · Shared by {entry.share.granted_by.name}</Muted></View></RowButton>)}
     {!hasVaults && !resource.loading && !resource.error && !resource.value?.length && <EmptyState title="Nothing is shared with you." />}
     {selected && <EntryDetails entry={selected} onClose={() => setSelected(null)} onChanged={() => { setSelected(null); resource.refresh() }} />}</Surface>
 }
@@ -207,7 +207,7 @@ function VaultPanelContent({ initialVault, initialEntry, initialView }: { initia
   const current = section === 'admin' ? 'admin' : section === 'break-glass' ? 'break-glass' : shared ? 'shared' : 'vaults'
   const inVault = current === 'vaults' ? selected : null
   const home = () => { setSection('vaults'); setShared(false); setSelected(null) }
-  const header = current === 'shared' ? { title: 'Shared with me', subtitle: 'Vaults and entries other people shared with you.' } : current === 'admin' ? { title: 'Team vaults', subtitle: 'Create team vaults and appoint their owners.' } : current === 'break-glass' ? { title: 'Emergency access', subtitle: 'Temporary, approved access to a vault whose owners are unavailable.' } : inVault ? { title: inVault.owner_type === 'personal' ? 'My vault' : inVault.name, subtitle: `${inVault.owner_type === 'personal' ? 'Only you can see this vault' : inVault.owner_type === 'company' ? inVault.company?.name ?? 'Company vault' : 'Team vault'}${inVault.my_role ? ` Â· you are ${inVault.my_role}` : ''}` } : { title: 'Passwords', subtitle: 'Your vaults. Values stay encrypted until you reveal them.' }
+  const header = current === 'shared' ? { title: 'Shared with me', subtitle: 'Vaults and entries other people shared with you.' } : current === 'admin' ? { title: 'Team vaults', subtitle: 'Create team vaults and appoint their owners.' } : current === 'break-glass' ? { title: 'Emergency access', subtitle: 'Temporary, approved access to a vault whose owners are unavailable.' } : inVault ? { title: inVault.owner_type === 'personal' ? 'My vault' : inVault.name, subtitle: `${inVault.owner_type === 'personal' ? 'Only you can see this vault' : inVault.owner_type === 'company' ? inVault.company?.name ?? 'Company vault' : 'Team vault'}${inVault.my_role ? ` · you are ${inVault.my_role}` : ''}` } : { title: 'Passwords', subtitle: 'Your vaults. Values stay encrypted until you reveal them.' }
   const crumbs = current === 'vaults' && !inVault ? undefined : [{ label: inVault?.mine === false ? 'Shared with me' : 'Passwords', onPress: inVault?.mine === false ? () => { setSelected(null); setShared(true) } : home }, { label: header.title }]
   const own = items.filter(v => v.mine !== false)
   const navigation = <Select height={40} style={{ flex: 1, minWidth: 0 }} label="Passwords sections" value={inVault?.mine === false ? 'shared' : current} onChange={value => { setSelected(null); if (value === 'shared') { setSection('vaults'); setShared(true) } else if (value === 'vaults') home(); else setSection(value) }}

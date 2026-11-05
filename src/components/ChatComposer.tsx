@@ -5,6 +5,7 @@ import { enterSends } from '../modules/messenger/composer'
 import { Image, Keyboard, Modal, Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions, type TextInputProps } from 'react-native'
 import { useRef, useState, type ComponentRef, type ReactNode } from 'react'
 import { Field, glass, useColors } from '../ui'
+import { touchBox } from '../shared/shellLayout'
 import { Icon, type IconName } from './Icon'
 
 const web = Platform.OS === 'web'
@@ -14,10 +15,10 @@ const coarsePointer = () => typeof window !== 'undefined' && typeof window.match
 
 /** Reference Composer: 40px round + / mic / send buttons around a 40px, 20px-radius message box. */
 function RoundButton({ label, onPress, disabled = false, primary = false, active = false, expanded, children }: { label: string; onPress: () => void; disabled?: boolean; primary?: boolean; active?: boolean; expanded?: boolean; children: ReactNode }) {
-  const c = useColors()
-  return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled, expanded }} disabled={disabled} onPress={onPress} hitSlop={4}
-    style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => ({ width: 40, height: 40, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 20, backgroundColor: primary ? (pressed || hovered ? c.primaryHover : c.primary) : pressed || hovered ? c.hover : 'transparent', opacity: disabled ? 0.5 : 1, transform: active ? [{ rotate: '45deg' }] : [] })}>
-    {children}
+  const c = useColors(); const { width } = useWindowDimensions()
+  // DEF-005: the Pressable is the 44px phone hit box; the 40px circle inside keeps the reference look.
+  return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled, expanded }} disabled={disabled} onPress={onPress} hitSlop={4} style={{ ...touchBox(40, width), flexShrink: 0 }}>
+    {({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => <View style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 20, backgroundColor: primary ? (pressed || hovered ? c.primaryHover : c.primary) : pressed || hovered ? c.hover : 'transparent', opacity: disabled ? 0.5 : 1, transform: active ? [{ rotate: '45deg' }] : [] }}>{children}</View>}
   </Pressable>
 }
 

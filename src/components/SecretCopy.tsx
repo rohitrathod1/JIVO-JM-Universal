@@ -30,7 +30,7 @@ export function SecretCopy({ value, entryId, field }: { value: string; entryId: 
   const state = useSyncExternalStore(copy.subscribe, copy.snapshot, copy.snapshot)
   useEffect(() => { const off = subscribeSensitiveView(copy.setActive); return () => { off(); copy.setActive(false) } }, [copy])
   return <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-    <View style={{ flex: 1, minWidth: 0 }}><CopyNote>{state.notice || (Platform.OS === 'ios' ? 'Copied values expire from the clipboard after 30 seconds.' : 'Copied values are cleared from the clipboard after 30 seconds but may remain in clipboard history.')}</CopyNote></View>
+    <View style={{ flex: 1, minWidth: 0 }}><CopyNote>{state.notice || (Platform.OS === 'ios' ? 'Copied values stay on this device (no Universal Clipboard) and expire from the clipboard after 30 seconds.' : 'Copied values are cleared from the clipboard after 30 seconds but may remain in clipboard history.')}</CopyNote></View>
     <CopyIconButton field={field} disabled={state.busy} onPress={() => void copy.copy(value)} />
   </View>
 }

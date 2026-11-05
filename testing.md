@@ -1,3 +1,76 @@
+# Open items round - 05-Nov-2026
+
+QA re-test of three fix reports: backend PERF-02 fan-out and BE-103 (unscanned group/profile photos), Universal DEF-005/006/007, OFF-05, OFF-06, M-08 and the Atlas leftover, and the test harness (STATIC-6, client-perf, load PING, AND-NOTE-02). Heavy steps ran one at a time. The isolated env was restarted (`stop-all.ps1`, `start-backend.ps1`, `start-preview.ps1`). `migrate` on `jm_e2e` had nothing to apply. 8000/8081, the dev DB and the USB phone were not touched. Everything was stopped at the end.
+
+## Fixed by QA in this round
+
+- **VaultPanel showed mojibake.** Commit 2e4a6d4 had saved `src/components/VaultPanel.tsx` through a cp1252 round trip. Entry rows read "Login Â· example" and masked secrets showed `â€¢â€¢`. The middle dot, bullet and em dash are restored (16 places).
+- **Selected and expanded states were not exposed on web.** react-native-web 0.21 ignores `accessibilityState`. The chat-list filter tabs, `UnderlineTabs`, the shared-media tabs and the admin tabs now pass `aria-selected`, and Profile sections pass `aria-expanded`. Found because client-perf could not see the selected filter chip.
+- **test:web drift (STATIC-6 follow-on).** Once the group-settings step was fixed, the suite stopped at 13 more places. Each was a screen changed in 2e4a6d4 that the test did not follow. `mocked-ui.cjs` and `capture-interactions.cjs` now follow these screens:
+  - group-photo removal
+  - disappearing messages and mute in group info "Chat settings"
+  - a cleared thread, which is now empty with no placeholder
+  - collapsed Profile sections
+  - the New folder, New entry and file-action sheets
+  - vault activity labels
+  - the "Passwords sections" menu for team vaults and emergency access
+  - the owner picker, which leaves out existing members
+  - the header bell on phones
+  - a mock for `/api/jm/atlas/status/`
+
+  No assertion was dropped. Some were tightened: aria-expanded, the folder POST, the excluded member. Decision U-021.
+
+## Results
+
+| Check | Before | After (05-Nov, this round) |
+|---|---|---|
+| Backend `ruff check .`, `makemigrations --check --dry-run` | PASS | PASS / No changes detected |
+| Backend FULL suite (`manage.py test --noinput`, `DB_TEST_NAME=test_jm_open_qa`) | not run (targeted labels only) | **1002 tests OK, 41 skipped, 825 s** |
+| `npm run typecheck` / `npm run lint` | PASS | PASS / PASS (0 problems), also after the QA fixes |
+| `npx vitest run` | 576 tests, 85 files | 583 tests, 86 files, PASS |
+| `npm run build:web` | 4.52 MiB, 214 files; Inter TTF 1.34 MB | 4.53 MiB, 214 files (shell 72c7e111776150e41c1b); fonts unchanged: 4 Inter TTF = 1,373,004 bytes (PERF-05 not done) |
+| `npm run test:pwa` | PASS | PASS, 214 precached, online 3.0 s, offline 1.0 s, 0 page errors |
+| `npm run test:web` 360 / 768 / 1440 / 844x390 + cross-tab | FAIL at 360 (group options) | **PASS at all four widths and cross-tab** (`test-results/e2e/qa-open/test-web-all-final.log`) |
+| Load 5 users x 1 msg/s x 15 s (:8010) | 0% errors, send p50 81 ms, delivery p50 111 ms | 0% errors (70/70 201), send p50 65 / p95 75 ms, delivery 280/280 p50 73 / p95 85 ms |
+| Load 50 users x 1 msg/s x 60 s (:8010) | 0% errors, 17.6 sends/s, send p50 8.4 s, delivery p50 67 s (1,000/6,924 counted), all sockets 4408 | 0% errors (1,883/1,883), 19.2 sends/s, 1,050 skipped at 5 in flight, send p50 8.0 / p95 8.6 s, delivery p50 63 / p95 67 s (6,005/7,532 counted). 159 PINGs/159 PONGs, 0 early closes. :8010 healthy afterwards (healthz 71 ms, login + HELLO OK). **Still saturated.** |
+| Client 500-chat list (4176) | 73 rows, 50-55 fps; filter toggle 60 s (script artefact) | 73 rows, 1,565 DOM nodes, 29.8 MB, scroll 54.5 fps (p95 16.9 ms); filter Groups 90 ms, All 67 ms, toggle 157 ms. Cold: FCP 0.71 s, LCP 1.32 s, CLS 0.25, first row 2.2-4.0 s, chat open 159-188 ms |
+| Long 2,000-message chat scroll-back | sentinel (not measured) | Reached message 1 through 39 "Load earlier" pages in 52 s at 52.4 fps (p95 33 ms), 102 bubbles mounted, 2,883 DOM nodes, 27 MB. Scrolling back down: 20 fps (p95 117 ms) |
+| Memory over 10 minutes | NOT RUN | 475 chat switches: heap 12.1 to 16.7 MB, flat at 16.4-16.7 MB after the first minute; DOM 1,260 stable; 0 page errors |
+| Websocket reconnect after 5 s offline | 86 ms, 18 requests / 66 KB | 116 ms, 18 requests / 16 KB |
+| Messaging (4176): image alice -> bob, PDF both users, Enter/Shift+Enter, reload keeps chat | PASS | PASS. Image send 201, tile loaded for alice in 213 ms and for bob in 131 ms. PDF export: 193/193 bytes for bob and for alice. |
+| Group photo upload (alice, /group-edit) | not run | PASS. PATCH 200. The avatar is set for alice and for bob (API), the preview is 256 px, and bob's group-info image loads. |
+| Offline K (cold start offline, then online) | recovered in 1.26 s | Recovered by itself in 1.25 s, 1 copy delivered. J (warm history) PASS |
+| Offline B (reload while offline) | 2/2 delivered | 2/2 delivered once and in order (seq 68, 69). Cached chats are still not shown (U-004) |
+| OFF-05 (offline reaction/edit) | no message | "You're offline, try again when connected." shown for the reaction and the edit. Nothing was applied on the server |
+| Responsive sweep 360/390/414, light+dark, alice+admin | DEF-005/006 FAIL | 0 overflow. None of the DEF-005 controls in the brief is flagged now: theme, Back, Conversation options, composer buttons, record, Jump to latest, filter tabs. Still flagged: see below |
+| Android native smoke | BLOCKED | **BLOCKED**: free RAM 1,614 MB of 8,101 MB after stopping the web servers (needs > 2,500 MB). No emulator was booted |
+
+Evidence:
+- `test-results/e2e/qa-open/`
+- `test-results/e2e/perf/qa-open/` (load-5u, load-50u, client-perf-4176-load.json, client-perf-4176-memory.json)
+- `test-results/e2e/messaging/cmd-results/qo1-qo6.txt` and `qa-open-*.png` (step `scripts/e2e/messaging/steps/qa-group-photo.cjs`)
+- `test-results/e2e/offline/qa-open-*.txt`
+- `test-results/e2e/responsive/summary-qa-open.json`
+
+## Still open
+
+- **PERF-02 throughput.** The fan-out cost per message is now constant: 12 queries and 2 decryptions for any group size. The 50-user run still saturates one process: sends queue for about 8 s and delivery lags about 1 minute. It improved only from 17.6 to 19.2 sends/s, so the bottleneck is no longer only the fan-out. Profile the send path next. `JM_REALTIME_FANOUT_WORKERS` is still 2. Production (3 workers + Redis) has not been load-tested.
+- **M-08 follow-up (new).** At 1440x900 the install banner sits centred at `bottom: 80` over the thread. It covers the newest message and blocks clicks on it until "Not now" is pressed. Its "Not now" button is named "Not now, hide the install banner".
+- **A11Y-01 (new).** About 40 other `accessibilityState` uses still do nothing on web: Select `expanded`, menu-item `selected`, busy flags.
+- **DEF-005 (remaining).** Still under 44 px:
+  - tabs of 32-38 px: group info Media/Docs/Links, approvals, admin, notifications, alerts
+  - notification Show/Type 36 px and Mark all as read/Delete 36 px
+  - admin row icons 32 px
+  - Email icon 36 px
+  - 40 px tool buttons: Add members, Edit group, Message, Create person, Status/Group
+  - the composer textarea 42 px
+- **DEF-006 (remaining).** In dark mode, the alerts "Active" chip is white on #22c55e at 2.28:1, and the mention "@Carol E2E" is 4.29:1.
+- **Message text overlaps the time.** In multi-line and group bubbles at 360 px, the message text overlaps the time.
+- PERF-05 Inter woff2: not done (1.34 MB TTF).
+- OFF-02 / U-004: no cached chats after an offline reload (by design).
+- Android: SEC-1 FLAG_SECURE, the airplane-mode queue and native-smoke.cts (AND-NOTE-02) were not run (RAM). `scripts/native-account-smoke.cts` still hardcodes :8000.
+- Unit-tested only, not run end to end: BE-103 refusal (Defender marks every upload CLEAN), client `upload_not_scanned` handling, OFF-06 per-chat order.
+
 # End-to-end test and fix round - 05-Nov-2026
 
 QA re-test after five fix agents (M-01 attachments, PERF-01 backend load, OFF-01 offline recovery, PWA/UI primitives, SEC-1/SEC-2). Tests ran one at a time on the 8 GB host. The isolated backend :8010 (`jm_e2e`) was restarted with the new code, `JM_AV_SCANNER=defender` and the `core.loops:selector_loop_factory` loop. `migrate` applied `access.0007_atlas_capability`, `atlas.0001_initial` and `audit.0006_atlas_stream` to `jm_e2e` only. The browser runs used the production PWA preview on :4176. The dev web :8091 was not started. 8000/8081 and the dev DB were not touched.

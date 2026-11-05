@@ -17,6 +17,18 @@ export function pagePadding(width: number) {
     : { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 24 }
 }
 
+/** WCAG 2.5.5 / Apple HIG minimum touch target on phones (DEF-005). */
+export const MIN_TOUCH = 44
+/**
+ * Transparent hit box for a control drawn at `size` px: on phones (below the `md` breakpoint) it grows to 44px
+ * and a negative margin gives the extra back to the layout, so the drawn control stays the same size and place.
+ * Put the visual (background, border, radius) on a child of this box, not on the box itself.
+ */
+export function touchBox(size: number, width: number) {
+  const pad = isWide(width) ? 0 : Math.max(0, (MIN_TOUCH - size) / 2)
+  return { width: size + pad * 2, height: size + pad * 2, margin: pad ? -pad : 0, alignItems: 'center', justifyContent: 'center' } as const
+}
+
 /** Reference control height is 40px (`h-10`); native keeps the 44pt platform touch target. */
 export const controlHeight = (platform: string) => (platform === 'web' ? 40 : 44)
 

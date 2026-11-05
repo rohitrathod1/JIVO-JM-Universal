@@ -26,6 +26,9 @@ async function newCtx(browser) {
   return ctx
 }
 
+// Waits until a role=tab locator reports aria-selected="true" (RN web maps accessibilityState.selected to it).
+const expectSelected = async (locator, timeout = 15000) => { const t = Date.now(); while (await locator.getAttribute('aria-selected') !== 'true') { if (Date.now() - t > timeout) throw new Error('tab not selected'); await new Promise(r => setTimeout(r, 25)) } }
+
 // rAF-based frame counter while an action runs: fps and worst frame gap
 const fpsDuring = async (page, fn) => {
   await page.evaluate(() => { window.__frames = []; let last = performance.now(); const tick = t => { window.__frames.push(t - last); last = t; if (window.__fpsOn) requestAnimationFrame(tick) }; window.__fpsOn = true; requestAnimationFrame(tick) })
@@ -79,8 +82,13 @@ async function loadPhase(browser) {
     domNodes: await page.evaluate(() => document.getElementsByTagName('*').length),
     heapMB: await page.evaluate(() => +(performance.memory.usedJSHeapSize / 1048576).toFixed(1)) }
   // a full re-render: switching the filter while 500 rows are mounted
-  const tf = Date.now(); await page.getByRole('button', { name: /^Groups/ }).first().click({ force: true }).catch(() => {}); await page.waitForTimeout(300)
-  await page.getByRole('button', { name: /^All/ }).first().click({ force: true }).catch(() => {}); await page.getByText(/^Perf Conv \d{3}$/).first().waitFor()
+  // The filter chips are role "tab" named by their label (ConversationWorkspace listFilters); a missing chip must fail the
+  // probe, not add two locator timeouts to the timing.
+  const chip = name => page.getByRole('tab', { name, exact: true }).first()
+  const tf = Date.now(); await chip('Groups').click(); await expectSelected(chip('Groups'))
+  result.conversationList.filterGroupsMs = Date.now() - tf
+  const ta = Date.now(); await chip('All').click(); await expectSelected(chip('All')); await page.getByText(/^Perf Conv \d{3}$/).first().waitFor()
+  result.conversationList.filterAllMs = Date.now() - ta
   result.conversationList.filterToggleMs = Date.now() - tf
   console.log('conversationList', JSON.stringify(result.conversationList)); save()
 
@@ -88,25 +96,40 @@ async function loadPhase(browser) {
   const tC = Date.now()
   const search = page.getByRole('searchbox').or(page.getByPlaceholder(/search/i)).first()
   await page.getByText(/^Perfpeer Perf$/).first().click({ timeout: 5000, force: true }).catch(async () => { await search.fill('Perfpeer'); await page.getByText(/^Perfpeer Perf$/).first().click({ force: true }) })
-  await page.getByText(/Perf long-chat message 2000\./).first().waitFor({ timeout: 30000 })
+  // Scope everything to the thread (FlatList "Latest messages" / "Message history"): the chat-list row preview also shows
+  // message 2000, and bubbles hold the body in nested elements (inline time spacer), so leaf-div matching found nothing.
+  const thread = page.getByLabel(/^(Latest messages|Message history)$/).first()
+  await thread.getByText(/Perf long-chat message 2000\./).first().waitFor({ timeout: 30000 })
   result.longChat = { openMs: Date.now() - tC }
-  const scrollUp = () => page.evaluate(() => {
-    const m = [...document.querySelectorAll('div')].find(d => d.children.length === 0 && /Perf long-chat message \d{4}\./.test(d.textContent || ''))
-    let el = m; while (el && !(el.scrollHeight > el.clientHeight + 10 && getComputedStyle(el).overflowY !== 'visible')) el = el.parentElement
-    if (!el) return null; el.scrollTop = Math.max(0, el.scrollTop - 1500); return el.scrollTop
-  })
-  const oldest = () => page.evaluate(() => { let min = 1e9; for (const d of document.querySelectorAll('div')) { if (d.children.length) continue; const m = /Perf long-chat message (\d{4})\./.exec(d.textContent || ''); if (m) min = Math.min(min, +m[1]) } return min })
-  const tS = Date.now(); let oldestSeen = await oldest(); const samples = []
+  const threadHandle = await thread.elementHandle()
+  // RN web puts the label on the ScrollView's scrolling div; fall back to the first scrollable descendant just in case.
+  // op: 'up' (scroll 1500 px towards older), 'down' (3000 px towards newer) or 'atTop'. No eval, so a CSP cannot break it.
+  const inThread = op => threadHandle.evaluate((root, op) => { const el = root.scrollHeight > root.clientHeight + 10 ? root
+    : [...root.querySelectorAll('div')].find(d => d.scrollHeight > d.clientHeight + 10 && getComputedStyle(d).overflowY !== 'visible') || root
+    if (op === 'up') el.scrollTop = Math.max(0, el.scrollTop - 1500); else if (op === 'down') el.scrollTop += 3000
+    return el.scrollTop === 0 }, op)
+  const seqs = () => threadHandle.evaluate(el => { const out = []; const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let n
+    while ((n = w.nextNode())) { const m = /Perf long-chat message (\d{4})\./.exec(n.data); if (m) out.push(+m[1]) } return out })
+  const oldest = async () => { const s = await seqs(); return s.length ? Math.min(...s) : null }
+  // The thread is not inverted: older history is above (scrollTop 0). History pages in through "Load earlier messages".
+  const loadEarlier = thread.getByRole('button', { name: 'Load earlier messages', exact: true })
+  const tS = Date.now(); let oldestSeen = await oldest(); const samples = []; let pages = 0
+  if (oldestSeen == null) throw new Error('long chat: no "Perf long-chat message" text inside the thread')
   const fpsChat = await fpsDuring(page, async () => {
-    while (Date.now() - tS < 120000 && oldestSeen > 1) { await scrollUp(); await page.waitForTimeout(80); const o = await oldest(); if (o !== oldestSeen) { oldestSeen = o; samples.push([Date.now() - tS, o]) } }
+    while (Date.now() - tS < 120000 && oldestSeen > 1) {
+      await inThread('up')
+      await page.waitForTimeout(80)
+      if (await inThread('atTop') && await loadEarlier.isVisible().catch(() => false) && await loadEarlier.isEnabled().catch(() => false)) { await loadEarlier.click(); pages++ }
+      const o = await oldest(); if (o != null && o !== oldestSeen) { oldestSeen = o; samples.push([Date.now() - tS, o]) }
+    }
   })
-  result.longChat = { ...result.longChat, reachedOldest: oldestSeen, msScrolling: Date.now() - tS, scroll: fpsChat, progress: samples.filter((_, i) => i % 5 === 0),
-    renderedMessages: await page.evaluate(() => [...document.querySelectorAll('div')].filter(d => d.children.length === 0 && /Perf long-chat message \d{4}\./.test(d.textContent || '')).length),
+  result.longChat = { ...result.longChat, reachedOldest: oldestSeen, reachedTop: oldestSeen === 1, earlierPages: pages, msScrolling: Date.now() - tS, scroll: fpsChat, progress: samples.filter((_, i) => i % 5 === 0),
+    renderedMessages: (await seqs()).length,
     domNodes: await page.evaluate(() => document.getElementsByTagName('*').length),
     heapMB: await page.evaluate(() => +(performance.memory.usedJSHeapSize / 1048576).toFixed(1)) }
   await page.screenshot({ path: path.join(outDir, `long-chat-top-${tag}.png`) })
-  // scroll back to the latest message
-  const fpsDown = await fpsDuring(page, async () => { for (let i = 0; i < 40; i++) { await page.evaluate(() => { const m = [...document.querySelectorAll('div')].find(d => d.children.length === 0 && /Perf long-chat message \d{4}\./.test(d.textContent || '')); let el = m; while (el && !(el.scrollHeight > el.clientHeight + 10 && getComputedStyle(el).overflowY !== 'visible')) el = el.parentElement; if (el) el.scrollTop += 3000 }); await page.waitForTimeout(50) } })
+  // scroll back to the latest message (same thread element)
+  const fpsDown = await fpsDuring(page, async () => { for (let i = 0; i < 40; i++) { await inThread('down'); await page.waitForTimeout(50) } })
   result.longChat.scrollDown = fpsDown
   console.log('longChat', JSON.stringify(result.longChat)); save()
 

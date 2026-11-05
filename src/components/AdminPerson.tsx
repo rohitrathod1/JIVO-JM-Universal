@@ -226,7 +226,7 @@ export function PersonDetail({ id, onClose, onChanged }: { id: string; onClose: 
     <Sheet visible={!!confirm} onClose={() => { if (!op.busy) setConfirm(null) }} title={confirm?.title} description={confirm?.body}
       footer={<View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}>
         <Button title="Cancel" accessibilityLabel="Cancel person action" variant="secondary" disabled={op.busy} onPress={() => setConfirm(null)} />
-        <Button title={confirm?.label ?? 'Confirm'} accessibilityLabel="Confirm person action" disabled={op.busy} style={confirm?.danger ? { backgroundColor: c.danger } : undefined}
+        <Button title={confirm?.label ?? 'Confirm'} accessibilityLabel="Confirm person action" disabled={op.busy} style={confirm?.danger ? { backgroundColor: c.dangerFill } : undefined}
           onPress={() => { const current = confirm; if (!current) return; void op.run(async () => { if (!me?.capabilities.includes('ADMIN_USERS')) throw Error('People administration is no longer enabled.'); return current.action() }, () => { setConfirm(null); refresh(); current.after?.() }) }} />
       </View>} />
     <Sheet visible={settingPassword} onClose={() => setSettingPassword(false)} title={`Set a password for ${u.name}`} closeLabel="Close set password">

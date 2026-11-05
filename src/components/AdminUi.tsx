@@ -102,7 +102,7 @@ export function RowIconButton({ icon, label, onPress, danger = false, disabled =
 export function PillTabs<T extends string>({ value, options, onChange, label, badge, horizontal = false }: { value: T; options: readonly (readonly [T, string])[]; onChange: (v: T) => void; label: string; badge?: Partial<Record<T, string>>; horizontal?: boolean }) {
   const c = useColors()
   const tabs = <View accessibilityRole="tablist" accessibilityLabel={label} style={{ flexDirection: 'row', flexWrap: horizontal ? 'nowrap' : 'wrap', gap: 6 }}>
-    {options.map(([v, text]) => { const selected = v === value; const count = badge?.[v]; return <Pressable key={v} accessibilityRole="tab" accessibilityLabel={text} accessibilityState={{ selected }} onPress={() => onChange(v)}
+    {options.map(([v, text]) => { const selected = v === value; const count = badge?.[v]; return <Pressable key={v} accessibilityRole="tab" accessibilityLabel={text} accessibilityState={{ selected }} aria-selected={selected} onPress={() => onChange(v)}
       style={({ pressed }) => ({ height: 32, paddingHorizontal: 12, borderRadius: 999, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: selected ? c.primary : c.neutral, opacity: pressed ? 0.8 : 1, ...pointer() })}>
       <Text style={{ fontFamily: 'Inter_500Medium', fontWeight: '500', fontSize: 14, color: selected ? '#ffffff' : c.muted }}>{text}</Text>
       {!!count && <View style={{ minWidth: 18, borderRadius: 9, paddingHorizontal: 5, backgroundColor: c.brandFill, alignItems: 'center' }}><Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 11, lineHeight: 16, color: '#ffffff' }}>{count}</Text></View>}

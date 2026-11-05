@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { Image, Modal, View } from 'react-native'
+import { Image, Text, View } from 'react-native'
 import { Button, Card, Label, useColors } from '../ui'
 import { useSession } from '../core/auth/Session'
 import { router, type Href } from 'expo-router'
 import { notificationPath } from '../shared/pushPolicy'
 import { webPush } from '../modules/notifications/webPush.web'
+
+/** M-08: wait until the person has settled in before suggesting installation (was 4 s after sign-in). */
+export const INSTALL_BANNER_DELAY = 45_000
 
 interface InstallPrompt extends Event {
   prompt(): Promise<void>
@@ -74,7 +77,7 @@ export function PwaSupport() {
 
   useEffect(() => {
     if (__DEV__ || status !== 'ready' || standalone() || recentlyDismissed() || !window.isSecureContext) return
-    const timer = setTimeout(() => setOpen(true), 4000)
+    const timer = setTimeout(() => setOpen(true), INSTALL_BANNER_DELAY)
     return () => clearTimeout(timer)
   }, [status])
 
@@ -90,20 +93,19 @@ export function PwaSupport() {
   }
   return <>
     {waiting && <View style={{ position: 'absolute', bottom: 80, left: 16, right: 16, zIndex: 9999, alignItems: 'center' }}><Card><Label>A new version of JM is available.</Label><Label>Save unfinished edits before reloading.</Label><Button title="Reload" onPress={() => { requestedReload.current = true; waiting.postMessage({ type: 'SKIP_WAITING' }) }} /></Card></View>}
-    <Modal visible={open && status === 'ready'} transparent animationType="fade" onRequestClose={dismiss}>
-      <View style={{ flex: 1, backgroundColor: '#0008', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-        <View accessibilityViewIsModal style={{ backgroundColor: colors.panel, borderRadius: 16, padding: 24, gap: 16, width: '100%', maxWidth: 430 }}>
-          <Label large>Install JIVO JM</Label>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}><Image source={{ uri: '/icons/icon-192.png' }} style={{ width: 64, height: 64, borderRadius: 16 }} accessibilityIgnoresInvertColors /><View style={{ flex: 1 }}><Label>JIVO JM</Label><Label>Messenger for JIVO · no app store needed</Label></View></View>
-          <Label>Open JM in its own window from your home screen or apps.</Label>
-          {!!installError && <Label>{installError}</Label>}
-          {!canInstall && <Label>{/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'In Safari, tap Share, then Add to Home Screen and Add.' : 'Where your browser supports installation, open its menu and choose Install app or Add to Home screen. On desktop Chrome or Edge, you can also use the install icon in the address bar.'}</Label>}
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 12 }}>
-            <Button variant="ghost" title="Not now" onPress={dismiss} />
-            {canInstall && <Button title={busy ? 'Installing…' : 'Install app'} disabled={busy} onPress={() => { void doInstall() }} />}
-          </View>
+    {/* M-08: a small non-modal banner above the tab bar, never a dialog over the chat list right after sign-in. */}
+    {open && status === 'ready' && !waiting && <View accessibilityRole="none" aria-live="polite" style={{ position: 'absolute', bottom: 80, left: 16, right: 16, zIndex: 9998, alignItems: 'center', pointerEvents: 'box-none' }}>
+      <View role="region" aria-label="Install JIVO JM" style={{ backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12, gap: 8, width: '100%', maxWidth: 430, boxShadow: '0 8px 24px rgba(15, 23, 42, 0.16)' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <Image source={{ uri: '/icons/icon-192.png' }} style={{ width: 36, height: 36, borderRadius: 9 }} accessibilityIgnoresInvertColors />
+          <View style={{ flex: 1, minWidth: 0 }}><Text style={{ color: colors.text, fontFamily: 'Inter_600SemiBold', fontWeight: '600', fontSize: 14, lineHeight: 20 }}>Install JIVO JM</Text><Text style={{ color: colors.muted, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 16 }}>{canInstall ? 'Open JM in its own window from your home screen or apps.' : /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'In Safari, tap Share, then Add to Home Screen.' : 'Use your browser menu: Install app or Add to Home screen.'}</Text></View>
+        </View>
+        {!!installError && <Text accessibilityRole="alert" style={{ color: colors.text, fontSize: 12, lineHeight: 16 }}>{installError}</Text>}
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}>
+          <Button size="sm" variant="ghost" title="Not now" accessibilityLabel="Not now, hide the install banner" onPress={dismiss} />
+          {canInstall && <Button size="sm" title={busy ? 'Installing…' : 'Install app'} disabled={busy} onPress={() => { void doInstall() }} />}
         </View>
       </View>
-    </Modal>
+    </View>}
   </>
 }

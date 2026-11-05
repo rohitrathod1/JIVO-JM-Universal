@@ -1,7 +1,7 @@
 import { ActivityIndicator, Platform, Pressable, Text, TextInput, View, StyleSheet, useWindowDimensions, type TextInputProps, type StyleProp, type ViewStyle } from 'react-native'
 import { createContext, useContext, useState } from 'react'
 import { useTheme } from './core/theme/useTheme'
-import { controlHeight, isWide } from './shared/shellLayout'
+import { controlHeight, isWide, MIN_TOUCH } from './shared/shellLayout'
 import type { ReactNode, Ref, ComponentRef } from 'react'
 // Reference tokens from Frontend/src/index.css. Solid glass fallback keeps native data readable;
 // web uses the reference translucent glass levels with backdrop blur (see `glass()`).
@@ -56,11 +56,12 @@ export function Label({ children, large = false }: { children: ReactNode; large?
   return <Text style={{ fontFamily: large ? 'Inter_600SemiBold' : 'Inter_400Regular', color: c.text, fontSize: size, fontWeight: large ? '600' : '400', lineHeight: large ? (size === 24 ? 32 : 28) : 22, letterSpacing: large ? -0.3 : 0 }}>{children}</Text>
 }
 export function Button({ title, onPress, disabled = false, loading = false, accessibilityLabel, variant = 'primary', size = 'md', style }: { title: string; onPress: () => void; disabled?: boolean; loading?: boolean; accessibilityLabel?: string; variant?: 'primary' | 'secondary' | 'ghost' | 'danger'; size?: 'sm' | 'md'; style?: StyleProp<ViewStyle> }) {
-  const c = useColors(); const [hovered, setHovered] = useState(false)
+  const c = useColors(); const [hovered, setHovered] = useState(false); const { width } = useWindowDimensions()
   const off = disabled || loading
   const filled = variant === 'primary' || variant === 'danger'
-  const background = variant === 'primary' ? (hovered ? c.primaryHover : c.primary) : variant === 'danger' ? c.danger : variant === 'secondary' ? (hovered ? (c.dark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.8)') : web ? c.glass2 : c.panel) : hovered ? c.hover : 'transparent'
-  const height = size === 'sm' ? (web ? 32 : 36) : controlHeight(Platform.OS)
+  const background = variant === 'primary' ? (hovered ? c.primaryHover : c.primary) : variant === 'danger' ? c.dangerFill : variant === 'secondary' ? (hovered ? (c.dark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.8)') : web ? c.glass2 : c.panel) : hovered ? c.hover : 'transparent'
+  // DEF-005: full-size buttons meet the 44px touch target on phones; the 40px reference height stays from `md` up.
+  const height = size === 'sm' ? (web ? 32 : 36) : isWide(width) ? controlHeight(Platform.OS) : Math.max(MIN_TOUCH, controlHeight(Platform.OS))
   return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityState={{ disabled: off, busy: loading }} disabled={off} onPress={onPress} onHoverIn={() => setHovered(true)} onHoverOut={() => setHovered(false)}
     style={({ pressed }) => [{ paddingHorizontal: size === 'sm' ? 12 : 16, minHeight: height, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', borderRadius: radius.control, borderWidth: variant === 'secondary' ? 1 : 0, borderColor: variant === 'secondary' && hovered ? 'rgba(22,163,74,0.4)' : c.border, backgroundColor: background, opacity: off ? 0.5 : pressed ? 0.85 : variant === 'danger' && hovered ? 0.9 : 1, transform: [{ scale: pressed ? 0.98 : 1 }], ...(filled ? { boxShadow: shadow.sm } : {}), ...cursor(off) }, style]}>
     {loading && <ActivityIndicator size="small" color={filled ? '#ffffff' : c.brand} />}

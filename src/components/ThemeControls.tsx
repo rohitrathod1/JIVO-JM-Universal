@@ -1,5 +1,6 @@
-import { Platform, Pressable, Text, View } from 'react-native'
+import { Platform, Pressable, Text, View, useWindowDimensions } from 'react-native'
 import { useColors } from '../ui'
+import { touchBox } from '../shared/shellLayout'
 import { ProfileSection } from './ProfileSection'
 import { useTheme } from '../core/theme/useTheme'
 import { Icon, type IconName } from './Icon'
@@ -7,7 +8,12 @@ import type { ThemeChoice } from '../core/theme/model'
 
 /** Same one-tap opposite-theme action as the reference. System remains the default. */
 export function ThemeToggle({ label = false, prominent = false }: { label?: boolean; prominent?: boolean }) {
-  const { dark, set } = useTheme(); const c = useColors()
+  const { dark, set } = useTheme(); const c = useColors(); const { width } = useWindowDimensions()
+  // DEF-005: the bare 36px icon gets a transparent 44px phone hit box; the hover/press circle stays 36px.
+  if (!label && !prominent) return <Pressable accessibilityRole="button" accessibilityLabel={dark ? 'Switch to light theme' : 'Switch to dark theme'} onPress={() => void set(dark ? 'light' : 'dark')}
+    style={{ ...touchBox(36, width), ...(Platform.OS === 'web' ? { cursor: 'pointer' } as object : {}) }}>
+    {({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => <View style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 999, backgroundColor: pressed || hovered ? (c.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)') : 'transparent' }}><Icon name={dark ? 'sun' : 'moon'} size={20} /></View>}
+  </Pressable>
   return <Pressable accessibilityRole="button" accessibilityLabel={dark ? 'Switch to light theme' : 'Switch to dark theme'} onPress={() => void set(dark ? 'light' : 'dark')}
     style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => ({ minWidth: label || prominent ? 44 : 36, minHeight: label || prominent ? 44 : 36, flexDirection: prominent ? 'row' : 'column', borderWidth: prominent ? 1 : 0, borderColor: c.border, alignItems: 'center', justifyContent: 'center', gap: prominent ? 8 : 4, padding: label ? 6 : 8, paddingHorizontal: prominent ? 14 : 8, borderRadius: label ? 12 : 999, backgroundColor: pressed || hovered ? (c.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)') : prominent ? c.panel : 'transparent', ...(Platform.OS === 'web' ? { cursor: 'pointer' } as object : {}) })}>
     <Icon name={dark ? 'sun' : 'moon'} size={label ? 22 : 20} />

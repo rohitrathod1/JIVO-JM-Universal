@@ -55,7 +55,7 @@ export function SharedMedia({ conversation }: { conversation: string }) {
   const empty = kind === 'media' ? 'No photos or videos yet.' : kind === 'docs' ? 'No documents yet.' : 'No links yet.'
   const muted = { color: c.muted, fontSize: 12, lineHeight: 16, fontFamily: 'Inter_400Regular' } as const
   return <View accessibilityLabel="Media, docs and links" style={{ gap: 12 }}>
-    <View accessibilityRole="tablist" style={{ flexDirection: 'row', gap: 4, padding: 4, borderRadius: 999, backgroundColor: c.neutral }}>{sharedTabs.map(tab => { const on = kind === tab.kind; return <Pressable key={tab.kind} accessibilityRole="tab" accessibilityLabel={tab.label} accessibilityState={{ selected: on }} onPress={() => setKind(tab.kind)}
+    <View accessibilityRole="tablist" style={{ flexDirection: 'row', gap: 4, padding: 4, borderRadius: 999, backgroundColor: c.neutral }}>{sharedTabs.map(tab => { const on = kind === tab.kind; return <Pressable key={tab.kind} accessibilityRole="tab" accessibilityLabel={tab.label} accessibilityState={{ selected: on }} aria-selected={on} onPress={() => setKind(tab.kind)}
       style={{ flex: 1, minHeight: 36, borderRadius: 999, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? c.panel : 'transparent', ...(on ? { shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 } : null) }}>
       <Text style={{ color: on ? c.text : c.muted, fontFamily: 'Inter_500Medium', fontSize: 14, lineHeight: 20 }}>{tab.label}</Text></Pressable> })}</View>
     {loading && !items.length && <ActivityIndicator accessibilityLabel="Loading shared items" />}

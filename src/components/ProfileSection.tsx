@@ -8,7 +8,7 @@ export function ProfileSection({ title, aside, badge, children }: { title: strin
   const c = useColors()
   const [expanded, setExpanded] = useState(false)
   return <Surface style={{ paddingHorizontal: 20, paddingVertical: 12 }}>
-    <Pressable accessibilityRole="button" accessibilityLabel={title} accessibilityHint={expanded ? 'Collapse section' : 'Expand section'} accessibilityState={{ expanded }} onPress={() => setExpanded(value => !value)} style={({ pressed }) => ({ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, opacity: pressed ? 0.7 : 1 })}>
+    <Pressable accessibilityRole="button" accessibilityLabel={title} accessibilityHint={expanded ? 'Collapse section' : 'Expand section'} accessibilityState={{ expanded }} aria-expanded={expanded} onPress={() => setExpanded(value => !value)} style={({ pressed }) => ({ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 10, opacity: pressed ? 0.7 : 1 })}>
       <Text style={{ flex: 1, color: c.text, fontFamily: 'Inter_600SemiBold', fontWeight: '600', fontSize: 16, lineHeight: 24 }}>{title}</Text>
       {badge}
       <Icon name={expanded ? 'chevronUp' : 'down'} size={20} color={c.muted} />

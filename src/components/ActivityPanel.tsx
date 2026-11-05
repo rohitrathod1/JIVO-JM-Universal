@@ -37,7 +37,7 @@ function SwipeRow({ children, onDelete, label, disabled }: { children: ReactNode
   const hover = web ? ({ onMouseEnter: () => setHovered(true), onMouseLeave: () => setHovered(false) } as object) : {}
   return <View style={{ position: 'relative', overflow: 'hidden' }} {...hover}>
     <Pressable accessibilityRole="button" accessibilityLabel="Delete" accessibilityElementsHidden={!open} importantForAccessibility={open ? 'auto' : 'no-hide-descendants'} aria-hidden={!open} tabIndex={open ? 0 : -1} disabled={disabled} onPress={() => { settle(0); onDelete() }}
-      style={[{ position: 'absolute', top: 0, bottom: 0, right: 0, width: SWIPE_REVEAL, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: c.danger }, pointer()]}>
+      style={[{ position: 'absolute', top: 0, bottom: 0, right: 0, width: SWIPE_REVEAL, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: c.dangerFill }, pointer()]}>
       <Icon name="trash2" size={16} color="#ffffff" /><Text style={{ fontFamily: font.s, fontWeight: '600', fontSize: 14, color: '#ffffff' }}>Delete</Text>
     </Pressable>
     <Animated.View {...pan.panHandlers} style={{ transform: [{ translateX: x }], backgroundColor: c.dark ? '#0f172a' : '#ffffff' }}>

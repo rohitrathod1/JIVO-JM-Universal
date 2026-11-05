@@ -7,7 +7,6 @@ import { capturePhoto } from '../modules/messenger/media/capture'
 import { AtlasIcon } from './AtlasIcon'
 import { useAtlasStatus } from '../modules/atlas/useAtlas'
 import { ConnectionStatus } from './ConnectionStatus'
-import { Sheet } from './Sheet'
 import { AttachmentExport } from './AttachmentExport'
 import { RichMessage } from './RichMessage'
 import { useChatImmersive } from './WorkspaceChrome'
@@ -44,7 +43,8 @@ import { errorMessage, origin } from '../core/api/client'
 import { realtime } from '../core/realtime/socket'
 import { subscribeLifecycle } from '../core/realtime/lifecycle'
 import { Button, Card, EmptyState, Field, Label, glass, useColors } from '../ui'
-import { chatListWidth, isWide } from '../shared/shellLayout'
+import { chatListWidth, isWide, touchBox } from '../shared/shellLayout'
+import { actionFailure, OFFLINE_ACTION } from '../modules/messenger/offlineAction'
 import { CreatePoll, ForwardMessage, FullImage, MessageActionSheet, SearchMessages, ShareContact } from './MessageTools'
 import { MediaPlayback } from './MediaPlayback'
 import { ConversationDetails } from './ConversationDetails'
@@ -72,9 +72,10 @@ const previewIcons: Record<chat.PreviewMedia, { icon: IconName; label: string }>
 /** Reference chat root: bg-[#efeae2]/60 dark:bg-slate-950/40 over the app canvas; native has no canvas gradient, so it uses the solid mix. */
 const chatTint = (c: ReturnType<typeof useColors>) => Platform.OS === 'web' ? (c.dark ? 'rgba(2,6,23,0.4)' : 'rgba(239,234,226,0.6)') : c.chat
 function HeaderButton({ icon, label, onPress, disabled = false, round = false }: { icon: IconName; label: string; onPress: () => void; disabled?: boolean; round?: boolean }) {
-  const c = useColors()
-  return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} style={state => ({ width: round ? 36 : 40, height: round ? 36 : 40, borderRadius: round ? 18 : 10, alignItems: 'center', justifyContent: 'center', backgroundColor: state.pressed || isHovered(state) ? c.hover : 'transparent', opacity: disabled ? 0.45 : 1, ...listPointer })}>
-    <Icon name={icon} size={20} color={round ? c.muted : c.text} />
+  const c = useColors(); const { width } = useWindowDimensions(); const size = round ? 36 : 40
+  // DEF-005: 44px phone hit box around the drawn 36/40px button.
+  return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} style={{ ...touchBox(size, width), opacity: disabled ? 0.45 : 1, ...listPointer }}>
+    {state => <View style={{ width: size, height: size, borderRadius: round ? 18 : 10, alignItems: 'center', justifyContent: 'center', backgroundColor: state.pressed || isHovered(state) ? c.hover : 'transparent' }}><Icon name={icon} size={20} color={round ? c.muted : c.text} /></View>}
   </Pressable>
 }
 
@@ -154,10 +155,12 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
   const mention = mentionAt(body, caret)
   const [pendingFile, setPendingFile] = useState<{ conversation: string; file: PickedFile } | null>(null)
   const pickingFile = useRef(false)
-  const [atlas, setAtlas] = useState(false)
   const atlasEnabled = !!useAtlasStatus()?.enabled
   const [actions, setActions] = useState<chat.Message | null>(null)
   const [error, setError] = useState(''); const [sending, setSending] = useState(false)
+  // OFF-05: a reaction or edit that failed for lack of a connection says so next to the composer (the banner alone is not tied to the action).
+  const [actionNotice, setActionNotice] = useState('')
+  const failAction = (e: unknown) => { const text = actionFailure(e, errorMessage); if (text === OFFLINE_ACTION) { setActions(null); setActionNotice(text) } else setError(text) }
   const [exporting,setExporting]=useState<{conversation:string;message:string;attachment:string}|null>(null)
   const [media, setMedia] = useState<{ conversation: string; message: string; attachment: string } | null>(null)
   const [menu, setMenuMode] = useState<'options' | 'tools' | null>(null); const setMenu = (open: boolean) => setMenuMode(open ? 'tools' : null); const [choice, setChoice] = useState<'clear' | null>(null)
@@ -320,12 +323,13 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
     setSending(true); setError('')
     try {
       live.stop()
+      setActionNotice('')
       if (editing) history.accept(await chat.editMessage(editing.id, withMentionTokens(body.trim(), live.members)))
       else await outbox.enqueue(me?.id ?? '', selected.id, { client_id: draftId.current, body: withMentionTokens(body.trim(), live.members), upload_ids: attachments.map(a => a.id), reply_to: reply?.id }, { attachments })
       if (!editing && me) conversationDrafts.write(me.id, selected.id, '')
       if (!active.current) return
       setBody(editing ? conversationDrafts.read(me?.id ?? '', selected.id) : ''); setAttachments([]); setEditing(null); setReply(null); draftId.current = randomUUID(); followIncoming.current = true; nearBottom.current = true; listRef.current?.scrollToEnd({ animated: false }); if (historyState.window.hasMoreAfter) void history.latest(); refresh()
-    } catch (e) { if (active.current) setError(errorMessage(e)) } finally { if (active.current) setSending(false) }
+    } catch (e) { if (active.current) { if (editing) failAction(e); else setError(errorMessage(e)) } } finally { if (active.current) setSending(false) }
   }
   async function attach(type: string | string[] = '*/*', camera = false) {
     if (!selected?.can.send_file || pickingFile.current || editing) return
@@ -341,9 +345,9 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
     finally { pickingFile.current = false }
   }
   async function perform(action: () => Promise<unknown>) {
-    setSending(true); setError('')
+    setSending(true); setError(''); setActionNotice('')
     try { await action(); if (active.current) { setActions(null); void history.reconcile(); void history.refreshDetail(); refresh() } }
-    catch (e) { if (active.current) setError(errorMessage(e)) } finally { if (active.current) setSending(false) }
+    catch (e) { if (active.current) failAction(e) } finally { if (active.current) setSending(false) }
   }
   const applySettings = (data: Parameters<typeof chat.updateSettings>[1]) => perform(async () => { setSelected(await chat.updateSettings(selected!.id, data)) })
   function loadEarlier() { followIncoming.current = false; nearBottom.current = false; setReaderAway(true); void history.page('before') }
@@ -372,7 +376,7 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
             {!preview && <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, flexShrink: 0, marginVertical: -8 }} contentContainerStyle={{ gap: 6, paddingBottom: 2 }}>
               {/* Reference FILTERS chips: h-7, px-3, text-xs medium; the selected chip is the primary fill.
                   The pressable is a 44px-tall transparent hit area around the 28px pill (DEF-005); the row's -8 margins keep the layout. */}
-              {listFilters.map(f => { const on = f.value === filter; const count = chipCounts[f.value] ?? 0; return <Pressable key={f.value} onPress={() => setFilter(f.value)} accessibilityLabel={f.label} accessibilityRole="tab" accessibilityState={{ selected: on }} style={state => ({ height: 44, justifyContent: 'center', ...listPointer, ...(isHovered(state) && !on ? { opacity: 0.9 } : {}) })}>{state => <View style={{ height: 28, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', borderRadius: 14, backgroundColor: on ? c.primary : c.neutral }}><Text style={{ fontFamily: 'Inter_500Medium', fontWeight: '500', fontSize: 12, lineHeight: 16, color: on ? '#ffffff' : isHovered(state) ? c.text : c.muted }}>{f.label}</Text>
+              {listFilters.map(f => { const on = f.value === filter; const count = chipCounts[f.value] ?? 0; return <Pressable key={f.value} onPress={() => setFilter(f.value)} accessibilityLabel={f.label} accessibilityRole="tab" accessibilityState={{ selected: on }} aria-selected={on} style={state => ({ height: 44, minWidth: 44, justifyContent: 'center', ...listPointer, ...(isHovered(state) && !on ? { opacity: 0.9 } : {}) })}>{state => <View style={{ height: 28, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', borderRadius: 14, backgroundColor: on ? c.primary : c.neutral }}><Text style={{ fontFamily: 'Inter_500Medium', fontWeight: '500', fontSize: 12, lineHeight: 16, color: on ? '#ffffff' : isHovered(state) ? c.text : c.muted }}>{f.label}</Text>
                 {count > 0 && <View accessibilityLabel={`${count} unread`} style={{ marginLeft: 6, minWidth: 16, height: 16, paddingHorizontal: 4, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? 'rgba(255,255,255,0.9)' : c.brandFill }}><Text style={{ fontFamily: 'Inter_700Bold', fontWeight: '700', fontSize: 10, lineHeight: 12, color: on ? c.primary : '#ffffff' }}>{count > 99 ? '99+' : count}</Text></View>}</View>}</Pressable> })}
             </ScrollView>}
           </>}
@@ -440,15 +444,19 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
               {!m.deleted && m.contact && <ContactCard person={m.contact} onProfile={() => setPerson(m.contact!)} />}
             </View></MessageBubble></> }} />
             {(readerAway || newMessages || historyState.window.hasMoreAfter) && <Pressable accessibilityRole="button" accessibilityLabel={newMessages ? 'New messages — jump to latest' : 'Jump to latest'} onPress={() => { setNewMessages(false); void history.latest() }}
-              style={({ pressed }) => [glass(c, 4), { position: 'absolute', right: 12, bottom: 12, flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, opacity: pressed ? 0.8 : 1 }]}>
+              style={{ position: 'absolute', right: 6, bottom: 6, padding: 6, ...listPointer }}>
+              {/* DEF-005: the transparent 6px ring makes the 32px pill a 44px hit box without changing how it looks. */}
+              {({ pressed }) => <View style={[glass(c, 4), { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, opacity: pressed ? 0.8 : 1 }]}>
               {newMessages && <Text style={{ borderRadius: 999, paddingHorizontal: 6, backgroundColor: c.brandFill, color: '#ffffff', fontFamily: 'Inter_600SemiBold', fontSize: 12, lineHeight: 16, overflow: 'hidden' }}>New</Text>}
               <Image accessible={false} source={require('../../assets/icons/ArrowDown.png')} style={{ width: 16, height: 16, tintColor: c.text }} />
+              </View>}
             </Pressable>}</View>
           <View style={{ paddingHorizontal: 12, gap: 8 }}>
           {!compact && historyState.window.hasMoreAfter && <View style={{ paddingTop: 6 }}><Button title="Load newer messages" disabled={historyState.loading} onPress={() => void history.page('after')} /></View>}
           {!!pending.notice && <Label>{pending.notice}</Label>}
 
           {reply && <ComposerContext mode="reply" name={reply.sender?.name} text={reply.body || (reply.attachments.length ? '📎 Attachment' : '')} onCancel={() => setReply(null)} />}
+          {!!actionNotice && <Text accessibilityRole="alert" style={{ color: c.text, fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18 }}>{actionNotice}</Text>}
           {editing && <ComposerContext mode="edit" text={editing.body} onCancel={() => { setEditing(null); setBody(conversationDrafts.read(me?.id ?? '', selected.id)) }} />}
           {attachments.map(a => <View key={a.id} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}><View style={{ flex: 1 }}><Label>{a.name} • ready</Label></View><Button title="Remove file" disabled={blocked} onPress={() => void perform(async () => { await chat.discardUpload(a.id); setAttachments(v => v.filter(item => item.id !== a.id)); draftId.current = randomUUID() })} /></View>)}
           {selected.can.send && <ComposerPreview body={body} />}
@@ -482,7 +490,6 @@ export function Messenger({ preview = false, initialConversation, initialSeq }: 
     {selected && selectedId && tool === 'contact' && <ShareContact conversation={selectedId} onSent={message => { history.accept(message); setTool(null); void history.latest(); refresh() }} onClose={() => setTool(null)} />}
     {selected && tool === 'event' && <EventComposer conversation={selected.id} onSent={message => { history.accept(message); setTool(null); void history.latest(); refresh() }} onClose={() => setTool(null)} />}
     {selected && tool === 'location' && <LocationComposer conversation={selected.id} onSent={message => { history.accept(message); setTool(null); void history.latest(); refresh() }} onClose={() => setTool(null)} />}
-    <Sheet visible={atlas} onClose={() => setAtlas(false)}><Label large>Atlas - JIVO Business AI</Label><Label>Atlas integration is coming soon. Your business assistant will appear here when it is ready.</Label><Button title="Close" onPress={() => setAtlas(false)} /></Sheet>
     {info && selected && info.conversation===selected.id && <MessageDetails message={info} onClose={()=>setInfo(null)} />}
     {votes && selected && messages.some(message => message.id === votes && !message.deleted) && <PollVoters id={votes} onClose={() => setVotes(null)} onPerson={value => { setVotes(null); setPerson(value) }} />}
     {person && selected && <PersonDetails person={person} onClose={() => setPerson(null)} />}

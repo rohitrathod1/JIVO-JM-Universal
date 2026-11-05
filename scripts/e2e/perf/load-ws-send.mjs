@@ -27,7 +27,11 @@ const now = () => performance.now() - t0
 const sends = [] // {user, t, ms, status, tag}
 const deliveries = [] // ms
 const pendingTags = new Map() // tag -> {t, expected, got}
-const wsStats = { opened: 0, failed: 0, closed: 0, closeCodes: {}, frames: 0, connectMs: [] }
+const wsStats = { opened: 0, failed: 0, closed: 0, closedEarly: 0, closeCodes: {}, frames: 0, pings: 0, pongs: 0, connectMs: [] }
+// Heartbeat like the app (src/core/realtime/client.ts): PING every 25 s, so the server's idle close (4408 after
+// JM_WS_IDLE_CLOSE_SECONDS without a client frame) never fires on a socket that only receives.
+const PING_MS = 25000
+let finished = false
 let stop = false, stopReason = ''
 
 const pct = (arr, p) => { if (!arr.length) return null; const s = [...arr].sort((a, b) => a - b); return +s[Math.min(s.length - 1, Math.floor(p / 100 * s.length))].toFixed(1) }
@@ -38,12 +42,14 @@ function openWs(name) {
     const start = performance.now()
     const ws = new WebSocket(base.replace(/^http/, 'ws') + '/ws/', { headers: { Origin: origin, Cookie: cookie } })
     let done = false
-    ws.onopen = () => { wsStats.opened++; wsStats.connectMs.push(performance.now() - start); if (!done) { done = true; resolve(ws) } }
+    let heartbeat = null
+    ws.onopen = () => { heartbeat = setInterval(() => { if (ws.readyState === 1) try { ws.send(JSON.stringify({ type: 'PING', data: {} })); wsStats.pings++ } catch {} }, PING_MS); wsStats.opened++; wsStats.connectMs.push(performance.now() - start); if (!done) { done = true; resolve(ws) } }
     ws.onerror = () => { if (!done) { done = true; wsStats.failed++; resolve(null) } }
-    ws.onclose = e => { wsStats.closed++; wsStats.closeCodes[e.code] = (wsStats.closeCodes[e.code] || 0) + 1 }
+    ws.onclose = e => { clearInterval(heartbeat); if (!finished) wsStats.closedEarly++; wsStats.closed++; wsStats.closeCodes[e.code] = (wsStats.closeCodes[e.code] || 0) + 1 }
     ws.onmessage = e => {
       wsStats.frames++
       let msg; try { msg = JSON.parse(String(e.data)) } catch { return }
+      if (msg.type === 'PONG') { wsStats.pongs++; return }
       if (msg.type !== 'MESSAGE_CREATED') return
       const body = msg.data?.body || ''
       const m = /\[LT:([0-9a-f]{12})\]/.exec(body)
@@ -105,7 +111,6 @@ const mon = setInterval(() => {
   if (stop || t - loadStart > SECONDS * 1000 + 35000) finish()
 }, 5000)
 
-let finished = false
 async function finish() {
   if (finished) return; finished = true
   clearInterval(mon); timers.forEach(clearTimeout)

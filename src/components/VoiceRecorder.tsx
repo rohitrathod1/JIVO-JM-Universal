@@ -7,6 +7,7 @@ import type { PickedFile } from '../modules/messenger/media/model'
 import { subscribeSensitiveView } from '../shared/sensitiveLifecycle'
 import { Button, useColors } from '../ui'
 import { Icon } from './Icon'
+import { touchBox } from '../shared/shellLayout'
 
 function Playback({ uri }: { uri: string }) {
  const player = useAudioPlayer({ uri }); const status = useAudioPlayerStatus(player)
@@ -34,7 +35,7 @@ export function VoiceRecorder({ disabled, onSend }: { disabled: boolean; onSend:
  /* eslint-enable react-hooks/refs, react-hooks/purity */
  const visible = state.phase !== 'idle' || !!state.error || !!error
  return <View style={{ zIndex: 20 }}>
-  <View {...responder.panHandlers} accessible accessibilityRole="button" accessibilityLabel="Hold to record a voice message" accessibilityState={{ disabled }} accessibilityActions={[{ name: 'activate', label: 'Start recording' }]} onAccessibilityAction={() => { if (!disabled) void voice.start() }} style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: c.primary, opacity: disabled ? 0.5 : 1 }}><Icon name="mic" size={22} color="#ffffff" /></View>
+  <View {...responder.panHandlers} accessible accessibilityRole="button" accessibilityLabel="Hold to record a voice message" accessibilityState={{ disabled }} accessibilityActions={[{ name: 'activate', label: 'Start recording' }]} onAccessibilityAction={() => { if (!disabled) void voice.start() }} style={touchBox(40, width)}><View style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: c.primary, opacity: disabled ? 0.5 : 1 }}><Icon name="mic" size={22} color="#ffffff" /></View></View>
   {visible && <View style={{ position: 'absolute', right: 0, bottom: 52, width: Math.min(width - 24, 500), padding: 12, borderRadius: 16, borderWidth: 1, borderColor: c.border, backgroundColor: c.panel, gap: 10 }}>
    {!!(state.error || error) && <Text accessibilityRole="alert" style={{ color: c.danger }}>{error || state.error}</Text>}
    {state.phase === 'preparing' && <Text style={{ color: c.muted }}>Allow microphone access to record.</Text>}

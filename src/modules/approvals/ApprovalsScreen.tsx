@@ -90,7 +90,7 @@ export function ApprovalsScreen() {
       {confirming && copy && <><Label large>{copy.title}</Label><Label>{copy.body}</Label>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8 }}>
           <Button title="Cancel" variant="secondary" disabled={!!busy} onPress={() => setConfirming(null)} />
-          <Button title={busy ? 'Working…' : copy.label} disabled={!!busy} style={confirming.d === 'approve' ? { backgroundColor: c.danger } : undefined} onPress={() => void act(confirming.item, confirming.d)} />
+          <Button title={busy ? 'Working…' : copy.label} disabled={!!busy} style={confirming.d === 'approve' ? { backgroundColor: c.dangerFill } : undefined} onPress={() => void act(confirming.item, confirming.d)} />
         </View></>}
     </Sheet>
     <Sheet visible={!!link} onClose={clearLink}>

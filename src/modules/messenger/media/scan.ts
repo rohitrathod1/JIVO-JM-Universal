@@ -1,4 +1,12 @@
 import type { Attachment } from '../api'
+/**
+ * The server refuses an upload that was never virus-scanned with 409 `upload_not_scanned` (scanner off). That
+ * cannot change by waiting, so it ends the wait at once and the queued item shows the server's detail.
+ */
+export function uploadNotScanned(error: unknown): boolean {
+  const response = error && typeof error === 'object' ? (error as { response?: { status?: number; data?: { code?: unknown } } }).response : undefined
+  return response?.status === 409 && response.data?.code === 'upload_not_scanned'
+}
 type Dependencies = { read: (id: string) => Promise<Attachment>; subscribe: (handler: (upload: Attachment) => void) => () => void }
 export function awaitScan(upload: Attachment, deps: Dependencies, signal: AbortSignal, timeout = 120000): Promise<Attachment> {
   return new Promise((resolve, reject) => {
@@ -22,7 +30,10 @@ export function awaitScan(upload: Attachment, deps: Dependencies, signal: AbortS
     accept(upload); if (done) return
     off = deps.subscribe(accept)
     const check = async () => {
-      try { accept(await deps.read(upload.id)) } catch { /* transient failures retain the bounded wait */ }
+      try { accept(await deps.read(upload.id)) } catch (error) {
+        if (uploadNotScanned(error)) { finish(undefined, error as Error); return }
+        /* other transient failures retain the bounded wait */
+      }
       if (!done) poll = setTimeout(() => void check(), 2000)
     }
     poll = setTimeout(() => void check(), 2000)

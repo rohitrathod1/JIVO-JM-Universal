@@ -44,7 +44,8 @@ async function exportFromActions(page, name) {
 }
 // Desktop rail bell is a menu button (reference BellMenu); the full page is behind "View all notifications & settings".
 async function openNotifications(page, width) {
-  if (width < 768) return page.getByRole('link', { name: 'Inbox', exact: true }).last().click()
+  // Phones: the header bell opens the Notifications page (Workspace header; there is no Inbox tab since 2e4a6d4).
+  if (width < 768) { await page.getByRole('button', { name: /^Notifications(, \d+ unread)?$/ }).first().click(); return page.waitForURL(u => new URL(u).pathname === '/notifications') }
   await page.getByRole('button', { name: /^Notifications(, \d+ unread)?$/ }).last().click()
   await page.getByRole('menuitem', { name: 'View all notifications & settings', exact: true }).click()
 }
@@ -203,7 +204,7 @@ async function run() {
 
         if (path === '/api/jp/vaults/vault/folders/') { if (method === 'POST') folders.push({ id: 'folder', name: body.name, parent: body.parent }); return send(method === 'POST' ? folders.at(-1) : folders) }
         if (path === '/api/jp/vaults/vault/folders/folder/') { if (method === 'PATCH') folders[0].name = body.name; else if (method === 'DELETE') folders = []; return send(folders[0] || {}) }
-        if (path === '/api/jp/people/') return send([{ id: 'peer', name: 'Example Colleague', email: 'colleague@example.invalid', is_active: true }])
+        if (path === '/api/jp/people/') return send([{ id: 'peer', name: 'Example Colleague', email: 'colleague@example.invalid', is_active: true }, { id: 'peer-2', name: 'Example Second Owner', email: 'second@example.invalid', is_active: true }])
         if (path === '/api/jp/entries/entry/shares/') { const share = { id: 'share', grantee: { id: 'peer', name: 'Example Colleague' }, granted_by: { id: 'me', name: 'Example Tester' }, granted_at: '2026-10-20', expires_at: body.expires_at || null }; shares.push(share); return send(share) }
         if (path === '/api/jp/entries/entry/shares/share/') { shares = []; return send({}) }
         if (path === '/api/jp/entries/entry/move/') { entries[0].folder = body.folder; return send(entries[0]) }
@@ -233,6 +234,8 @@ async function run() {
         if (path === '/api/jp/break-glass/') { if(method==='POST') { const request={id:'emergency-request',vault:{id:body.vault_id,name:'Emergency example',owner_type:'shared'},requested_by:me,reason:body.reason,requested_at:'2026-10-20',approved_by:null,approved_at:null,denied_at:null,expires_at:null,status:'pending',can:{decide:false,revoke:false}}; emergency.push(request); return send(request) } return send(emergency) }
         if (path === '/api/jm/admin/users/me/' && method === 'PATCH') { Object.assign(adminPerson, body); return send(adminPerson) }
         if (path === '/api/jm/auth/invitations/accept/' || path === '/api/jm/auth/password/reset/') { if (method === 'GET') return send({ valid: url.searchParams.get('token') === 'mock-token', email: 'tester@example.invalid', full_name: 'Example Tester' }); signedIn = true; return send({ status: 'ok' }) }
+        // Ask Atlas is opt-in during the beta (backend BE-102): this mocked person is not an Atlas tester.
+        if (path === '/api/jm/atlas/status/') return send({ enabled: true, allowed: false, message: null })
         unexpected.push(method + ' ' + path); return send({ detail: 'Unmocked endpoint' }, 501)
       })
       await page.goto(base + '/login')
@@ -347,18 +350,24 @@ async function run() {
       await page.getByRole('button', { name: /, group info$/ }).first().click()
       await page.getByRole('tab', { name: 'Docs', exact: true }).click()
       await expect(page.getByText('Synthetic shared document.pdf', { exact: true })).toBeVisible()
-      // Group settings sit behind the group options menu (Frontend GroupInfo).
-      const groupSettings=async()=>{await page.getByRole('button',{name:'Group options',exact:true}).click();await page.getByRole('button',{name:'Group settings',exact:true}).click()}
-      const backToInfo=()=>page.getByRole('button',{name:'Back to group info',exact:true}).click()
+      // Group settings live on their own page like WhatsApp: /group-info -> "Edit group" -> /group-edit (decision U-019).
+      // Both are routes with a page header whose only way back is the "Back" button.
+      const onPage=async(path,heading)=>{await page.waitForURL(u=>new URL(u).pathname===path);await expect(page.getByRole('heading',{name:heading,exact:true})).toBeVisible()}
+      const pageBack=async()=>{await page.getByRole('button',{name:'Back',exact:true}).click()}
+      const groupSettings=async()=>{await onPage('/group-info','Group info');await page.getByRole('button',{name:'Edit group',exact:true}).click();await onPage('/group-edit','Edit group');await page.getByLabel('Group title',{exact:true}).waitFor()}
+      const backToInfo=async()=>{await pageBack();await onPage('/group-info','Group info')}
       const memberAction=async(person,name)=>{const action=page.getByRole('button',{name,exact:true});if(!(await action.isVisible()))await page.getByRole('button',{name:`Actions for ${person}`,exact:true}).click();await action.click()}
       await groupSettings()
       await captureTests.groupPhoto(page)
+      await expect(page.getByLabel('Group title', { exact: true })).toHaveValue('Example conversation')
       await expect(page.getByRole('button', { name: 'Save group information', exact: true })).toBeDisabled()
       await page.getByLabel('Group title', { exact: true }).fill('Updated example group')
+      await expect(page.getByRole('button', { name: 'Save group information', exact: true })).toBeEnabled()
       await page.getByRole('button', { name: 'Save group information', exact: true }).click()
       await expect.poll(()=>conversation.title).toBe('Updated example group')
-      await expect(page.getByRole('button', { name: 'Save group information', exact: true })).toBeDisabled()
-      await backToInfo()
+      assert.equal(mutations.filter(m=>m.path==='/api/jm/conversations/chat/'&&m.method==='PATCH'&&m.body.title==='Updated example group').length, 1)
+      // A successful save returns to group info (the edit page closes itself).
+      await onPage('/group-info','Group info')
       await memberAction('Example Colleague','Make Example Colleague an admin')
       await page.getByRole('button', { name: 'Confirm conversation change', exact: true }).click()
       await expect.poll(()=>mutations.filter(m=>m.path.includes('/members/')&&m.method==='PATCH').length).toBeGreaterThan(0)
@@ -368,31 +377,50 @@ async function run() {
       await page.getByRole('button', { name: "View New Example Member's profile", exact: true }).waitFor()
       assert.equal(mutations.find(m => m.path.endsWith('/members/') && m.method === 'POST').body.share_history, 'none')
       await groupSettings()
+      // The edit page loads fresh data: the saved title and the member added above.
+      await expect(page.getByLabel('Group title', { exact: true })).toHaveValue('Updated example group')
+      await expect(page.getByRole('button', { name: 'Save group information', exact: true })).toBeDisabled()
+      await expect(page.getByRole('radio',{name:'Everyone can send',exact:true})).toBeChecked()
       await page.getByRole('radio',{name:'Selected members can send',exact:true}).click()
       await page.getByLabel('Allow sender New Example Member',{exact:true}).check()
-        await page.getByRole('button',{name:'Save permissions',exact:true}).click()
-        await expect.poll(()=>mutations.filter(m=>m.path.endsWith('/send-mode/')).length).toBe(1)
-        assert.deepEqual(mutations.find(m=>m.path.endsWith('/send-mode/')).body,{mode:'selected',sender_ids:['new-member']})
+      await page.getByRole('button',{name:'Save permissions',exact:true}).click()
+      await expect.poll(()=>mutations.filter(m=>m.path.endsWith('/send-mode/')).length).toBe(1)
+      assert.deepEqual(mutations.find(m=>m.path.endsWith('/send-mode/')).body,{mode:'selected',sender_ids:['new-member']})
+      await page.getByText('Messaging permissions saved', { exact: true }).waitFor()
+      await expect(page.getByRole('button',{name:'Save permissions',exact:true})).toBeDisabled()
       await backToInfo()
-      await page.getByRole('button', { name: 'Close conversation details', exact: true }).click()
-      // Disappearing messages, mute and clear live in the chat header menu (reference ChatView), not in group info.
-      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await pageBack()
+      await page.waitForURL(u=>new URL(u).pathname==='/messenger')
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).waitFor()
+      // Back in the chat, the header shows the saved title (the workspace refreshes on focus).
+      await page.getByRole('button', { name: 'Updated example group, group info', exact: true }).first().waitFor()
+      // Disappearing messages and mute live in group info "Chat settings" (ChatProfileSettings, WhatsApp-style like
+      // U-019); only "Clear chat for me" stays in the chat header menu.
+      await page.getByRole('button', { name: 'Updated example group, group info', exact: true }).first().click()
+      await onPage('/group-info','Group info')
       await page.getByRole('button', { name: 'Disappearing messages', exact: true }).click()
       await page.getByRole('radio', { name: '24 hours', exact: true }).click()
       await page.getByRole('button', { name: 'Apply', exact: true }).click()
       await expect.poll(() => conversation.disappearing_seconds).toBe(86400)
-      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
       await page.getByRole('button', { name: 'Disappearing messages', exact: true }).click()
       await expect(page.getByRole('radio', { name: '24 hours', exact: true })).toBeChecked()
       await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
-      await page.getByRole('button', { name: 'Mute for 8 hours', exact: true }).click()
+      await page.getByRole('button', { name: 'Mute notifications', exact: true }).click()
+      await page.getByRole('radio', { name: 'For 8 hours', exact: true }).click()
+      await page.getByRole('button', { name: 'Apply', exact: true }).click()
       await expect.poll(() => Boolean(conversation.muted_until)).toBe(true)
+      await page.getByRole('button', { name: 'Mute notifications', exact: true }).click()
+      await expect(page.getByRole('radio', { name: 'Keep current mute', exact: true })).toBeChecked()
+      await page.getByRole('radio', { name: 'Unmute', exact: true }).waitFor()
+      await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+      await pageBack()
+      await page.waitForURL(u=>new URL(u).pathname==='/messenger')
       await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
-      await page.getByRole('button', { name: 'Unmute', exact: true }).waitFor()
       await page.getByRole('button', { name: 'Clear chat for me', exact: true }).click()
+      expect(await page.getByLabel(/^Message from /).count()).toBeGreaterThan(0)
       await page.getByRole('button', { name: 'Clear chat', exact: true }).click()
-      await page.getByText('No messages yet.', { exact: true }).waitFor()
+      // Like the reference MessageList, a cleared thread is simply empty (no "No messages yet." placeholder since 2e4a6d4).
+      await expect(page.getByLabel(/^Message from /)).toHaveCount(0)
       const restricted = message('restricted', 1, 'Restricted example'); restricted.attachments = [audioAttachment]; messages = [restricted]; socketClient.send(JSON.stringify({ type: 'MESSAGE_CREATED', data: restricted }))
       await page.getByRole('button', { name: 'Open media Example audio.wav', exact: true }).click()
       await page.getByRole('button', { name: 'Close media', exact: true }).waitFor()
@@ -400,12 +428,16 @@ async function run() {
       await page.getByRole('button', { name: 'Open Updated example group', exact: true }).waitFor()
       await expect(page.getByLabel('Message', { exact: true })).toHaveCount(0)
       await expect(page.getByRole('button', { name: 'Close media', exact: true })).toHaveCount(0)
+      // Profile is a list of collapsed sections (ProfileSection, since 2e4a6d4): open them all before using their fields.
+      const expandProfile=async()=>{await page.getByRole('button',{name:'Your details',exact:true}).waitFor();for(const title of ['Your details','Access','Two-step verification','Security notices','Password','Signed-in devices','Chat background','This device']){const section=page.getByRole('button',{name:title,exact:true});if(await section.count()&&await section.first().getAttribute('aria-expanded')!=='true'){await section.first().click();await expect(section.first()).toHaveAttribute('aria-expanded','true')}}}
       await page.getByRole('link', { name: /^Profile: / }).last().click()
+      await expandProfile()
       await page.getByLabel('Display name').waitFor()
       await page.getByRole('link',{name:'Home',exact:true}).click()
         await page.getByRole('link',{name:'Profile & security',exact:true}).waitFor()
         await page.screenshot({path:'test-results/home-mocked-'+width+'.png',fullPage:true})
         await page.getByRole('link',{name:'Profile & security',exact:true}).click()
+        await expandProfile()
         await page.getByLabel('Display name').fill('Updated Example Tester')
       await page.getByRole('button', { name: 'Save profile', exact: true }).click()
       await page.getByRole('button', { name: 'Verify password', exact: true }).waitFor()
@@ -427,7 +459,7 @@ async function run() {
       await page.getByLabel('Current profile photo',{exact:true}).waitFor({state:'hidden'})
       await captureTests.profileLifecycleAndInstall(page)
       await page.evaluate(()=>window.credentialMock.mode='success');await page.getByRole('button',{name:'Turn on app lock',exact:true}).click();await page.getByRole('button',{name:'Turn off app lock',exact:true}).waitFor();
-      await page.reload();await page.getByText('JM is locked',{exact:true}).waitFor();await page.getByLabel('App unlock password',{exact:true}).fill('mock-only-password');await page.getByRole('button',{name:'Unlock JM',exact:true}).click();await page.getByText('JM is locked',{exact:true}).waitFor({state:'hidden'});await page.getByRole('link',{name:/^Profile: /}).last().click();await page.getByRole('button',{name:'Turn off app lock',exact:true}).waitFor();await page.getByRole('button',{name:'Turn off app lock',exact:true}).click();await page.getByRole('button',{name:'Turn on app lock',exact:true}).waitFor();
+      await page.reload();await page.getByText('JM is locked',{exact:true}).waitFor();await page.getByLabel('App unlock password',{exact:true}).fill('mock-only-password');await page.getByRole('button',{name:'Unlock JM',exact:true}).click();await page.getByText('JM is locked',{exact:true}).waitFor({state:'hidden'});await page.getByRole('link',{name:/^Profile: /}).last().click();await expandProfile();await page.getByRole('button',{name:'Turn off app lock',exact:true}).waitFor();await page.getByRole('button',{name:'Turn off app lock',exact:true}).click();await page.getByRole('button',{name:'Turn on app lock',exact:true}).waitFor();
 
       for(const mode of ['success','cancel','pending']){verified=false;stepMethods=['passkey','password'];const calls=await page.evaluate(()=>window.credentialMock.calls);await page.evaluate(mode=>window.credentialMock.mode=mode,mode);await page.getByRole('button',{name:'Save profile',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.credentialMock.calls)).toBe(calls+1);if(mode==='pending'){await page.getByRole('button',{name:'Use your password instead',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.credentialMock.cancelled)).toBeGreaterThan(0)}if(mode!=='success'){await page.getByRole('button',{name:'Verify password',exact:true}).waitFor();await expect(page.getByText('The passkey could not be used.',{exact:true})).toHaveCount(0);await page.locator('input[aria-label="Current password"]:visible').last().fill('mock-only-password');await page.getByRole('button',{name:'Verify password',exact:true}).click()}await expect.poll(()=>verified).toBe(true);await expect(page.getByText('Profile updated.',{exact:true})).toBeVisible()}
       verified=false;stepMethods=['passkey'];await page.evaluate(()=>window.credentialMock.mode='cancel');await page.getByRole('button',{name:'Save profile',exact:true}).click();await page.getByRole('button',{name:'Verify with passkey',exact:true}).waitFor();await expect(page.getByRole('button',{name:'Verify password',exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Cancel',exact:true}).click();stepMethods=['password'];verified=true;
@@ -443,11 +475,14 @@ async function run() {
       await page.getByRole('button',{name:'Verify password',exact:true}).waitFor();assert.equal(unlockCalls,1);await page.getByRole('button',{name:'Cancel',exact:true}).click();await expect(page.getByRole('button',{name:'Open vault Example vault',exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Unlock',exact:true}).click();await page.locator('input[aria-label="Current password"]:visible').last().fill('mock-only-password');await page.getByRole('button',{name:'Verify password',exact:true}).click();await expect.poll(()=>vaultVerified).toBe(true);
 
       await page.getByRole('button', { name: 'Open vault Example vault', exact: true }).click()
-      await page.getByRole('button', { name: 'Manage folders', exact: true }).click()
-      await page.getByLabel('New folder name', { exact: true }).fill('Example folder')
-      await page.getByRole('button', { name: 'Create folder', exact: true }).click()
-      await page.getByRole('button', { name: 'Rename folder Example folder', exact: true }).waitFor()
-      await page.getByRole('button', { name: 'Close folder manager', exact: true }).click()
+      // The folder tool is a "New folder" sheet (Name + Create, VaultTools FolderManager since 2e4a6d4); it closes on success.
+      await page.getByRole('button', { name: 'New folder', exact: true }).click()
+      await expect(page.getByRole('button', { name: 'Create', exact: true })).toBeDisabled()
+      await page.getByLabel('Name', { exact: true }).fill('Example folder')
+      await page.getByRole('button', { name: 'Create', exact: true }).click()
+      await page.getByRole('button', { name: 'Create', exact: true }).waitFor({ state: 'hidden' })
+      assert.deepEqual(folders.map(f => f.name), ['Example folder'])
+      assert.equal(mutations.filter(m => m.path === '/api/jp/vaults/vault/folders/' && m.method === 'POST').length, 1)
       await page.getByRole('button', { name: 'Open Example entry', exact: true }).click()
       await page.getByRole('button', { name: 'Reveal password', exact: true }).click()
       await page.getByText('MOCK_REVEAL_ONLY', { exact: true }).waitFor()
@@ -487,73 +522,80 @@ async function run() {
       await page.getByRole('button', { name: 'Close entry', exact: true }).waitFor({ state: 'hidden' })
       assert.equal(entries[0].folder, 'folder')
       await page.getByRole('button', { name: 'Create entry', exact: true }).click()
-      await page.getByLabel('Entry title', { exact: true }).fill('New mocked entry')
+      // The entry form is a "New entry" sheet with plain field labels (Title, Password, Field 1 name; Save/Cancel) since 2e4a6d4.
+      const entryForm = page.getByRole('dialog', { name: 'New entry' })
+      await entryForm.waitFor()
+      await entryForm.getByLabel('Title', { exact: true }).fill('New mocked entry')
       const savesBeforeGeneration = mutations.filter(m => m.path === '/api/jp/entries/' && m.method === 'POST').length
-      await page.getByRole('button', { name: 'Password generator', exact: true }).click()
+      await entryForm.getByRole('button', { name: 'Password generator', exact: true }).click()
       await page.getByRole('button', { name: 'Generate password', exact: true }).click()
-      await expect(page.getByLabel('Secret password', { exact: true })).toHaveValue(/^.{20}$/)
+      await expect(entryForm.getByLabel('Password', { exact: true })).toHaveValue(/^.{20}$/)
       await page.getByRole('button', { name: 'Passphrase', exact: true }).click()
-      await expect(page.getByLabel('Secret password', { exact: true })).toHaveValue(/^(?:[a-z]+-){6}[1-9]\d$/)
+      await expect(entryForm.getByLabel('Password', { exact: true })).toHaveValue(/^(?:[a-z]+-){6}[1-9]\d$/)
       assert.equal(mutations.filter(m => m.path === '/api/jp/entries/' && m.method === 'POST').length, savesBeforeGeneration, 'Generation remains on device until Save')
-      await page.getByLabel('Secret password', { exact: true }).fill('MOCK_INPUT_ONLY')
-      await page.getByRole('button', { name: 'Add custom secret field', exact: true }).click()
-      await page.getByLabel('Custom field 1 name', { exact: true }).fill('unchanged')
-      await page.getByRole('button', { name: 'Save entry', exact: true }).click()
+      await entryForm.getByLabel('Password', { exact: true }).fill('MOCK_INPUT_ONLY')
+      await entryForm.getByRole('button', { name: 'Add field', exact: true }).click()
+      await entryForm.getByLabel('Field 1 name', { exact: true }).fill('unchanged')
+      await entryForm.getByRole('button', { name: 'Save', exact: true }).click()
       await page.getByRole('button', { name: 'Open New mocked entry', exact: true }).waitFor()
       assert.equal(mutations.find(m => m.path === '/api/jp/entries/' && m.method === 'POST').body.secret.fields, undefined)
-      await page.getByRole('button', { name: 'Cancel entry', exact: true }).waitFor({ state: 'hidden' })
+      await entryForm.waitFor({ state: 'hidden' })
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
       await page.screenshot({ path: 'test-results/vault-mocked-' + width + '.png', fullPage: true })
       await page.getByRole('button',{name:'Vault files',exact:true}).click()
+      // Vault files (VaultFiles since 2e4a6d4): a row opens the preview ("Open file"); rename/export/delete use one sheet titled
+      // "Rename file" / "Export file" / "Delete file?" whose confirm button is Save / Export / Delete next to Cancel.
+      const fileAction=page.getByRole('dialog',{name:/^(Rename file|Export file|Delete file\?)$/})
+      const confirmFile=fileAction.getByRole('button',{name:/^(Save|Export|Delete)$/})
       await page.emulateMedia({colorScheme:'dark'})
-      await page.getByRole('button',{name:'Preview file mock.pem',exact:true}).click()
+      await page.getByRole('button',{name:'Open file mock.pem',exact:true}).click()
       await page.getByText('MOCK_FILE_PREVIEW',{exact:true}).waitFor()
       await expect(page.getByText('MOCK_FILE_PREVIEW',{exact:true})).toHaveCSS('color','rgb(241, 245, 249)') // Reference dark foreground #F1F5F9 (design.md).
       await page.getByText('MOCK_FILE_PREVIEW',{exact:true}).waitFor({state:'hidden'})
       await page.emulateMedia({colorScheme:'light'})
       delayedPreview=true
-      await page.getByRole('button',{name:'Preview file mock.pem',exact:true}).click()
+      await page.getByRole('button',{name:'Open file mock.pem',exact:true}).click()
       await expect.poll(()=>previewRequested).toBe(true)
       await page.evaluate(()=>window.dispatchEvent(new Event('blur')))
       previewReply();await page.evaluate(()=>window.dispatchEvent(new Event('focus')))
-      await expect(page.getByRole('button',{name:'Preview file mock.pem',exact:true})).toBeEnabled()
+      await expect(page.getByRole('button',{name:'Open file mock.pem',exact:true})).toBeEnabled()
       await expect(page.getByText('MOCK_LATE_FILE',{exact:true})).toHaveCount(0);delayedPreview=false
       await page.getByRole('button',{name:'Rename file mock.pem',exact:true}).click()
-      await page.getByLabel('New vault file name',{exact:true}).fill('renamed.pem');fileRenameAllowed=false
-      await page.getByRole('button',{name:'Confirm vault file action',exact:true}).click()
+      await fileAction.getByLabel('Name',{exact:true}).fill('renamed.pem');fileRenameAllowed=false
+      await confirmFile.click()
       await page.getByText('This file action is no longer allowed.',{exact:true}).last().waitFor()
       assert.equal(fileRows[0].name,'mock.pem');fileRenameAllowed=true
-      await page.getByRole('button',{name:'Confirm vault file action',exact:true}).click()
+      await confirmFile.click()
       await page.getByRole('button',{name:'Download file renamed.pem',exact:true}).click()
       await page.evaluate(()=>{window.vaultBlobURLs=0;const original=URL.createObjectURL.bind(URL);URL.createObjectURL=value=>{window.vaultBlobURLs++;return original(value)}})
       verified=false
       const attempts=mutations.filter(m=>m.path==='/api/jp/files/file/download/').length
-      await page.getByRole('button',{name:'Confirm vault file action',exact:true}).click()
-      await page.getByRole('button',{name:'Cancel',exact:true}).click()
-      await expect(page.getByRole('button',{name:'Confirm vault file action',exact:true})).toBeEnabled()
+      await confirmFile.click()
+      await page.getByRole('dialog').filter({has:page.getByRole('button',{name:'Verify password',exact:true})}).getByRole('button',{name:'Cancel',exact:true}).click()
+      await expect(confirmFile).toBeEnabled()
       assert.equal(mutations.filter(m=>m.path==='/api/jp/files/file/download/').length,attempts+1)
       assert.equal(await page.evaluate(()=>window.vaultBlobURLs),0)
-      await page.getByRole('button',{name:'Confirm vault file action',exact:true}).click()
+      await confirmFile.click()
       await page.getByRole('dialog').getByLabel('Current password',{exact:true}).fill('MOCK_VERIFY')
       const download=page.waitForEvent('download');await page.getByRole('button',{name:'Verify password',exact:true}).click();assert.equal((await download).suggestedFilename(),'renamed.pem')
       assert.equal(mutations.filter(m=>m.path==='/api/jp/files/file/download/').length,attempts+3)
       for(const cancelMethod of ['button','blur']){
         holdDownload=true;downloadRequested=false
         await page.getByRole('button',{name:'Download file renamed.pem',exact:true}).click()
-        await page.getByRole('button',{name:'Confirm vault file action',exact:true}).click()
+        await confirmFile.click()
         await expect.poll(()=>downloadRequested).toBe(true)
         const before=await page.evaluate(()=>window.vaultBlobURLs)
         if(cancelMethod==='button')await page.getByRole('button',{name:'Cancel current file download',exact:true}).click()
         else await page.evaluate(()=>window.dispatchEvent(new Event('blur')))
-        await expect(page.getByRole('button',{name:'Confirm vault file action',exact:true})).toBeEnabled()
+        await expect(confirmFile).toBeEnabled()
         downloadReply();await page.evaluate(()=>window.dispatchEvent(new Event('focus')))
-        await page.getByRole('button',{name:'Cancel vault file action',exact:true}).click()
+        await fileAction.getByRole('button',{name:'Cancel',exact:true}).click()
         assert.equal(await page.evaluate(()=>window.vaultBlobURLs),before)
       }
       holdDownload=false
 
       const chooser=page.waitForEvent('filechooser');await page.getByRole('button',{name:'Upload vault file',exact:true}).click();await (await chooser).setFiles({name:'upload.pem',mimeType:'application/octet-stream',buffer:Buffer.from('MOCK UPLOAD')})
-      await page.getByRole('button',{name:'Delete file upload.pem',exact:true}).click();await page.getByRole('button',{name:'Confirm vault file action',exact:true}).click()
+      await page.getByRole('button',{name:'Delete file upload.pem',exact:true}).click();await confirmFile.click()
       await expect(page.getByRole('button',{name:'Delete file upload.pem',exact:true})).toHaveCount(0)
       await page.screenshot({path:'test-results/vault-files-'+width+'.png',fullPage:true})
 
@@ -566,27 +608,41 @@ async function run() {
       await page.getByRole('button', { name:'Confirm vault archive change',exact:true }).click()
       await page.getByRole('button', { name:'Unarchive vault',exact:true }).waitFor()
       await page.getByRole('button', { name:'Vault activity',exact:true }).click()
-      await page.getByText('vault created \u00b7 success', { exact:true }).waitFor()
-      await page.getByRole('button', { name:'Team vaults',exact:true }).click()
-      await page.getByRole('button', { name:'New team vault',exact:true }).click()
-      await page.getByLabel('Team vault name', {exact:true}).fill('Mock team vault')
-      await page.getByLabel('Find vault member', {exact:true}).fill('Example')
-      await page.getByRole('button', {name:'Choose Example Colleague',exact:true}).click()
-      await page.getByRole('button', {name:'Create team vault',exact:true}).click()
+      // Activity is a When / Who / What / Entry table (VaultManagement since 2e4a6d4); a successful row has no outcome badge.
+      await page.getByText('Vault created', { exact:true }).waitFor()
+      await expect(page.getByText('success', { exact:true })).toHaveCount(0)
+      // Team vaults and emergency access are sections of the "Passwords sections" menu (VaultPanel since 2e4a6d4); their
+      // forms are sheets: "New team vault" (Create), "Appoint an owner of ..." (Add), "Request emergency access" (Request).
+      const passwordsSection=async name=>{await page.getByRole('button',{name:'Passwords sections',exact:true}).click();await page.getByRole('menuitem',{name,exact:true}).click()}
+      await passwordsSection('Team vaults')
+      await page.getByRole('button', { name:'New vault',exact:true }).click()
+      const newVault=page.getByRole('dialog',{name:'New team vault'})
+      await newVault.getByLabel('Team vault name', {exact:true}).fill('Mock team vault')
+      await newVault.getByLabel('Find vault member', {exact:true}).fill('Example')
+      await newVault.getByRole('button', {name:'Choose Example Colleague',exact:true}).click()
+      await newVault.getByText('Selected: Example Colleague',{exact:true}).waitFor()
+      await newVault.getByRole('button', {name:'Create',exact:true}).click()
+      await newVault.waitFor({state:'hidden'})
       await page.getByRole('button', {name:'Manage owners of Mock team vault',exact:true}).click()
-      await page.getByRole('button', {name:'Appoint vault owner',exact:true}).click()
-      await page.getByLabel('Find vault member', {exact:true}).fill('Example')
-      await page.getByRole('button', {name:'Choose Example Colleague',exact:true}).click()
-      await page.getByRole('button', {name:'Confirm vault member',exact:true}).click()
-      await page.getByRole('button',{name:'Cancel adding member',exact:true}).waitFor({state:'hidden'})
+      await page.getByRole('button', {name:'Appoint owner',exact:true}).click()
+      const appoint=page.getByRole('dialog',{name:'Appoint an owner of Mock team vault'})
+      await appoint.getByLabel('Find vault member', {exact:true}).fill('Example')
+      // The picker leaves out people who are already members (Example Colleague is the super owner here).
+      await appoint.getByRole('button', {name:'Choose Example Second Owner',exact:true}).waitFor()
+      await expect(appoint.getByRole('button', {name:'Choose Example Colleague',exact:true})).toHaveCount(0)
+      await appoint.getByRole('button', {name:'Choose Example Second Owner',exact:true}).click()
+      await appoint.getByRole('button', {name:'Add',exact:true}).click()
+      await appoint.waitFor({state:'hidden'})
       await page.getByText('Sent to an existing owner for approval.',{exact:true}).waitFor()
       await page.getByRole('button', {name:'Close vault owners',exact:true}).click()
-      await page.getByRole('button', {name:'Emergency access',exact:true}).click()
-      await page.getByRole('button', {name:'Request emergency access',exact:true}).click()
-      await page.getByRole('button', {name:'Emergency example',exact:true}).click()
-      await page.getByLabel('Emergency access reason',{exact:true}).fill('Mock owners are unavailable')
-      await page.getByRole('button', {name:'Submit emergency request',exact:true}).click()
-      await page.getByRole('button',{name:'Cancel emergency request',exact:true}).waitFor({state:'hidden'})
+      await passwordsSection('Emergency access')
+      await page.getByRole('button', {name:'Request access',exact:true}).click()
+      const emergencyForm=page.getByRole('dialog',{name:'Request emergency access'})
+      await emergencyForm.getByRole('button',{name:'Vault for emergency access',exact:true}).click()
+      await page.getByRole('menuitem', {name:'Emergency example',exact:true}).click()
+      await emergencyForm.getByLabel('Reason',{exact:true}).fill('Mock owners are unavailable')
+      await emergencyForm.getByRole('button', {name:'Request',exact:true}).click()
+      await emergencyForm.waitFor({state:'hidden'})
       await page.getByText('Requested. Another approver must decide.',{exact:true}).waitFor()
       assert.equal(emergency.length,1)
       await openNotifications(page, width)

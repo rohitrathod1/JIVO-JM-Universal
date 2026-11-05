@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { chatListWidth, controlHeight, isActiveLink, isActiveShellLink, isWide, pagePadding, shellLinks } from './shellLayout'
+import { chatListWidth, controlHeight, touchBox, MIN_TOUCH, isActiveLink, isActiveShellLink, isWide, pagePadding, shellLinks } from './shellLayout'
 
 describe('reference shell layout', () => {
   it('switches to the rail at the md breakpoint', () => {
@@ -43,5 +43,16 @@ describe('reference shell layout', () => {
     expect(isActiveLink('/messenger/abc', '/messenger')).toBe(true)
     expect(isActiveLink('/messengers', '/messenger')).toBe(false)
     expect(isActiveLink('/home', '/home')).toBe(true)
+  })
+})
+
+describe('touchBox (DEF-005)', () => {
+  it('grows small controls to 44px on phones without moving the layout', () => {
+    expect(touchBox(36, 390)).toMatchObject({ width: MIN_TOUCH, height: MIN_TOUCH, margin: -4 })
+    expect(touchBox(40, 320)).toMatchObject({ width: 44, height: 44, margin: -2 })
+  })
+  it('keeps the drawn size on wide screens and for controls already 44px', () => {
+    expect(touchBox(36, 1024)).toMatchObject({ width: 36, height: 36, margin: 0 })
+    expect(touchBox(48, 390)).toMatchObject({ width: 48, height: 48 })
   })
 })

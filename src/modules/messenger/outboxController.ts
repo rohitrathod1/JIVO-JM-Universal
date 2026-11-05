@@ -14,6 +14,24 @@ export interface OutboxStorage {
   subscribe?: (changed: () => void) => () => void
 }
 export const retryDelay = (attempts: number) => Math.min(60_000, 1_000 * 2 ** Math.min(6, Math.max(0, attempts - 1)))
+/** An error that belongs to one queued item (e.g. a file scan that is still running), not to the connection. */
+const itemOnly = (error: unknown) => Boolean(error && typeof error === 'object' && 'retryable' in error && (error as { retryable?: unknown }).retryable === true)
+/**
+ * Order is kept per chat (OFF-06): the first queued item of each chat is its head, and a head that is waiting
+ * for its retry time holds back only later items of the same chat. Returns the oldest head that is due now,
+ * and the earliest time any head becomes due.
+ */
+export function nextDue(entries: PendingSend[], now: number): { item?: PendingSend; wake?: number } {
+  const heads = new Set<string>(); let wake: number | undefined
+  for (const p of entries) {
+    if (p.status !== 'queued' || heads.has(p.conversation)) continue
+    heads.add(p.conversation)
+    const at = p.nextAttemptAt ?? 0
+    if (at <= now) return { item: p }
+    wake = wake === undefined ? at : Math.min(wake, at)
+  }
+  return { wake }
+}
 
 export class OutboxController {
   private owner: string | null = null
@@ -134,9 +152,9 @@ export class OutboxController {
   private schedule() {
     this.cancelTimer()
     if (!this.active || !this.hydrated) return
-    const item = this.entries.find(p => p.status === 'queued')
-    if (!item) return
-    const delay = Math.max(0, (item.nextAttemptAt ?? 0) - this.now())
+    const { item, wake } = nextDue(this.entries, this.now())
+    if (!item && wake === undefined) return
+    const delay = item ? 0 : Math.max(0, wake! - this.now())
     this.timer = setTimeout(() => { this.timer = null; void this.flush() }, delay)
   }
   async flush() {
@@ -146,9 +164,9 @@ export class OutboxController {
     try {
       await this.writes
       while (this.active && epoch === this.epoch) {
-        // Never overtake an older queued message whose retry is delayed.
-        const item = this.entries.find(p => p.status === 'queued')
-        if (!item || (item.nextAttemptAt ?? 0) > this.now()) break
+        // Never overtake an older queued message of the same chat whose retry is delayed (other chats may go on).
+        const { item } = nextDue(this.entries, this.now())
+        if (!item) break
         const controller = new AbortController(); this.flight = controller
         this.change(item.payload.client_id, 'sending'); await this.writes
         if (epoch !== this.epoch) break
@@ -162,10 +180,11 @@ export class OutboxController {
         } catch (error) {
           if (epoch !== this.epoch) return
           const aborted = controller.signal.aborted
-          const queued = aborted || this.deps.network(error)
+          const queued = aborted || itemOnly(error) || this.deps.network(error)
           const attempts = aborted ? item.attempts ?? 0 : (item.attempts ?? 0) + 1
           this.change(item.payload.client_id, queued ? 'queued' : 'failed', queued ? undefined : this.deps.message(error), { attempts, nextAttemptAt: queued && !aborted ? this.now() + retryDelay(attempts) : 0 })
-          if (queued) break
+          // A connection failure stops the whole drain; a retry owned by this item lets other chats continue.
+          if (queued && (aborted || !itemOnly(error))) break
         } finally { if (this.flight === controller) this.flight = null }
       }
     } finally { this.draining = false; this.schedule() }
