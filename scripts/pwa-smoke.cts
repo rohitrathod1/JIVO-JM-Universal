@@ -46,7 +46,7 @@ async function main() {
     const started = Date.now()
     await page.goto(origin, { waitUntil: 'domcontentloaded' })
     await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller))
-    await page.getByLabel('Email address', { exact: true }).waitFor()
+    await page.getByLabel(/^(Email|JIVO email)$/).waitFor()
     report.onlineStartupMs = Date.now() - started
     const manifest = await page.evaluate(async () => {
       const href = document.querySelector<HTMLLinkElement>('link[rel="manifest"]')?.href
@@ -97,7 +97,7 @@ async function main() {
     await context.setOffline(true)
     const offlineStarted = Date.now()
     await page.reload({ waitUntil: 'domcontentloaded' })
-    await page.getByLabel('Email address', { exact: true }).waitFor()
+    await page.getByLabel(/^(Email|JIVO email)$/).waitFor()
     const apiOffline = await page.evaluate(async () => { try { await fetch('/api/pwa-private-probe'); return false } catch { return true } })
     assert.equal(apiOffline, true)
     report.offlineStartupMs = Date.now() - offlineStarted
@@ -114,7 +114,7 @@ async function main() {
     checks.push('New build waits and shows Reload instead of replacing an open session automatically')
     await page.getByRole('button', { name: 'Reload', exact: true }).click()
     await page.waitForFunction(async () => (await caches.keys()).some(name => name.endsWith('-test-update')))
-    await page.getByLabel('Email address', { exact: true }).waitFor()
+    await page.getByLabel(/^(Email|JIVO email)$/).waitFor()
     checks.push('Explicit Reload activates updated shell')
     assert.deepEqual(errors, [])
     report.pageErrors = errors

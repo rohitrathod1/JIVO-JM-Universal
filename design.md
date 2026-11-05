@@ -1,6 +1,6 @@
 # Universal migration design
 
-Scope: the 2 November 2026 migration and its authorized continuation. All changes stay in Universal. Frontend and Backend are read-only references. The user explicitly excluded the unified `/approvals` page; existing administration and vault approval actions remain.
+Scope: the 2 November 2026 migration and its authorized continuation. All changes stay in Universal. Frontend and Backend are read-only references. On 02-Nov-2026 the user asked for exact parity, so the unified `/approvals` inbox is included; existing administration and vault approval actions remain. Verification results: [testing.md](testing.md).
 
 This is an incremental migration of the existing strict TypeScript application. Rewriting its working session, messaging, vault and administration code would discard verified behavior. Full production and visual parity are **not yet achieved**. See [testing.md](testing.md) for current evidence and [FEATURE-PARITY-CHECKLIST.md](FEATURE-PARITY-CHECKLIST.md) for the acceptance checklist.
 
@@ -45,3 +45,10 @@ Cold start while unable to validate the session remains locked. Browser/PWA shel
 ## Platform boundaries
 
 The existing local Android application ID and custom scheme remain. Original branding is configured for common and Android adaptive icons. The final Android debug build passed in 12m 9s. The preceding continuation APK covered existing-session/share review; the final APK was subsequently installed and passed native send/receive against two authorized accounts. Current static/unit/tooling checks pass, while stable-source responsive browser, cross-tab and PWA checks also pass in [testing.md](testing.md). No public domain, final identifiers or signing credentials were supplied. Native passkeys, verified links, push, store builds, iOS compilation and real-device acceptance therefore remain separate requirements. Follow [docs/PLATFORM-DEPLOYMENT.md](docs/PLATFORM-DEPLOYMENT.md), and use [testing.md](testing.md) before treating any build as a release candidate.
+
+## Parity pass - 02-Nov-2026
+
+- Tokens: `src/ui.tsx` adds the reference index.css colours, glass levels 1-4 (translucent with blur on web, solid fallback on native), `radius` (panel 16, card 12, control 10) and `shadow`. Controls are 40px on web and 44pt on native; page padding is 16px on phones and 32px from 768px.
+- Navigation order: rail Home, Messenger, Activity, Passwords, Approvals, Profile, Admin; phone bar Home, Activity, Chats, Passwords, Approvals, Profile, Admin. Approvals carries the amber waiting badge, Messenger the unread badge.
+- Shared media tabs are Media/Docs/Links (Voice removed, as in the Frontend). New icon assets `Phone.png` and `Mail.png` were rasterized from Lucide (ISC) path data and are registered in `Icon`.
+- Jivo Auth (FE-032 to FE-034, BE-083): one `useIdentity()` answer drives login labels, token pages, profile (central name and email read-only, password card only when `password_change` is advertised) and administration (automatic people list, no invitations).

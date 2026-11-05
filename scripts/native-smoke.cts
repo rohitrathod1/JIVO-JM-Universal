@@ -110,7 +110,7 @@ async function main() {
     await waitText('Sign out'); await delivered(queued); await openConversation()
     await waitText(queued); await capture('native-restored-queue')
     passed.push('cookie session and protected queued send survive process restart; delivered once after reconnect'); console.log(passed.at(-1))
-    await tap('Sign out'); await waitText('Email address')
+    await tap('Sign out'); await waitText('Sign in')
     passed.push('native sign-out returns to login')
     const result = { at: new Date().toISOString(), device: serial, passed }
     writeFileSync(path.join(root, 'test-results/native-smoke.json'), JSON.stringify(result, null, 2))

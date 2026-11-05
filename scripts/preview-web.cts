@@ -5,8 +5,16 @@ import httpProxy = require('http-proxy')
 import { loopbackOrigin, socketOrigin } from './web-proxy-policy.cts'
 
 const root = path.resolve(__dirname, '..')
-const directory = fs.realpathSync(path.resolve(root, process.env.JM_WEB_DIST || 'dist'))
+const requested = path.resolve(root, process.env.JM_WEB_DIST || 'dist')
+if (!requested.startsWith(root + path.sep)) throw Error('Preview directory must stay inside Universal')
+// A missing or half-written dist/ must not crash the preview: keep serving a clear 503 until a build lands.
+const directory = fs.existsSync(requested) ? fs.realpathSync(requested) : requested
 if (!directory.startsWith(root + path.sep)) throw Error('Preview directory must stay inside Universal')
+const missingBuild = `${path.relative(root, path.join(directory, 'index.html'))} is missing. Run "npm run build:web" first.`
+if (!fs.existsSync(path.join(directory, 'index.html'))) console.error(`Warning: ${missingBuild}`)
+// Every Expo Router page in src/app (pwa/sw.ts and deploy/nginx-universal.conf.example keep the same list;
+// scripts/pwa-policy.test.cts fails if a route is missing from any of them).
+const shellRoute = /^\/(?:$|(?:login|home|share|messenger|profile|passwords|notifications|admin|preview|tools|approvals|alerts|atlas|group-info|group-edit)\/?$|(?:invite|reset-password)\/[^/]+\/?$)/
 const port = Number(process.env.JM_PREVIEW_PORT || 4175)
 if (!Number.isInteger(port) || port <= 1024 || port > 65535) throw Error('Invalid preview port')
 const publicOrigin = `http://127.0.0.1:${port}`
@@ -28,15 +36,22 @@ const server = http.createServer((req, res) => {
   if (pathname.includes('\\') || pathname.split('/').some(part => part.startsWith('.'))) { res.writeHead(403); res.end(); return }
   let file = path.resolve(directory, '.' + pathname)
   if (file !== directory && !file.startsWith(directory + path.sep)) { res.writeHead(403); res.end(); return }
-  if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) {
-    if (path.extname(pathname) || !/^\/(?:$|(?:login|home|share|messenger|profile|passwords|notifications|admin|preview)\/?$|(?:invite|reset-password)\/[^/]+\/?$)/.test(pathname)) { res.writeHead(404); res.end(); return }
+  let missing = true
+  try { missing = !fs.existsSync(file) || fs.statSync(file).isDirectory() } catch { missing = true }
+  if (missing) {
+    if (path.extname(pathname) || !shellRoute.test(pathname)) { res.writeHead(404); res.end(); return }
     file = path.join(directory, 'index.html')
   }
-  const resolved = fs.realpathSync(file)
+  // dist/ may be mid-rebuild (npm run build:web): answer 503 instead of crashing the preview.
+  let resolved: string
+  try { resolved = fs.realpathSync(file) } catch {
+    res.writeHead(503, { 'Retry-After': '2', 'Content-Type': 'text/plain; charset=utf-8' })
+    res.end(path.basename(file) === 'index.html' ? missingBuild : 'Build in progress.'); return
+  }
   if (!resolved.startsWith(directory + path.sep)) { res.writeHead(403); res.end(); return }
   res.writeHead(200, { 'Content-Type': mime[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin' })
   if (req.method === 'HEAD') { res.end(); return }
-  fs.createReadStream(file).pipe(res)
+  fs.createReadStream(file).on('error', () => res.destroy()).pipe(res)
 })
 server.on('upgrade', (req, socket, head) => {
   if (!localHost(req) || !backendPath(req.url)) { socket.destroy(); return }

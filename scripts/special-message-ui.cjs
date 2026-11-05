@@ -50,7 +50,9 @@ module.exports = async function specialMessageUi(page, { base, person, message, 
     return route.fallback()
   }
   const button = name => page.getByRole('button', { name, exact: true }).last()
-  async function tool(name) { await button('Conversation options').click(); await button(name).click() }
+  // Reference AttachMenu: Event and Location are items of the composer's Attach menu.
+  const attachItem = { 'Create event': 'Event', 'Share location': 'Location' }
+  async function tool(name) { await button('Attach').click(); await page.getByRole('menuitem', { name: attachItem[name] ?? name, exact: true }).click() }
   async function time(label, hour, minute, meridiem) {
     await button(label).click(); await button('Hour').click(); await button(`hour ${hour}`).click()
     await button('Minute').click(); await button(`minute ${minute}`).click(); await button(meridiem).click(); await button('Apply').click()

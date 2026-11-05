@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Atlas AI — breathing orbit</title>
+  <desc id="desc">A friendly smiling face inside a luminous cyan, blue and violet ring, with gently expanding circular ripples. Transparent background.</desc>
+  <defs>
+    <linearGradient id="orbit" x1="15%" y1="10%" x2="85%" y2="90%">
+      <stop offset="0" stop-color="#21d9ed"/>
+      <stop offset=".32" stop-color="#35baff"/>
+      <stop offset=".67" stop-color="#8181ff"/>
+      <stop offset="1" stop-color="#d18aff"/>
+    </linearGradient>
+    <filter id="glow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <style>
+      .smile-mouth {
+        transform-box: fill-box;
+        transform-origin: center top;
+        animation: smile 1s ease-in-out infinite;
+      }
+      @keyframes smile {
+        0%, 100% { transform: scale(0.94, 0.68); }
+        50% { transform: scale(1.06, 1.12); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .motion { display:none; }
+        .smile-mouth { animation:none; }
+      }
+    </style>
+  </defs>
+  <g fill="none">
+    <circle cx="128" cy="128" r="100" stroke="#8295f9" stroke-width="1.5" opacity=".18"/>
+    <g class="motion" stroke="#8295f9" stroke-width="1.5">
+      <circle cx="128" cy="128" r="76" opacity="0">
+        <animate attributeName="r" values="76;112" dur="3.6s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;.32;0" keyTimes="0;.2;1" dur="3.6s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="128" cy="128" r="76" opacity="0">
+        <animate attributeName="r" values="76;112" begin="-1.8s" dur="3.6s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;.32;0" keyTimes="0;.2;1" begin="-1.8s" dur="3.6s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    <circle cx="128" cy="128" r="69" stroke="url(#orbit)" stroke-width="16" opacity=".5" filter="url(#glow)"/>
+    <circle cx="128" cy="128" r="69" stroke="url(#orbit)" stroke-width="15"/>
+    <circle cx="128" cy="128" r="60.5" stroke="#b7d5ff" stroke-width="1" opacity=".2"/>
+  </g>
+  <g fill="none" stroke="url(#orbit)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 101 112 L 101 118 M 155 112 L 155 118" stroke-width="9"/>
+    <path class="smile-mouth" d="M 102 140 C 112 158, 144 158, 154 140" stroke-width="7"/>
+  </g>
+</svg>

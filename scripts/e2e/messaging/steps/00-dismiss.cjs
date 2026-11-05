@@ -1,0 +1,1 @@
+module.exports = async ({ P, out }) => { for (const u of ['alice', 'bob', 'carol']) { const b = P[u].getByRole('button', { name: 'Not now', exact: true }); const n = await b.count(); if (n) await b.first().click(); out(u, 'install prompt dismissed:', n) } }

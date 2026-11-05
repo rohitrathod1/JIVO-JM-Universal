@@ -1,0 +1,7 @@
+const { api, acc } = require('./lib.cjs')
+;(async () => { const a = await api('alice'); const t0=Date.now()
+ const l = await a.req('GET', '/api/jm/conversations/'); console.log('list', l.status, Date.now()-t0+'ms')
+ const rows = l.body.results || l.body; for (const c of rows) console.log(JSON.stringify(c).slice(0, 900))
+ const d = acc.conversations.direct_alice_bob.public_id; const t1=Date.now()
+ const m = await a.req('GET', `/api/jm/conversations/${d}/messages/`); console.log('msgs', m.status, Date.now()-t1+'ms', Object.keys(m.body), (m.body.results||[]).length); console.log(JSON.stringify((m.body.results||[]).slice(-1)[0]).slice(0,1500))
+})().catch(e => { console.error(e); process.exit(1) })

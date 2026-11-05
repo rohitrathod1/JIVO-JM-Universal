@@ -1,4 +1,5 @@
-import { allows, ADMIN_ACCESS } from '../config/capabilities'
+import { allows, ADMIN_ACCESS, type Capability } from '../config/capabilities'
+import { APPROVALS_ACCESS } from '../modules/approvals/model'
 
 /** Reference Tailwind `md` breakpoint: the icon rail replaces the phone top/bottom bars from here. */
 export const WIDE_BREAKPOINT = 768
@@ -19,23 +20,56 @@ export function pagePadding(width: number) {
 /** Reference control height is 40px (`h-10`); native keeps the 44pt platform touch target. */
 export const controlHeight = (platform: string) => (platform === 'web' ? 40 : 44)
 
-export type ShellLink = { title: string; tabTitle: string; href: string; icon: 'home' | 'chat' | 'key' | 'bell' | 'user' | 'shield' }
-
 /**
- * Navigation in reference order. Rail: Home, Messenger, then the notification tool right after Messenger,
- * then the remaining pages. Phone bar: Home, inbox, Chats, Passwords, Profile (Admin stays last so it is
- * reachable on phones too). Accessible titles stay stable for scripts; `tabTitle` is the short phone label.
+ * Reference MessengerPage chats column: `md:w-[360px] lg:w-[400px]`, shown beside the conversation pane
+ * from the `md` breakpoint (768px) up; phones show one or the other.
  */
-export function shellLinks(capabilities: readonly string[], preview = false): { rail: ShellLink[]; tabs: ShellLink[] } {
-  const can = (rule: Parameters<typeof allows>[1]) => preview || allows(capabilities, rule)
+export const chatListWidth = (width: number) => (width >= 1024 ? 400 : 360)
+
+export type ShellIcon = 'home' | 'messagesSquare' | 'key' | 'clipboardCheck' | 'bell' | 'user' | 'shield' | 'shieldCheck' | 'users' | 'lockKeyhole' | 'megaphone' | 'tools'
+/** `query` marks a link to one view of a page (e.g. an Admin tab), so it is active only on that view. */
+export type ShellLink = { title: string; tabTitle: string; href: string; icon: ShellIcon; query?: { key: string; value: string; fallback?: boolean } }
+
+/** Phone tabs keep five slots, replacing Alerts or Passwords with Tools according to vault access.
+ * `tools` identifies the rail link followed by its theme switch.
+ */
+export function shellLinks(capabilities: readonly string[], preview = false): { rail: ShellLink[]; tabs: ShellLink[]; account: ShellLink[]; tools: string | null } {
+  const can = (rule: Capability | readonly Capability[]) => preview || allows(capabilities, rule)
+  const keep = (items: (ShellLink | false)[]) => items.filter((item): item is ShellLink => !!item)
   const home: ShellLink = { title: 'Home', tabTitle: 'Home', href: '/home', icon: 'home' }
-  const chats: ShellLink | null = can('JM_ACCESS') ? { title: 'Messenger', tabTitle: 'Chats', href: '/messenger', icon: 'chat' } : null
-  const activity: ShellLink = { title: 'Activity', tabTitle: 'Activity', href: '/notifications', icon: 'bell' }
-  const vault: ShellLink | null = can('JP_ACCESS') ? { title: 'Passwords', tabTitle: 'Passwords', href: '/passwords', icon: 'key' } : null
+  const chats = can('JM_ACCESS') && { title: 'Messenger', tabTitle: 'Chats', href: '/messenger', icon: 'messagesSquare' } as ShellLink
+  // Notifications are available through the header bell and desktop rail.
+  const inbox = can('JM_ACCESS') && { title: 'Notifications', tabTitle: 'Inbox', href: '/notifications', icon: 'bell' } as ShellLink
+  const vault = can('JP_ACCESS') && { title: 'Passwords', tabTitle: 'Passwords', href: '/passwords', icon: 'key' } as ShellLink
+  const alerts: ShellLink = { title: 'Alerts', tabTitle: 'Alerts', href: '/alerts', icon: 'megaphone' }
+  // Reference registry: Approvals follows Passwords (ADMIN_USERS or JP_ACCESS, FE-023).
+  const approvals = can(APPROVALS_ACCESS) && { title: 'Approvals', tabTitle: 'Approvals', href: '/approvals', icon: 'clipboardCheck' } as ShellLink
+  const people = can('ADMIN_USERS') && { title: 'People', tabTitle: 'People', href: '/admin?tab=people', icon: 'users', query: { key: 'tab', value: 'people', fallback: true } } as ShellLink
+  const groups = can(ADMIN_ACCESS) && { title: 'Permission groups', tabTitle: 'Groups', href: '/admin?tab=groups', icon: 'shieldCheck', query: { key: 'tab', value: 'groups', fallback: !can('ADMIN_USERS') } } as ShellLink
+  const security = can('ADMIN_USERS') && { title: 'Security', tabTitle: 'Security', href: '/admin?tab=security', icon: 'lockKeyhole', query: { key: 'tab', value: 'security' } } as ShellLink
+  const launcher = can('JM_ACCESS') && { title: 'Tools', tabTitle: 'Tools', href: '/tools', icon: 'tools' } as ShellLink
+  const manageTools = can('ADMIN_USERS') && { title: 'Software tools', tabTitle: 'Software tools', href: '/admin?tab=tools', icon: 'tools', query: { key: 'tab', value: 'tools' } } as ShellLink
   const profile: ShellLink = { title: 'Profile', tabTitle: 'Profile', href: '/profile', icon: 'user' }
-  const admin: ShellLink | null = can(ADMIN_ACCESS) ? { title: 'Admin', tabTitle: 'Admin', href: '/admin', icon: 'shield' } : null
-  const keep = (items: (ShellLink | null)[]) => items.filter((item): item is ShellLink => !!item)
-  return { rail: keep([home, chats, activity, vault, profile, admin]), tabs: keep([home, activity, chats, vault, profile, admin]) }
+  const admin = can(ADMIN_ACCESS) && { title: 'Administration', tabTitle: 'Admin', href: '/admin', icon: 'shield' } as ShellLink
+  const rail = keep([home, chats, inbox, vault, launcher, approvals, people, groups, security, manageTools])
+  return {
+    rail,
+    tabs: keep([home, vault ? launcher : can('JM_ACCESS') && alerts, chats, vault || launcher, profile]),
+    // Reference: on phones the remaining pages (and Sign out) are reached from Profile.
+    account: keep([profile, can('JM_ACCESS') && alerts, launcher, approvals, admin]),
+    tools: chats ? '/notifications' : rail.at(-1)?.href ?? null,
+  }
 }
 
 export const isActiveLink = (pathname: string, href: string) => pathname === href || pathname.startsWith(href + '/')
+
+/** Active state for a shell link, including links to one view of a page (`/admin?tab=groups`). */
+export function isActiveShellLink(pathname: string, params: Record<string, string | string[] | undefined>, link: ShellLink) {
+  const path = link.href.split('?')[0]
+  if (!isActiveLink(pathname, path)) return false
+  const param = (key: string) => { const value = params[key]; return typeof value === 'string' ? value : undefined }
+  if (link.query) { const current = param(link.query.key); return current === link.query.value || (!current && !!link.query.fallback) }
+  // A plain link is not lit while one of its views has its own link (the Alerts tab on /notifications).
+  return !(path === '/notifications' && param('view') === 'alerts')
+}
+

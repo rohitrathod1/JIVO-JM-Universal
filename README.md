@@ -87,3 +87,27 @@ Native passkeys, verified HTTPS app links and background push remain deferred un
 ## Cleanup
 
 135 obsolete patch scripts, audit snapshots, logs and template entry points were removed. [Cleanup manifest](docs/cleanup-2026-11-02.json). The recovery archive is outside this repository at `../.maintenance-backups/universal-cleanup-2026-11-02.zip`. Active runtime code, assets and reusable verification tools are retained.
+
+
+### Native notifications and quiet hours
+
+Expo notifications and the native time picker require a new development binary:
+
+```powershell
+npm.cmd run android:build
+npm.cmd run android:launch
+```
+
+Device notification settings include a local test that does not need Firebase. Remote push uses the backend's `/api/jm/push/expo/` endpoint and existing notification preferences, mute rules and session expiry. Quiet hours are selected with a time picker and saved in India time.
+
+For remote push, create/link a **JM** EAS project and set `EXPO_PUBLIC_EAS_PROJECT_ID` in `.env`. Register the Android package from `app.json` (`com.anonymous.jivojmuniversal`) in Firebase, download that app's `google-services.json`, and configure `expo.android.googleServicesFile` in `app.json`. Upload the matching FCM v1 credentials to that EAS project, then rebuild. iOS requires its own bundle identifier and APNs credentials. The OMS config found at `C:\Users\JIVO\Desktop\OMS\OMS` belongs to `com.jivo.oms`; it cannot be copied unchanged into JM.
+
+Backend configuration: `JM_EXPO_PUSH_ENABLED=True`; set `JM_EXPO_ACCESS_TOKEN` only if enhanced Expo push security is enabled. Production uses the existing Dramatiq worker for send retries and delayed Expo delivery receipts. The inline development task backend sends tickets immediately but does not schedule delayed receipt checks. An accepted Expo ticket does not itself prove delivery to the device.
+
+### Software tools and Atlas
+
+Administrators with `ADMIN_USERS` can open Administration > Software tools to add, edit, order or hide software links. Supply an HTTPS website and optionally a native app link (for example, a registered app scheme). Native clients try the app link and fall back to the website if no app opens it. Browser clients open the website in a new tab. The directory refreshes every 30 seconds.
+
+Deploy backend migration `org.0003_softwaretool` and the `/api/jm/tools/` and `/api/jm/admin/tools/` endpoints to messenger.jivo.in before using Tools against production. No placeholder HO/JI URLs are seeded.
+
+Phone tabs are Home / Tools / Chats / Passwords / Profile with `JP_ACCESS`, or Home / Alerts / Chats / Tools / Profile without it (Messenger entries require `JM_ACCESS`). Notifications use the bell after the theme toggle. Atlas above the new-chat button is a placeholder and sends no AI requests.

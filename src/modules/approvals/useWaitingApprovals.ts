@@ -5,7 +5,7 @@ import { listApprovals, onApprovalsChanged } from './api'
 export function useWaitingApprovals(enabled: boolean) {
   const [count, setCount] = useState(0)
   useEffect(() => {
-    if (!enabled) { setCount(0); return }
+    if (!enabled) return // the returned value is masked to 0 below while disabled
     let active = true
     const load = () => { void listApprovals('pending').then(r => { if (active) setCount(r.waiting_on_me ?? 0) }).catch(() => { /* badge only; the page shows errors */ }) }
     load()

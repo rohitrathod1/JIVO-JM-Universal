@@ -1,9 +1,10 @@
-import type { Message, SendPayload } from './api'
+import type { QueuedMedia } from './queuedMedia'
+import type { Attachment, Message, SendPayload } from './api'
 
 export interface PendingSend {
   owner: string; conversation: string; payload: SendPayload; created: number
   status: 'queued' | 'sending' | 'failed'; error?: string
-  attempts?: number; nextAttemptAt?: number
+  attempts?: number; nextAttemptAt?: number; media?: QueuedMedia[]; attachments?: Attachment[]; progress?: number
 }
 export interface OutboxStorage {
   read: (owner?: string) => Promise<PendingSend[]>
@@ -79,7 +80,7 @@ export class OutboxController {
   setActive(active: boolean) { this.active = active; if (!active) { this.flight?.abort(); this.cancelTimer() } else void this.flush() }
 
   // Await this before clearing the composer. Failed writes never create queued bubbles.
-  enqueue(owner: string, conversation: string, payload: SendPayload): Promise<void> {
+  enqueue(owner: string, conversation: string, payload: SendPayload, extra?: Pick<PendingSend, 'media' | 'attachments'>): Promise<void> {
     if (owner !== this.owner || !this.hydrated) throw Error('Wait for your outbox to finish restoring.')
     const key = payload.client_id
     const pending = this.pending.get(key)
@@ -89,7 +90,7 @@ export class OutboxController {
     const epoch = this.epoch
     // Device time can move backwards while composing; retain enqueue order.
     this.lastCreated = Math.max(this.now(), this.lastCreated + 1)
-    const entry: PendingSend = { owner, conversation, payload: { ...payload, upload_ids: [...(payload.upload_ids ?? [])] }, created: this.lastCreated, status: 'queued' }
+    const entry: PendingSend = { ...extra, owner, conversation, payload: { ...payload, upload_ids: [...(payload.upload_ids ?? [])] }, created: this.lastCreated, status: 'queued' }
     const operation = this.write(() => this.deps.storage.put(entry, true)).then(() => {
       if (epoch !== this.epoch) throw Error('Your session changed before the message was queued.')
       if (!this.entries.some(p => p.payload.client_id === key)) this.entries = [...this.entries, entry].sort((a, b) => a.created - b.created)
@@ -97,6 +98,21 @@ export class OutboxController {
     }).finally(() => { if (epoch === this.epoch) this.pending.delete(key) })
     this.pending.set(key, operation)
     return operation
+  }
+  async uploaded(client: string, key: string, uploadId: string) {
+    const epoch = this.epoch
+    const entry = this.entries.find(p => p.payload.client_id === client)
+    if (!entry) throw Error('Queued message is no longer available.')
+    const updated = { ...entry, media: entry.media?.map(m => m.key === key ? { ...m, uploadId } : m) }
+    await this.write(() => this.deps.storage.put(updated, false))
+    if (epoch !== this.epoch || this.owner !== entry.owner) throw Error('Your session changed.')
+    this.entries = this.entries.map(p => p.payload.client_id === client ? updated : p); this.publish()
+  }
+  progress(client: string, progress: number) {
+    const rounded = Math.round(progress * 100) / 100
+    const entry = this.entries.find(p => p.payload.client_id === client)
+    if (!entry || entry.progress === rounded) return
+    this.entries = this.entries.map(p => p === entry ? { ...p, progress: rounded } : p); this.publish()
   }
   discard(client: string) {
     const entry = this.entries.find(p => p.payload.client_id === client)
@@ -154,4 +170,10 @@ export class OutboxController {
       }
     } finally { this.draining = false; this.schedule() }
   }
+}
+
+/** A websocket echo may arrive before the send request or disk cleanup finishes. */
+export function pendingForConversation(entries: PendingSend[], conversation: string, messages: Pick<Message, 'client_id'>[]) {
+ const acknowledged = new Set(messages.map(m => m.client_id).filter(Boolean))
+ return entries.filter(p => p.conversation === conversation && !acknowledged.has(p.payload.client_id))
 }

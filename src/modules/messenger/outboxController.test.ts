@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { OutboxController, retryDelay, type PendingSend } from './outboxController'
+import { OutboxController, retryDelay, pendingForConversation, type PendingSend } from './outboxController'
 import type { Message, SendPayload } from './api'
 const payload={client_id:'same-id',body:'synthetic only',upload_ids:[]}
 const msg={id:'sent',conversation:'chat'} as Message
@@ -91,4 +91,32 @@ it('keeps restored older sends ahead of new sends after a device clock correctio
  const f = fixture([{ owner: 'a', conversation: 'chat', payload, created: 100_000, status: 'queued' }]); await f.controller.bind('a')
  await f.controller.enqueue('a', 'chat', { ...payload, client_id: 'second' }); f.controller.setActive(true); await tick()
  expect(f.send.mock.calls.map(call => call[1].client_id)).toEqual(['same-id', 'second'])
+})
+
+it('persists offline media and resumes its upload checkpoint after restart', async () => {
+ const f = fixture(); await f.controller.bind('a')
+ const media = [{ key: 'photo-key', name: 'photo.jpg', size: 512, mime: 'image/jpeg' }]
+ await f.controller.enqueue('a', 'chat', payload, { media })
+ expect(f.send).not.toHaveBeenCalled()
+ expect((await f.storage.read())[0].media).toEqual(media)
+ await f.controller.uploaded(payload.client_id, 'photo-key', 'uploaded-photo')
+ const restored = fixture(await f.storage.read()); await restored.controller.bind('a')
+ expect(restored.controller.snapshot().entries[0].media?.[0].uploadId).toBe('uploaded-photo')
+ restored.controller.setActive(true); await tick()
+ expect(restored.send).toHaveBeenCalledOnce()
+ expect(restored.send.mock.calls[0][1].client_id).toBe(payload.client_id)
+ expect(restored.controller.snapshot().entries).toEqual([])
+})
+it('hides a pending bubble as soon as its websocket echo is in history', () => {
+ const entry: PendingSend = { owner: 'a', conversation: 'chat', payload, created: 1, status: 'sending' }
+ expect(pendingForConversation([entry], 'chat', [{ client_id: payload.client_id }])).toEqual([])
+ expect(pendingForConversation([entry], 'chat', [{ client_id: null }])).toEqual([entry])
+ expect(pendingForConversation([entry], 'another-chat', [])).toEqual([])
+})
+it('does not persist every upload progress tick', async () => {
+ const f = fixture(); await f.controller.bind('a'); await f.controller.enqueue('a', 'chat', payload)
+ const before = f.storage.put.mock.calls.length
+ f.controller.progress(payload.client_id, 0.51); f.controller.progress(payload.client_id, 0.511)
+ expect(f.controller.snapshot().entries[0].progress).toBe(0.51)
+ expect(f.storage.put).toHaveBeenCalledTimes(before)
 })

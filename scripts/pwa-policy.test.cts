@@ -75,3 +75,33 @@ test('interrupted precache rejects installation and removes only its own failed 
   await successful.install()
   assert.deepEqual(successful.deleted, [])
 })
+
+test('every Expo Router page is served the SPA shell by the service worker, preview server and nginx template', async () => {
+  const appDir = path.join(__dirname, '..', 'src', 'app')
+  const pages: string[] = []
+  const walk = (dir: string, prefix: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) { walk(path.join(dir, entry.name), `${prefix}/${entry.name}`); continue }
+      const name = entry.name.replace(/\.(?:web\.|native\.)?tsx?$/, '')
+      if (name === entry.name || name.startsWith('_') || name.startsWith('+')) continue
+      pages.push(`${prefix}/${name === 'index' ? '' : name}`.replace(/\[[^\]]+\]/g, 'sample-token').replace(/\/$/, '') || '/')
+    }
+  }
+  walk(appDir, '')
+  assert.ok(pages.includes('/tools') && pages.includes('/group-edit') && pages.includes('/invite/sample-token'), pages.join(','))
+  const preview = fs.readFileSync(path.join(__dirname, 'preview-web.cts'), 'utf8').match(/const shellRoute = (\/.+\/)\s*$/m)?.[1]
+  assert.ok(preview, 'preview-web.cts shellRoute')
+  const previewRoute = vm.runInNewContext(preview) as RegExp
+  const nginx = fs.readFileSync(path.join(__dirname, '..', 'deploy', 'nginx-universal.conf.example'), 'utf8').match(/location ~ (\^\/\(\|.+\$) \{\s*try_files \$uri \/index\.html;/)?.[1]
+  assert.ok(nginx, 'nginx SPA shell location')
+  const nginxRoute = new RegExp(nginx)
+  const sw = worker()
+  for (const page of pages) {
+    for (const url of [page, page === '/' ? '/' : `${page}/`]) {
+      assert.equal(await sw.request(url, 'GET', 'navigate'), 'public shell', `service worker ${url}`)
+      assert.ok(previewRoute.test(url), `preview ${url}`)
+      assert.ok(nginxRoute.test(url), `nginx ${url}`)
+    }
+  }
+  for (const url of ['/api/jm/', '/django-admin/', '/unknown', '/media/x']) assert.ok(!previewRoute.test(url) && !nginxRoute.test(url), url)
+})

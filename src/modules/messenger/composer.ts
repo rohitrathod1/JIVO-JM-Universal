@@ -20,3 +20,8 @@ export function insertMention(text: string, caret: Caret, name: string) {
   const end = match.start + insert.length
   return { text: text.slice(0, match.start) + insert + text.slice(match.end), caret: { start: end, end } }
 }
+
+/** Reference Composer.tsx: Enter sends and Shift+Enter adds a line, except during IME composition or on a coarse (touch) pointer. */
+export function enterSends(key: { key: string; shiftKey?: boolean; isComposing?: boolean }, coarse: boolean) {
+  return key.key === 'Enter' && !key.shiftKey && !key.isComposing && !coarse
+}

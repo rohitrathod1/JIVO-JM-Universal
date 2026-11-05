@@ -1,28 +1,32 @@
 import { ActivityIndicator, Platform, Pressable, Text, TextInput, View, StyleSheet, useWindowDimensions, type TextInputProps, type StyleProp, type ViewStyle } from 'react-native'
-import { useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import { useTheme } from './core/theme/useTheme'
 import { controlHeight, isWide } from './shared/shellLayout'
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref, ComponentRef } from 'react'
 // Reference tokens from Frontend/src/index.css. Solid glass fallback keeps native data readable;
 // web uses the reference translucent glass levels with backdrop blur (see `glass()`).
+// Contrast (WCAG AA, DEF-006): `brand` is the accent used as text/icons on the theme's own surfaces;
+// `brandFill`/`dangerFill`/`warningFill` are badge/chip backgrounds that carry white text (>= 4.5:1).
+// The reference greens #16a34a/#22c55e give only 2.3-3.3:1 in those roles, so they are kept for rings only.
 export const palette = {
   light: {
     dark: false, bg: '#f6f8f6', panel: '#ffffff', shell: '#f6f9f7', text: '#0f172a', muted: '#475569', subtle: '#e2e8f0', border: 'rgba(15,23,42,0.1)', ring: '#16a34a',
-    primary: '#15803d', primaryHover: '#166534', brand: '#16a34a', gold: '#e8a317', soft: '#dcfce7', neutral: '#f1f5f9', chat: '#f2eee9', outgoing: '#d9fdd3', incoming: '#ffffff',
+    primary: '#15803d', primaryHover: '#166534', brand: '#15803d', brandFill: '#15803d', dangerFill: '#b91c1c', warningFill: '#b45309', gold: '#e8a317', soft: '#dcfce7', neutral: '#f1f5f9', chat: '#f2eee9', outgoing: '#d9fdd3', incoming: '#ffffff',
     danger: '#b91c1c', dangerSoft: '#fee2e2', success: '#15803d', successSoft: '#dcfce7', warning: '#b45309', warningSoft: '#fef3c7', info: '#1d4ed8', infoSoft: '#dbeafe',
     glass1: 'rgba(255,255,255,0.55)', glass1Border: 'rgba(255,255,255,0.45)', glass2: 'rgba(255,255,255,0.68)', glass2Border: 'rgba(255,255,255,0.55)', glass3: 'rgba(255,255,255,0.9)', glass4: 'rgba(255,255,255,0.86)', glass4Border: 'rgba(255,255,255,0.6)',
     input: 'rgba(255,255,255,0.9)', hover: 'rgba(0,0,0,0.05)',
   },
   dark: {
     dark: true, bg: '#0c1210', panel: '#1e293b', shell: '#111c22', text: '#f1f5f9', muted: '#cbd5e1', subtle: '#1e293b', border: 'rgba(255,255,255,0.1)', ring: '#22c55e',
-    primary: '#16a34a', primaryHover: '#15803d', brand: '#22c55e', gold: '#f0b429', soft: '#163828', neutral: '#263340', chat: '#0b111c', outgoing: '#144d37', incoming: '#1e293b',
-    danger: '#f87171', dangerSoft: '#42252b', success: '#4ade80', successSoft: 'rgba(34,197,94,0.16)', warning: '#fbbf24', warningSoft: 'rgba(245,158,11,0.16)', info: '#93c5fd', infoSoft: 'rgba(59,130,246,0.16)',
+    primary: '#15803d', primaryHover: '#166534', brand: '#22c55e', brandFill: '#15803d', dangerFill: '#b91c1c', warningFill: '#b45309', gold: '#f0b429', soft: '#163828', neutral: '#263340', chat: '#0b111c', outgoing: '#144d37', incoming: '#1e293b',
+    danger: '#f87171', dangerSoft: 'rgba(239,68,68,0.16)', success: '#4ade80', successSoft: 'rgba(34,197,94,0.16)', warning: '#fbbf24', warningSoft: 'rgba(245,158,11,0.16)', info: '#93c5fd', infoSoft: 'rgba(59,130,246,0.16)',
     glass1: 'rgba(15,23,42,0.55)', glass1Border: 'rgba(255,255,255,0.08)', glass2: 'rgba(30,41,59,0.6)', glass2Border: 'rgba(255,255,255,0.1)', glass3: 'rgba(15,23,42,0.86)', glass4: 'rgba(17,24,39,0.9)', glass4Border: 'rgba(255,255,255,0.1)',
     input: 'rgba(15,23,42,0.7)', hover: 'rgba(255,255,255,0.1)',
   },
 } as const
-export type Colors = (typeof palette)['light'] | (typeof palette)['dark']
-export function useColors(): Colors { return palette[useTheme().dark ? 'dark' : 'light'] }
+export type Colors = { [K in keyof typeof palette.light]: K extends 'dark' ? boolean : string }
+export const ColorOverrides = createContext<Partial<Colors>>({})
+export function useColors(): Colors { const base = palette[useTheme().dark ? 'dark' : 'light']; return { ...base, ...useContext(ColorOverrides) } }
 
 const web = Platform.OS === 'web'
 /** Reference radii: 16px panels, 12px inner cards, 10px inputs/buttons. */
@@ -55,7 +59,7 @@ export function Button({ title, onPress, disabled = false, loading = false, acce
   const c = useColors(); const [hovered, setHovered] = useState(false)
   const off = disabled || loading
   const filled = variant === 'primary' || variant === 'danger'
-  const background = variant === 'primary' ? (hovered ? c.primaryHover : c.primary) : variant === 'danger' ? c.danger : variant === 'secondary' ? (web ? c.glass2 : c.panel) : hovered ? c.hover : 'transparent'
+  const background = variant === 'primary' ? (hovered ? c.primaryHover : c.primary) : variant === 'danger' ? c.danger : variant === 'secondary' ? (hovered ? (c.dark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.8)') : web ? c.glass2 : c.panel) : hovered ? c.hover : 'transparent'
   const height = size === 'sm' ? (web ? 32 : 36) : controlHeight(Platform.OS)
   return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityState={{ disabled: off, busy: loading }} disabled={off} onPress={onPress} onHoverIn={() => setHovered(true)} onHoverOut={() => setHovered(false)}
     style={({ pressed }) => [{ paddingHorizontal: size === 'sm' ? 12 : 16, minHeight: height, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', borderRadius: radius.control, borderWidth: variant === 'secondary' ? 1 : 0, borderColor: variant === 'secondary' && hovered ? 'rgba(22,163,74,0.4)' : c.border, backgroundColor: background, opacity: off ? 0.5 : pressed ? 0.85 : variant === 'danger' && hovered ? 0.9 : 1, transform: [{ scale: pressed ? 0.98 : 1 }], ...(filled ? { boxShadow: shadow.sm } : {}), ...cursor(off) }, style]}>
@@ -63,11 +67,11 @@ export function Button({ title, onPress, disabled = false, loading = false, acce
     <Text style={{ fontFamily: 'Inter_500Medium', color: filled ? '#ffffff' : c.text, fontWeight: '500', textAlign: 'center', fontSize: 14, lineHeight: 20 }}>{title}</Text>
   </Pressable>
 }
-export function Field({ label, compact, hint, error, style, onFocus, onBlur, ...props }: TextInputProps & { label: string; compact?: boolean; hint?: string; error?: string }) {
+export function Field({ label, compact, hint, error, trailing, inset = true, style, onFocus, onBlur, ...props }: TextInputProps & { ref?: Ref<ComponentRef<typeof TextInput>>; label: string; compact?: boolean; hint?: string; error?: string; trailing?: ReactNode; inset?: boolean }) {
   const c = useColors(); const [focused, setFocused] = useState(false)
-  return <View style={{ gap: 6 }}>{!compact && <Text style={{ fontFamily: 'Inter_500Medium', color: c.text, fontSize: 14, lineHeight: 20, fontWeight: '500' }}>{label}</Text>}<TextInput {...props} accessibilityLabel={props.accessibilityLabel ?? label} aria-invalid={error ? true : undefined}
+  return <View style={{ gap: 6 }}>{!compact && <Text style={{ fontFamily: 'Inter_500Medium', color: c.text, fontSize: 14, lineHeight: 20, fontWeight: '500' }}>{label}</Text>}<View style={inset ? { paddingLeft: 16, paddingRight: trailing ? 52 : 16, borderWidth: 1, borderRadius: radius.control, borderColor: error ? c.danger : focused ? c.brand : c.border, backgroundColor: web ? c.input : c.panel, ...(focused ? { boxShadow: '0 0 0 2px rgba(22, 163, 74, 0.25)' } : {}) } : undefined}><TextInput selectionColor={c.brand} cursorColor={c.brand} underlineColorAndroid="transparent" {...props} accessibilityLabel={props.accessibilityLabel ?? label} aria-invalid={error ? true : undefined}
     onFocus={event => { setFocused(true); onFocus?.(event) }} onBlur={event => { setFocused(false); onBlur?.(event) }}
-    placeholderTextColor={c.muted} style={[{ fontFamily: 'Inter_400Regular', fontSize: web ? 14 : 16, paddingHorizontal: 12, paddingVertical: 8, minHeight: controlHeight(Platform.OS), borderWidth: 1, borderRadius: radius.control, borderColor: error ? c.danger : focused ? c.brand : c.border, color: c.text, backgroundColor: web ? c.input : c.panel, opacity: props.editable === false ? 0.6 : 1, ...(focused ? { boxShadow: '0 0 0 2px rgba(22, 163, 74, 0.25)' } : {}), ...(web ? ({ outlineStyle: 'none' } as object) : {}) }, style]} />
+    placeholderTextColor={c.muted} style={[{ fontFamily: 'Inter_400Regular', fontSize: 16, includeFontPadding: false, textAlignVertical: props.multiline ? 'top' : 'center', paddingHorizontal: 16, paddingStart: 16, paddingEnd: trailing ? 52 : 16, paddingVertical: 12, minHeight: 52, borderWidth: 1, borderRadius: radius.control, borderColor: error ? c.danger : focused ? c.brand : c.border, color: c.text, backgroundColor: web ? c.input : c.panel, opacity: props.editable === false ? 0.6 : 1, ...(focused ? { boxShadow: '0 0 0 2px rgba(22, 163, 74, 0.25)' } : {}), ...(web ? ({ outlineStyle: 'none', cursor: props.editable === false ? 'default' : 'text' } as object) : {}) }, style, !inset ? { paddingStart: StyleSheet.flatten(style)?.paddingLeft ?? 16, paddingEnd: trailing ? 52 : StyleSheet.flatten(style)?.paddingRight ?? 16 } : undefined, inset ? { padding: 0, paddingVertical: 12, paddingHorizontal: 0, paddingLeft: 0, paddingRight: 0, paddingStart: 0, paddingEnd: 0, borderWidth: 0, borderRadius: 0, backgroundColor: 'transparent', boxShadow: undefined } : undefined]} />{trailing && <View style={{ position: 'absolute', right: 2, top: 0, bottom: 0, justifyContent: 'center' }}>{trailing}</View>}</View>
     {error ? <Text accessibilityRole={web ? 'alert' : undefined} style={{ fontFamily: 'Inter_400Regular', color: c.danger, fontSize: 12, lineHeight: 16 }}>{error}</Text>
       : hint ? <Text style={{ fontFamily: 'Inter_400Regular', color: c.muted, fontSize: 12, lineHeight: 16 }}>{hint}</Text> : null}</View>
 }

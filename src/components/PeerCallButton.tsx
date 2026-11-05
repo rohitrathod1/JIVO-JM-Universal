@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Image, Linking, Pressable, Text, View } from 'react-native'
+import { Linking, Platform, Pressable, Text, View } from 'react-native'
 import { getPerson, type ConversationItem, type PersonProfile } from '../modules/messenger/api'
 import { dialablePeer, headerInfo } from '../modules/messenger/conversationInfo'
 import { mediaUrl } from '../modules/messenger/media/url'
@@ -9,16 +9,15 @@ import { realtime } from '../core/realtime/socket'
 import { errorMessage, origin } from '../core/api/client'
 import { Label, useColors } from '../ui'
 import { ChatAvatar } from './ChatAvatar'
+import { Icon } from './Icon'
 
-// Lucide Phone / Mail (the Frontend's icons), rasterized at 3x like the other assets/icons.
-const contactIcons = { phone: require('../../assets/icons/Phone.png'), mail: require('../../assets/icons/Mail.png') } as const
 
 /** A round contact action: `soft` is the green chip of the profile rows, otherwise a plain header icon button. */
-export function RoundAction({ icon, label, onPress, disabled = false, soft = false }: { icon: keyof typeof contactIcons; label: string; onPress: () => void; disabled?: boolean; soft?: boolean }) {
+export function RoundAction({ icon, label, onPress, disabled = false, soft = false }: { icon: 'phone' | 'mail'; label: string; onPress: () => void; disabled?: boolean; soft?: boolean }) {
   const c = useColors(); const size = soft ? 36 : 44
   return <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
     hitSlop={soft ? 4 : 0} style={({ pressed }) => ({ width: size, height: size, borderRadius: size / 2, alignItems: 'center', justifyContent: 'center', backgroundColor: soft ? c.soft : pressed ? c.neutral : 'transparent', opacity: disabled ? 0.45 : pressed && soft ? 0.8 : 1 })}>
-    <Image accessible={false} source={contactIcons[icon]} style={{ width: soft ? 16 : 22, height: soft ? 16 : 22, tintColor: soft ? c.primary : c.muted }} />
+    <Icon name={icon} size={soft ? 16 : 22} color={soft ? c.primary : c.muted} />
   </Pressable>
 }
 
@@ -57,8 +56,8 @@ export function PeerCallButton({ conversation }: { conversation: ConversationIte
 export function ChatHeaderTitle({ conversation, live, onPress }: { conversation: ConversationItem; live?: string | null; onPress: () => void }) {
   const c = useColors(); const title = conversation.title || conversation.peer?.name || 'Conversation'; const info = live || headerInfo(conversation)
   return <Pressable accessibilityRole="button" accessibilityLabel={`${title}, ${conversation.kind === 'group' ? 'group info' : 'profile'}`} onPress={onPress}
-    style={({ pressed }) => ({ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 12, opacity: pressed ? 0.75 : 1 })}>
+    style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => ({ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4, borderRadius: 8, backgroundColor: hovered || pressed ? (c.dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)') : 'transparent', ...(Platform.OS === 'web' ? { cursor: 'pointer' } as object : {}) })}>
     <ChatAvatar name={title} seed={conversation.peer?.id ?? conversation.id} uri={mediaUrl(conversation.avatar_url, origin)} group={conversation.kind === 'group'} size={40} />
-    <View style={{ flex: 1, minWidth: 0 }}><Text numberOfLines={1} style={{ color: c.text, fontFamily: 'Inter_600SemiBold', fontSize: 16, lineHeight: 24 }}>{title}</Text>{!!info && <Text numberOfLines={1} style={{ color: c.muted, fontSize: 12, lineHeight: 18 }}>{info}</Text>}</View>
+    <View style={{ flex: 1, minWidth: 0 }}><Text numberOfLines={1} style={{ color: c.text, fontFamily: 'Inter_600SemiBold', fontWeight: '600', fontSize: 16, lineHeight: 24 }}>{title}</Text>{!!info && <Text numberOfLines={1} style={{ color: c.muted, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 16 }}>{info}</Text>}</View>
   </Pressable>
 }

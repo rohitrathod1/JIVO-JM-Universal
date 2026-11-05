@@ -1,3 +1,4 @@
+import { FullImage } from './MessageTools'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Image, Linking, Pressable, Text, View } from 'react-native'
 import { getConversation, getShared, type SharedItem, type SharedKind } from '../modules/messenger/api'
@@ -59,7 +60,7 @@ export function SharedMedia({ conversation }: { conversation: string }) {
       <Text style={{ color: on ? c.text : c.muted, fontFamily: 'Inter_500Medium', fontSize: 14, lineHeight: 20 }}>{tab.label}</Text></Pressable> })}</View>
     {loading && !items.length && <ActivityIndicator accessibilityLabel="Loading shared items" />}
     {!!error && <View style={{ alignItems: 'center', gap: 4, paddingVertical: 12 }}><Text style={{ color: c.danger, fontSize: 14 }}>{error}</Text><Button title="Try again" accessibilityLabel="Retry shared items" variant="ghost" onPress={() => void load()} /></View>}
-    {!loading && !error && !items.length && <Text style={{ color: c.muted, fontSize: 14, textAlign: 'center', paddingVertical: 16 }}>{empty}</Text>}
+    {!loading && !error && !items.length && <Text style={{ color: c.muted, fontFamily: 'Inter_400Regular', fontSize: 14, lineHeight: 20, textAlign: 'center', paddingVertical: 24 }}>{empty}</Text>}
     {kind === 'media' ? <View accessibilityLabel="Photos and videos" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>{items.filter(item => item.attachment).map(item => { const a = item.attachment!; const thumb = mediaUrl(a.thumb_url, origin); return <Pressable key={sharedKey(item)} accessibilityRole="button" accessibilityLabel={`${a.kind === 'video' ? 'Video' : 'Photo'} · ${listTime(item.message.created_at)}`} onPress={() => setExporting(item)}
       style={({ pressed }) => ({ width: '32%', aspectRatio: 1, flexGrow: 0, borderRadius: 6, overflow: 'hidden', backgroundColor: c.neutral, opacity: pressed ? 0.8 : 1, alignItems: 'center', justifyContent: 'center' })}>
       {thumb && <Image source={{ uri: thumb }} style={{ position: 'absolute', width: '100%', height: '100%' }} resizeMode="cover" />}
@@ -76,6 +77,6 @@ export function SharedMedia({ conversation }: { conversation: string }) {
       </View>}
     </View>)}
     {before !== null && <Button title={loading ? 'Loading…' : 'Show older'} accessibilityLabel="More shared items" variant="ghost" disabled={loading} onPress={() => void load(before)} />}
-    {exporting?.attachment && <AttachmentExport conversation={conversation} message={exporting.message.id} seq={exporting.message.seq} attachment={exporting.attachment} onClose={() => setExporting(null)} />}
+    {exporting?.attachment?.kind === 'image' ? <FullImage attachment={exporting.attachment} onClose={() => setExporting(null)} /> : exporting?.attachment && <AttachmentExport conversation={conversation} message={exporting.message.id} seq={exporting.message.seq} attachment={exporting.attachment} onClose={() => setExporting(null)} />}
   </View>
 }

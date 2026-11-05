@@ -26,7 +26,7 @@ describe('upload scanner boundary', () => {
   })
   it('bounds the wait even if the scan never finishes', async () => {
     const promise = awaitScan(upload, { read: vi.fn(async () => upload), subscribe: () => () => {} }, new AbortController().signal, 5000)
-    const assertion = expect(promise).rejects.toThrow('still being checked')
+    const assertion = expect(promise).rejects.toMatchObject({ retryable: true })
     await vi.advanceTimersByTimeAsync(5000); await assertion
   })
   it('preserves existing file size limits', () => {

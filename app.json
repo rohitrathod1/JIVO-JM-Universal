@@ -70,10 +70,24 @@
         {
           "android": {
             "enabled": true,
-            "singleShareMimeTypes": ["text/*", "image/*", "video/*", "audio/*", "application/*"],
-            "multipleShareMimeTypes": ["text/*", "image/*", "video/*", "audio/*", "application/*"]
+            "singleShareMimeTypes": [
+              "text/*",
+              "image/*",
+              "video/*",
+              "audio/*",
+              "application/*"
+            ],
+            "multipleShareMimeTypes": [
+              "text/*",
+              "image/*",
+              "video/*",
+              "audio/*",
+              "application/*"
+            ]
           },
-          "ios": { "enabled": false }
+          "ios": {
+            "enabled": false
+          }
         }
       ],
       [
@@ -82,7 +96,14 @@
           "locationWhenInUsePermission": "Allow JIVO JM to use your location when you choose to share a location or an event place."
         }
       ],
-      "expo-status-bar"
+      "expo-status-bar",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-notifications",
+        {
+          "color": "#16a34a"
+        }
+      ]
     ],
     "scheme": "jivo-jm"
   }

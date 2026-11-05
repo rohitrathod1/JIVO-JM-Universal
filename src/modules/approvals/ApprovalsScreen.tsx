@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
 import { Link, type Href } from 'expo-router'
 import { isAxiosError } from 'axios'
 import { errorMessage } from '../../core/api/client'
@@ -7,11 +7,14 @@ import { useResource } from '../../shared/useResource'
 import { SensitiveRequestGuard } from '../../shared/sensitive'
 import { subscribeSensitiveView } from '../../shared/sensitiveLifecycle'
 import { formatDateTime } from '../../shared/utils/format'
-import { Button, Card, Label, styles, useColors } from '../../ui'
+import { Button, Card, EmptyState, Label, Surface, styles, useColors } from '../../ui'
+import { Icon, type IconName } from '../../components/Icon'
+import { Badge, IconTextButton, PageHeader, PillTabs } from '../../components/AdminUi'
 import { Sheet } from '../../components/Sheet'
 import { approvalsChanged, decide, listApprovals } from './api'
 import { FILTERS, KIND_LABEL, appHref, badgeText, confirmCopy, doneMessage, emptyTitle, metaLine, resultLink, rowsFor, statusFor, statusTone, type ApprovalDecision, type ApprovalFilter, type ApprovalItem } from './model'
 
+const KIND_ICON: Record<string, { icon: IconName; color: string }> = { admin: { icon: 'shieldCheck', color: '#d97706' }, vault_owner: { icon: 'key', color: '#7c3aed' }, emergency_access: { icon: 'lifeBuoy', color: '#e11d48' } }
 const isStepUpCancel = (e: unknown) => isAxiosError(e) && (e.response?.data as { code?: string } | undefined)?.code === 'step_up_required'
 
 /**
@@ -53,41 +56,35 @@ export function ApprovalsScreen() {
   const all = list.value?.results ?? []
   const rows = rowsFor(all, filter)
   const waiting = badgeText(list.value?.waiting_on_me)
-  const tone = { warning: { bg: '#fef3c7', fg: '#92400e' }, success: { bg: c.soft, fg: c.primary }, danger: { bg: c.dangerSoft, fg: c.danger }, neutral: { bg: c.neutral, fg: c.muted } }
   const copy = confirming ? confirmCopy(confirming.item, confirming.d) : null
 
-  return <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.page}>
-    <Label large>Approvals</Label>
-    <View accessibilityRole="tablist" accessibilityLabel="Show" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-      {FILTERS.map(([value, label]) => { const selected = filter === value; return <Pressable key={value} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected }} onPress={() => { setFilter(value); setError(''); setNotice('') }}
-        style={({ pressed }) => ({ minHeight: 36, paddingHorizontal: 12, borderRadius: 18, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: selected ? c.primary : c.neutral, opacity: pressed ? 0.8 : 1 })}>
-        <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 14, color: selected ? 'white' : c.muted }}>{label}</Text>
-        {value === 'waiting' && !!waiting && <View style={{ borderRadius: 9, paddingHorizontal: 6, backgroundColor: c.brand }}><Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 11, color: 'white' }}>{waiting}</Text></View>}
-      </Pressable> })}
-    </View>
+  return <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.page, { gap: 0 }]}>
+    <PageHeader title="Approvals" />
+    <View style={{ marginBottom: 16 }}><PillTabs label="Show" value={filter} options={FILTERS} onChange={value => { setFilter(value); setError(''); setNotice('') }} badge={{ waiting: waiting || undefined }} /></View>
     {!!error && <Text accessibilityRole="alert" style={{ color: c.danger, fontFamily: 'Inter_400Regular' }}>{error}</Text>}
     {!!notice && <Text accessibilityLiveRegion="polite" style={{ color: c.primary, fontFamily: 'Inter_500Medium' }}>{notice}</Text>}
     {list.loading && <ActivityIndicator accessibilityLabel="Loading approvals" />}
     {!!list.error && <Card><Label>{errorMessage(list.error)}</Label><Button title="Retry" variant="secondary" onPress={list.refresh} /></Card>}
-    {!list.loading && !list.error && rows.length === 0 && <Card style={{ alignItems: 'center', paddingVertical: 32 }}><Text style={{ fontFamily: 'Inter_500Medium', fontSize: 15, color: c.muted }}>{emptyTitle(filter)}</Text></Card>}
-    <View accessibilityLabel="Approvals" style={{ gap: 12 }}>
-      {rows.map(item => { const key = `${item.kind}-${item.id}`; const t = tone[statusTone(item.status)]; return <Card key={key} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', gap: 12 }}>
-        <View style={{ flex: 1, minWidth: 220, gap: 4 }}>
-          <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 12, letterSpacing: 0.6, color: c.muted }}>{KIND_LABEL[item.kind]?.toUpperCase() ?? item.kind}</Text>
+    {!list.loading && !list.error && rows.length === 0 && <EmptyState title={emptyTitle(filter)} />}
+    <View accessibilityLabel="Approvals" style={{ gap: 12, marginTop: error || notice ? 12 : 0 }}>
+      {rows.map(item => { const key = `${item.kind}-${item.id}`; const kind = KIND_ICON[item.kind] ?? KIND_ICON.admin; const badgeTone = ({ warning: 'warning', success: 'success', danger: 'danger', neutral: 'neutral' } as const)[statusTone(item.status)] ?? 'neutral'; return <Surface key={key} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', gap: 12, padding: 16 }}>
+        <View style={{ marginTop: 2 }}><Icon name={kind.icon} size={20} color={kind.color} /></View>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text numberOfLines={1} ellipsizeMode="clip" style={{ fontFamily: 'Inter_500Medium', fontWeight: '500', fontSize: 12, lineHeight: 16, letterSpacing: 0.6, color: c.muted }}>{KIND_LABEL[item.kind]?.toUpperCase() ?? item.kind}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-            <Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 15, color: c.text }}>{item.title}</Text>
-            {!!item.subject && <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 15, color: c.muted }}>· {item.subject}</Text>}
-            <View style={{ borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2, backgroundColor: t.bg }}><Text style={{ fontFamily: 'Inter_500Medium', fontSize: 12, color: t.fg }}>{item.status}</Text></View>
+            <Text style={{ fontFamily: 'Inter_500Medium', fontWeight: '500', fontSize: 16, lineHeight: 24, color: c.text }}>{item.title}</Text>
+            {!!item.subject && <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 16, lineHeight: 24, color: c.muted }}>· {item.subject}</Text>}
+            <Badge tone={badgeTone}>{item.status}</Badge>
           </View>
-          <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 18, color: c.muted }}>{metaLine(item, formatDateTime)}</Text>
-          {!!item.reason && <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 14, color: c.text }}>“{item.reason}”</Text>}
-          <Link replace href={appHref(item) as Href} accessibilityLabel={`Open ${item.title}`} style={{ fontFamily: 'Inter_500Medium', fontSize: 12, color: c.brand }}>Open</Link>
+          <Text style={{ marginTop: 2, fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 16, color: c.muted }}>{metaLine(item, formatDateTime)}</Text>
+          {!!item.reason && <Text style={{ marginTop: 4, fontFamily: 'Inter_400Regular', fontSize: 14, lineHeight: 20, color: c.text }}>“{item.reason}”</Text>}
+          <Link replace href={appHref(item) as Href} accessibilityLabel={`Open ${item.title}`} style={{ marginTop: 4, alignSelf: 'flex-start', fontFamily: 'Inter_500Medium', fontWeight: '500', fontSize: 12, lineHeight: 16, color: c.brand, textDecorationLine: 'none' }}>Open</Link>
         </View>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-          {item.can.decide && <><Button title="Approve" accessibilityLabel={`Approve ${item.title}`} disabled={!!busy} onPress={() => setConfirming({ item, d: 'approve' })} /><Button title="Deny" variant="secondary" accessibilityLabel={`Deny ${item.title}`} disabled={!!busy} onPress={() => setConfirming({ item, d: 'deny' })} /></>}
-          {item.can.cancel && <Button title={busy === key ? 'Withdrawing…' : 'Withdraw'} variant="ghost" disabled={!!busy} onPress={() => void act(item, 'cancel')} />}
+          {item.can.decide && <><IconTextButton size="sm" icon="check" title="Approve" accessibilityLabel={`Approve ${item.title}`} disabled={!!busy} onPress={() => setConfirming({ item, d: 'approve' })} /><IconTextButton size="sm" icon="x" title="Deny" variant="secondary" accessibilityLabel={`Deny ${item.title}`} disabled={!!busy} onPress={() => setConfirming({ item, d: 'deny' })} /></>}
+          {item.can.cancel && <IconTextButton size="sm" title={busy === key ? 'Withdrawing…' : 'Withdraw'} accessibilityLabel="Withdraw" variant="ghost" disabled={!!busy} onPress={() => void act(item, 'cancel')} />}
         </View>
-      </Card> })}
+      </Surface> })}
     </View>
     <Sheet visible={!!confirming} onClose={() => { if (!busy) setConfirming(null) }}>
       {confirming && copy && <><Label large>{copy.title}</Label><Label>{copy.body}</Label>

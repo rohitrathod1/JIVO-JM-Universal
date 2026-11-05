@@ -33,13 +33,13 @@ async function main() {
   try {
     for (const [app, base] of [['reference', 'http://localhost:5174'], ['universal', process.env.JM_UI_URL || 'http://127.0.0.1:4175']]) {
       if (process.env.JM_UI_APP && process.env.JM_UI_APP !== app) continue
-      for (const theme of ['light', 'dark']) for (const width of [360, 1440]) {
+      for (const theme of ['light', 'dark']) for (const width of [390, 768, 1440]) {
         const context = await browser.newContext({ viewport: { width, height: 1000 }, colorScheme: theme, serviceWorkers: 'block' })
         await fixtures(context, false)
-        const page = await context.newPage(); const errors = []
+        const page = require('./parity/settle.cjs').settleImages(await context.newPage()); const errors = []
         page.on('pageerror', error => errors.push(error.message))
         await page.goto(`${base}/login`, { waitUntil: 'networkidle' })
-        await expect(page.getByLabel(app === 'reference' ? 'Email' : 'Email address', { exact: true })).toBeVisible().catch(async error => { console.error(app, theme, width, errors, await page.locator('body').innerText()); throw error })
+        await expect(page.getByLabel('Email', { exact: true })).toBeVisible().catch(async error => { console.error(app, theme, width, errors, await page.locator('body').innerText()); throw error })
         await page.screenshot({ path: path.join(dir, `${app}-login-${theme}-${width}.png`) })
         await context.unroute('**/api/jm/**'); await fixtures(context, true)
         await page.goto(`${base}/messenger`, { waitUntil: 'networkidle' })

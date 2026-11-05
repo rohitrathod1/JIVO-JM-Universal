@@ -4,7 +4,7 @@ const captureTests=require('./capture-interactions.cjs')
 const assert = require('node:assert/strict')
 const base = 'http://localhost:' + Number(fs.readFileSync('.local-ui-port', 'utf8'))
 const person = { id: 'peer', name: 'Example Colleague', email: 'colleague@example.invalid', avatar_url: null, company: 'Example Company', is_active: true }
-const me = { id: 'me', name: 'Example Tester', display_name: 'Example Tester', full_name: 'Example Tester', email: 'tester@example.invalid', phone: '', bio: '', avatar_url: null,
+const me = { id: 'me', name: 'Example Tester', display_name: 'Example Tester', full_name: 'Example Tester', email: 'tester@example.invalid', phone: '+91 98100 00000', bio: '', avatar_url: null,
   can_create_groups: true, pending_email: null, pending_email_requested_at: null, employee_code: null, date_joined: '2026-01-01', last_seen_privacy: 'everyone',
   companies: [], capabilities: ['JM_ACCESS', 'JM_SEND_MESSAGE', 'JM_SEND_FILE', 'JM_CREATE_GROUP', 'JM_SEND_ALERT', 'JP_ACCESS', 'JP_MANAGE_VAULT', 'JP_REQUEST_EMERGENCY', 'ADMIN_USERS'], groups: [],
   session: { id: 'current-device', expires_at: '2027-01-01', auth_method: 'password' },
@@ -19,6 +19,43 @@ function mockWave() {
   const samples = 8000 * 8, buffer = Buffer.alloc(44 + samples * 2)
   buffer.write('RIFF'); buffer.writeUInt32LE(buffer.length - 8, 4); buffer.write('WAVE', 8); buffer.write('fmt ', 12); buffer.writeUInt32LE(16, 16); buffer.writeUInt16LE(1, 20); buffer.writeUInt16LE(1, 22); buffer.writeUInt32LE(8000, 24); buffer.writeUInt32LE(16000, 28); buffer.writeUInt16LE(2, 32); buffer.writeUInt16LE(16, 34); buffer.write('data', 36); buffer.writeUInt32LE(samples * 2, 40); return buffer
 }
+// Navigation as in the reference shell: rail links from 768px, the five phone tabs below it, and the account menu
+// (hold Profile) for Approvals, Administration and Sign out.
+async function accountMenu(page) {
+  await page.getByRole('link', { name: /^Profile: / }).last().click({ delay: 700 })
+}
+async function nav(page, width, railName, tabName, menuName) {
+  if (width >= 768) return page.getByRole('link', { name: railName, exact: true }).last().click()
+  if (tabName) return page.getByRole('link', { name: tabName, exact: true }).last().click()
+  await accountMenu(page)
+  await page.getByRole('menu', { name: 'Account' }).getByRole('menuitem', { name: menuName, exact: true }).click()
+}
+// Administration has no tab row any more (reference): the rail links each section on desktop, a tab strip on phones.
+async function adminSection(page, width, name) {
+  if (width >= 768) return page.getByRole('link', { name, exact: true }).last().click()
+  return page.getByRole('tablist', { name: 'Administration' }).getByRole('tab', { name, exact: true }).click()
+}
+// Media and image bubbles follow the reference (no inline export button); export lives in the message actions sheet.
+async function exportFromActions(page, name) {
+  const bubble = page.getByLabel(/^Message from /).filter({ has: page.getByRole('button', { name: new RegExp('^(Open media|View image) ' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') }) }).last()
+  await bubble.hover()
+  await bubble.getByRole('button', { name: 'Message actions', exact: true }).click()
+  await page.getByRole('button', { name: 'Export attachment ' + name, exact: true }).click()
+}
+// Desktop rail bell is a menu button (reference BellMenu); the full page is behind "View all notifications & settings".
+async function openNotifications(page, width) {
+  if (width < 768) return page.getByRole('link', { name: 'Inbox', exact: true }).last().click()
+  await page.getByRole('button', { name: /^Notifications(, \d+ unread)?$/ }).last().click()
+  await page.getByRole('menuitem', { name: 'View all notifications & settings', exact: true }).click()
+}
+async function signOut(page) {
+  await accountMenu(page)
+  await page.getByRole('menu', { name: 'Account' }).getByRole('menuitem', { name: 'Sign out', exact: true }).click()
+  await page.getByText('Sign out of JM?', { exact: true }).waitFor()
+  await page.getByRole('dialog', { name: 'Sign out of JM?' }).getByRole('button', { name: 'Sign out', exact: true }).click()
+  await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor()
+}
+
 async function run() {
   const browser = await chromium.launch({ channel: 'msedge', headless: true })
   try {
@@ -40,7 +77,7 @@ async function run() {
       let preferences = { push_enabled: false, push_preview: 'none', dnd_start: null, dnd_end: null, mentions_override_mute: true, jp_push: true, sound_enabled: true, vibrate_enabled: true }
       const adminPerson = { ...me, status: 'active', companies: [], groups: [], mfa_enabled: false, employee_code: null, is_active: true, is_deleted: false }
 
-      const managedUsers = [adminPerson]; let policy = { two_step_enforced: false, updated_at: null, updated_by: null }; const permissionGroups = []; const teamVaults = []; const ownerRequests = []; const teamMembers = [{ user: person, role: 'owner', super_owner: true, via_break_glass: false, added_by: person, added_at: '2026-01-01', expires_at: null }]; let emergency = []
+      const managedUsers = [adminPerson]; let policy = { two_step_enforced: false, updated_at: null, updated_by: null }; let approvalDecided = false; const permissionGroups = []; const teamVaults = []; const ownerRequests = []; const teamMembers = [{ user: person, role: 'owner', super_owner: true, via_break_glass: false, added_by: person, added_at: '2026-01-01', expires_at: null }]; let emergency = []
       let fileRows = [{id:'file',name:'mock.pem',size:12,created_at:'2026-10-20',updated_at:'2026-10-20',created_by:me,previewable:true}]; let fileRenameAllowed=true; let delayedPreview=false; let previewReply; let previewRequested=false
       let holdDownload=false;let downloadRequested=false;let downloadReply
 
@@ -91,12 +128,15 @@ async function run() {
         if (path === '/api/jm/auth/options/') return send({ passkey_sign_in: false })
         if (path === '/api/jm/auth/login/') { signedIn = true; return send({ status: 'ok' }) }
         if (path === '/api/jm/auth/logout/') { signedIn = false; return send({ status: 'ok' }) }
+        if (path === '/api/jm/me/security-notices/' && method === 'GET') return send({ results: [], next_cursor: null, unavailable_count: 0 })
         if (path === '/api/jm/me/' && method === 'GET') return signedIn ? send(me) : send({ detail: 'Sign in' }, 401)
         if (path === '/api/jm/me/' && method === 'PATCH') {
           if (!verified) return send({ code: 'step_up_required', scope: 'security_settings', methods: stepMethods }, 403)
           Object.assign(me, body); return send(me)
         }
         if(path==='/api/jm/auth/step-up/options/')return send({methods:body.scope==='app_unlock'?['passkey','password']:stepMethods,passkey:(body.scope==='app_unlock'||stepMethods.includes('passkey'))?{flow:'synthetic-flow',options:{challenge:'AQIDBAUGBwgJCgsMDQ4PEA',rpId:'localhost',allowCredentials:[],userVerification:'preferred'}}:null})
+        if (path === '/api/jm/approvals/') { const items = approvalDecided ? [] : [{ kind: 'admin', id: 'approval-1', title: 'Reset two-step verification', subject: 'Example Colleague', reason: 'Lost phone', status: 'pending', requested_by: { id: 'peer', name: 'Example Colleague' }, requested_at: '2026-11-01T10:00:00Z', expires_at: null, decided_by: null, decided_at: null, can: { decide: true, cancel: false }, actions: { approve: '/api/jm/admin/approvals/approval-1/approve/', deny: '/api/jm/admin/approvals/approval-1/deny/', cancel: '/api/jm/admin/approvals/approval-1/cancel/' }, link: '/admin?tab=approvals' }]; return send({ results: items, waiting_on_me: items.length }) }
+        if (path === '/api/jm/admin/approvals/approval-1/approve/' && method === 'POST') { approvalDecided = true; return send({ status: 'approved' }) }
         if (path === '/api/jm/auth/step-up/') { if(body.scope==='jp')vaultVerified=true;verified = true; return send({ status: 'ok' }) }
         if (path === '/api/jm/search/messages/') return send({ results: messages.filter(m => m.body.includes(url.searchParams.get('q'))).map(m => ({ message: m, conversation: { id: 'chat', title: 'Example conversation', kind: 'direct' } })), next_cursor: null })
         if (path === '/api/jm/conversations/chat/polls/') { const msg = { ...message('poll-' + messages.length, messages.length + 1, '', true), kind: 'poll', poll: { question: body.question, options: body.options.map((text, index) => ({ id: 'o' + index, text, votes: 0, me: false })), allow_multiple: body.allow_multiple, voters: 0, total_votes: 0 } }; messages.push(msg); return send(msg) }
@@ -152,7 +192,7 @@ async function run() {
         if(/^\/api\/jp\/files\/[^/]+\/$/.test(path)){const id=path.split('/')[4];if(method==='PATCH')fileRows.find(f=>f.id===id).name=body.name;if(method==='DELETE')fileRows=fileRows.filter(f=>f.id!==id);return send(fileRows.find(f=>f.id===id)||{})}
         if(path==='/api/jm/admin/companies/')return send([{id:'company',code:'EX',name:'Example Company',is_active:true,is_deleted:false}])
         if(path==='/api/jm/admin/memberships/'){assert.equal(body.company,'EX');managedUsers[1].companies.push({id:'membership',company:'EX',company_name:'Example Company',company_color:'#15803D',title:body.title,department:body.department,is_active:true,is_default:false});return send(managedUsers[1].companies.at(-1))}
-        if(path==='/api/jm/admin/memberships/membership/'){if(method==='DELETE')managedUsers[1].companies=[];else Object.assign(managedUsers[1].companies[0],body);return send({})}
+        if(path==='/api/jm/admin/memberships/membership/'){const own=managedUsers[1].companies.find(m=>m.id==='membership');if(method==='DELETE')managedUsers[1].companies=managedUsers[1].companies.filter(m=>m!==own);else{if(body.is_default)managedUsers[1].companies.forEach(m=>{m.is_default=false});Object.assign(own,body)}return send({})}
         if(path==='/api/jm/admin/users/new-user/chat-access/'){if(method==='PUT')Object.assign(chatPolicy,body);return send(chatPolicy)}
         if(path==='/api/jm/admin/users/new-user/chat-access/allowed/'){if(method==='POST'){if(body.add)allowedPeople=body.add.map(id=>managedUsers.find(p=>p.id===id));if(body.remove)allowedPeople=allowedPeople.filter(p=>!body.remove.includes(p.id));chatPolicy.allowed_count=allowedPeople.length;return send(chatPolicy)}return send({results:allowedPeople,next_cursor:null})}
 
@@ -196,16 +236,16 @@ async function run() {
         unexpected.push(method + ' ' + path); return send({ detail: 'Unmocked endpoint' }, 501)
       })
       await page.goto(base + '/login')
-      await page.getByLabel('Email address').fill('tester@example.invalid')
+      await page.getByLabel('Email', { exact: true }).fill('tester@example.invalid')
       await page.getByLabel('Password', { exact: true }).fill('mock-only-password')
-      await page.getByRole('button', { name: 'Continue', exact: true }).click()
+      await page.getByRole('button', { name: 'Sign in', exact: true }).click()
       await page.getByRole('button', { name: 'Open Example conversation', exact: true }).click()
       await page.getByText('Hello from the mocked API', { exact: true }).waitFor()
-      await page.getByRole('button',{name:'Export attachment Example audio.wav',exact:true}).click()
+      await exportFromActions(page,'Example audio.wav')
       const attachmentDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Confirm attachment export',exact:true}).click();assert.equal((await attachmentDownload).suggestedFilename(),'export-Example_audio.wav');await page.getByRole('button',{name:'Close attachment export',exact:true}).click()
       await page.evaluate(()=>{window.attachmentURLs=0;const create=URL.createObjectURL.bind(URL);URL.createObjectURL=blob=>{window.attachmentURLs++;return create(blob)}})
-      await page.getByRole('button',{name:'Export attachment Example audio.wav',exact:true}).click();holdAttachment=true;await page.getByRole('button',{name:'Confirm attachment export',exact:true}).click();await expect.poll(()=>attachmentRequested).toBe(true);await page.getByRole('button',{name:'Cancel attachment export',exact:true}).click();releaseAttachment();holdAttachment=false;assert.equal(await page.evaluate(()=>window.attachmentURLs),0)
-      await page.getByRole('button',{name:'Export attachment Example audio.wav',exact:true}).click();messages[0].deleted=true;await page.getByRole('button',{name:'Confirm attachment export',exact:true}).click();await page.getByText('This attachment is no longer available.',{exact:true}).waitFor();assert.equal(attachmentDownloads,2);messages[0].deleted=false;await page.getByRole('button',{name:'Close attachment export',exact:true}).click()
+      await exportFromActions(page,'Example audio.wav');holdAttachment=true;await page.getByRole('button',{name:'Confirm attachment export',exact:true}).click();await expect.poll(()=>attachmentRequested).toBe(true);await page.getByRole('button',{name:'Cancel attachment export',exact:true}).click();releaseAttachment();holdAttachment=false;assert.equal(await page.evaluate(()=>window.attachmentURLs),0)
+      await exportFromActions(page,'Example audio.wav');messages[0].deleted=true;await page.getByRole('button',{name:'Confirm attachment export',exact:true}).click();await page.getByText('This attachment is no longer available.',{exact:true}).waitFor();assert.equal(attachmentDownloads,2);messages[0].deleted=false;await page.getByRole('button',{name:'Close attachment export',exact:true}).click()
 
       await page.getByRole('button', { name: 'Open media Example audio.wav', exact: true }).click()
       await page.getByRole('button', { name: 'Play audio', exact: true }).click()
@@ -214,18 +254,18 @@ async function run() {
       socketClient.send(JSON.stringify({ type: 'MESSAGE_DELETED', data: { conversation: 'chat', id: 'first', seq: 1, updated_at: '2026-10-20T07:00:00Z' } }))
       await page.getByRole('button', { name: 'Close media', exact: true }).waitFor({ state: 'hidden' })
       for (let seq = 2; seq <= 25; seq++) { const incoming = message('reader-' + seq, seq, 'Reader sample ' + seq); messages.push(incoming); socketClient.send(JSON.stringify({ type: 'MESSAGE_CREATED', data: incoming })) }
-      await expect(page.getByText('Reader sample 25', { exact: true })).toBeInViewport().catch(async error => { console.log('READER_GEOMETRY', await page.getByText('Reader sample 25', { exact: true }).evaluate(node => { const result = []; for (let n = node; n; n = n.parentElement) result.push({ tag: n.tagName, height: n.clientHeight, scroll: n.scrollHeight, top: n.scrollTop, y: n.getBoundingClientRect().y, overflow: getComputedStyle(n).overflowY }); return result })); console.log('INDICATOR', await page.getByRole('button', { name: 'New messages — jump to latest', exact: true }).count()); await page.screenshot({ path: 'test-results/reader-failure.png' }); throw error })
+      await expect(page.getByText('Reader sample 25', { exact: true })).toBeInViewport().catch(async error => { console.log('READER_GEOMETRY', await page.getByText('Reader sample 25', { exact: true }).evaluate(node => { const result = []; for (let n = node; n; n = n.parentElement) result.push({ tag: n.tagName, height: n.clientHeight, scroll: n.scrollHeight, top: n.scrollTop, y: n.getBoundingClientRect().y, overflow: getComputedStyle(n).overflowY }); return result })); console.log('INDICATOR', await page.getByRole('button', { name: 'New messages \u2014 jump to latest', exact: true }).count()); await page.screenshot({ path: 'test-results/reader-failure.png' }); throw error })
       await page.getByText('Reader sample 25', { exact: true }).hover()
       await page.getByText('Reader sample 25', { exact: true }).evaluate(node => { let scroll = node.parentElement; while (scroll && !(scroll.scrollHeight > scroll.clientHeight && ['auto', 'scroll'].includes(getComputedStyle(scroll).overflowY))) scroll = scroll.parentElement; if (!scroll) throw Error('Message scroll container missing'); scroll.scrollTop = 0; scroll.dispatchEvent(new Event('scroll')) })
-      await expect(page.getByText('Message deleted', { exact: true })).toBeInViewport()
+      await expect(page.getByText(/^(This message was deleted|You deleted this message)$/)).toBeInViewport()
       await page.getByLabel('Message history', { exact: true }).waitFor()
       const incoming = message('reader-26', 26, 'Arrival while reading history'); messages.push(incoming); socketClient.send(JSON.stringify({ type: 'MESSAGE_CREATED', data: incoming }))
-      await page.getByRole('button', { name: 'New messages — jump to latest', exact: true }).waitFor()
-      await expect(page.getByText('Message deleted', { exact: true })).toBeInViewport()
-      await page.getByRole('button', { name: 'New messages — jump to latest', exact: true }).click()
+      await page.getByRole('button', { name: 'New messages \u2014 jump to latest', exact: true }).waitFor()
+      await expect(page.getByText(/^(This message was deleted|You deleted this message)$/)).toBeInViewport()
+      await page.getByRole('button', { name: 'New messages \u2014 jump to latest', exact: true }).click()
       await expect(page.getByText('Arrival while reading history', { exact: true })).toBeInViewport()
       socketClient.send(JSON.stringify({type:'TYPING_STARTED',data:{conversation:'chat',user:'peer'}}))
-        await page.getByText('Example is typing…',{exact:true}).waitFor()
+        await page.getByText('Example is typing\u2026',{exact:true}).waitFor()
         socketClient.send(JSON.stringify({type:'TYPING_STOPPED',data:{conversation:'chat',user:'peer'}}))
         await page.getByLabel('Message',{exact:true}).fill('@Example')
         await page.getByRole('button',{name:'Mention Example Colleague',exact:true}).click()
@@ -233,8 +273,10 @@ async function run() {
         failNextSend=true
         await page.getByLabel('Message', { exact: true }).fill('Mocked text message')
       await page.getByRole('button', { name: 'Send message', exact: true }).click()
-      await expect(page.getByRole('button',{name:'Retry queued message',exact:true})).toBeEnabled()
+      await expect(page.getByText('Waiting for network \u00b7 sends automatically', { exact: true })).toBeVisible()
+      await expect(page.getByRole('button', { name: 'Discard queued message', exact: true })).toBeVisible()
       failNextSend=false
+        await expect.poll(() => mutations.filter(m => m.path.endsWith('/messages/') && m.method === 'POST').length).toBeGreaterThanOrEqual(2)
         await page.getByText('Mocked text message', { exact: true }).waitFor()
         const retries=mutations.filter(m=>m.path.endsWith('/messages/')&&m.method==='POST');assert.equal(retries[0].body.client_id,retries[1].body.client_id)
       const post = mutations.find(m => m.path.endsWith('/messages/') && m.method === 'POST')
@@ -253,10 +295,10 @@ async function run() {
       await expect(page.getByLabel('Message', { exact: true })).toHaveValue('Draft before editing')
       await page.getByLabel('Message', { exact: true }).fill('')
       await captureTests.capture(page,height)
-      const sendBounds = await page.getByRole('button', { name: 'Send message', exact: true }).boundingBox()
+      const sendBounds = await page.getByRole('button', { name: /^(Send message|Record a voice message|Hold to record a voice message)$/ }).boundingBox()
       assert.ok(sendBounds && sendBounds.y + sendBounds.height <= height, 'Composer is reachable inside the viewport');assert.ok(sendBounds.height<=52,'Send label fits without excessive wrapping')
-      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
-      await page.getByRole('button', { name: 'Create poll', exact: true }).click()
+      await page.getByRole('button', { name: 'Attach', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Poll', exact: true }).click()
       await page.getByLabel('Poll question', { exact: true }).fill('Mock poll question')
       await page.getByLabel('Poll choices (one per line)', { exact: true }).fill('First choice\nSecond choice')
       await page.getByRole('button', { name: 'Send poll', exact: true }).click()
@@ -266,7 +308,7 @@ async function run() {
       await page.getByText('Synthetic colleague profile', { exact: true }).waitFor()
       await page.getByRole('button', { name: 'Close profile', exact: true }).click()
       await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
-      await page.getByRole('button', { name: 'Search messages', exact: true }).click()
+      await page.getByRole('button', { name: 'Search', exact: true }).click()
       await page.getByLabel('Search messages', { exact: true }).fill('Edited mocked')
       await page.getByRole('button', { name: 'Find messages', exact: true }).click()
       await page.getByRole('button', { name: 'Jump to message', exact: true }).click()
@@ -278,55 +320,78 @@ async function run() {
       if (width === 360) await require('./scripts/special-message-ui.cjs')(page, { base, person, message, getMessages: () => messages, setMessages: value => { messages = value } })
       const eventMessage = { ...message('event-synthetic', messages.length + 1, ''), kind: 'event', event: { title: 'Synthetic team event', starts_at: '2027-01-01T12:00:00Z', ends_at: null, place: 'Synthetic room', description: 'Event response test', counts: { going: 0, maybe: 0, not_going: 0 }, my_answer: null }, can: { ...message('x', 1, '').can, respond: true } }
       messages.push(eventMessage); socketClient.send(JSON.stringify({ type: 'MESSAGE_CREATED', data: eventMessage }))
-      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
-      await page.getByRole('dialog').getByRole('button', { name: 'Jump to latest', exact: true }).click()
+      const latest = page.getByRole('button', { name: /^(New messages ? jump to latest|Jump to latest)$/ }); if (await latest.isVisible()) await latest.click()
       await page.getByRole('button', { name: 'Going (0)', exact: true }).click()
       await expect(page.getByRole('button', { name: 'Going (1) selected', exact: true })).toBeVisible()
       await page.getByRole('button', { name: 'View event responses', exact: true }).click()
       await expect(page.getByText('Example Colleague', { exact: true }).last()).toBeVisible()
       await page.getByRole('button', { name: 'Close event responses', exact: true }).click()
-      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      // Reference: Lock chat lives in the chat's profile/details settings, not in the header menu.
+      await page.getByRole('button', { name: /, (profile|group info)$/ }).first().click()
       await page.getByRole('button', { name: 'Lock chat', exact: true }).click()
       await expect.poll(() => conversation.locked).toBe(true)
+      if (page.url().includes('/group-info')) await page.goBack()
+      else for (const close of ['Close profile', 'Close conversation details']) { const b = page.getByRole('button', { name: close, exact: true }); if (await b.isVisible().catch(() => false)) { await b.click(); break } }
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).waitFor()
       await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
       await page.getByRole('button', { name: 'Hide locked chats', exact: true }).click()
       await expect(page.getByLabel('Message', { exact: true })).toHaveCount(0)
       await expect(page.getByText('Synthetic team event', { exact: true })).toHaveCount(0)
       await page.getByRole('button', { name: 'Unlock', exact: true }).click()
       await page.getByLabel('Message', { exact: true }).waitFor()
-      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await page.getByRole('button', { name: /, (profile|group info)$/ }).first().click()
       await page.getByRole('button', { name: 'Unlock chat', exact: true }).click()
       await expect.poll(() => conversation.locked).toBe(false)
-      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
-      await page.getByRole('button', { name: 'Conversation details', exact: true }).click()
-      await page.getByRole('button', { name: 'Docs', exact: true }).click()
+      if (page.url().includes('/group-info')) { await page.goBack(); await page.getByRole('button', { name: 'Conversation options', exact: true }).waitFor() }
+      // Reference: group info opens from the chat header title.
+      await page.getByRole('button', { name: /, group info$/ }).first().click()
+      await page.getByRole('tab', { name: 'Docs', exact: true }).click()
       await expect(page.getByText('Synthetic shared document.pdf', { exact: true })).toBeVisible()
-      await page.getByRole('button', { name: '24 hours', exact: true }).click()
-      await expect.poll(() => conversation.disappearing_seconds).toBe(86400)
-      await expect(page.getByRole('button', { name: '24 hours selected', exact: true })).toBeVisible()
+      // Group settings sit behind the group options menu (Frontend GroupInfo).
+      const groupSettings=async()=>{await page.getByRole('button',{name:'Group options',exact:true}).click();await page.getByRole('button',{name:'Group settings',exact:true}).click()}
+      const backToInfo=()=>page.getByRole('button',{name:'Back to group info',exact:true}).click()
+      const memberAction=async(person,name)=>{const action=page.getByRole('button',{name,exact:true});if(!(await action.isVisible()))await page.getByRole('button',{name:`Actions for ${person}`,exact:true}).click();await action.click()}
+      await groupSettings()
       await captureTests.groupPhoto(page)
+      await expect(page.getByRole('button', { name: 'Save group information', exact: true })).toBeDisabled()
       await page.getByLabel('Group title', { exact: true }).fill('Updated example group')
       await page.getByRole('button', { name: 'Save group information', exact: true }).click()
       await expect.poll(()=>conversation.title).toBe('Updated example group')
-      await expect(page.getByRole('button', { name: 'Save group information', exact: true })).toBeEnabled()
-      await page.getByRole('button', { name: 'Make Example Colleague an admin', exact: true }).click()
+      await expect(page.getByRole('button', { name: 'Save group information', exact: true })).toBeDisabled()
+      await backToInfo()
+      await memberAction('Example Colleague','Make Example Colleague an admin')
       await page.getByRole('button', { name: 'Confirm conversation change', exact: true }).click()
-      await page.getByRole('button', { name: 'Make Example Colleague a member', exact: true }).waitFor()
+      await expect.poll(()=>mutations.filter(m=>m.path.includes('/members/')&&m.method==='PATCH').length).toBeGreaterThan(0)
       await page.getByRole('button', { name: 'Add group members', exact: true }).click()
       await page.getByRole('button', { name: 'New Example Member', exact: true }).click()
       await page.getByRole('button', { name: 'Add 1 members', exact: true }).click()
-      await page.getByRole('button', { name: 'Remove New Example Member', exact: true }).waitFor()
+      await page.getByRole('button', { name: "View New Example Member's profile", exact: true }).waitFor()
       assert.equal(mutations.find(m => m.path.endsWith('/members/') && m.method === 'POST').body.share_history, 'none')
+      await groupSettings()
+      await page.getByRole('radio',{name:'Selected members can send',exact:true}).click()
       await page.getByLabel('Allow sender New Example Member',{exact:true}).check()
-        await page.getByRole('button',{name:'Review selected senders',exact:true}).click()
-        await page.getByRole('button',{name:'Confirm selected senders',exact:true}).click()
+        await page.getByRole('button',{name:'Save permissions',exact:true}).click()
         await expect.poll(()=>mutations.filter(m=>m.path.endsWith('/send-mode/')).length).toBe(1)
         assert.deepEqual(mutations.find(m=>m.path.endsWith('/send-mode/')).body,{mode:'selected',sender_ids:['new-member']})
-        await page.getByRole('button', { name: 'Mute for 8 hours', exact: true }).click()
-      await page.getByRole('button', { name: 'Unmute conversation', exact: true }).waitFor()
-      await page.getByRole('button', { name: 'Clear conversation for me', exact: true }).click()
-      await page.getByRole('button', { name: 'Confirm conversation change', exact: true }).click()
+      await backToInfo()
       await page.getByRole('button', { name: 'Close conversation details', exact: true }).click()
+      // Disappearing messages, mute and clear live in the chat header menu (reference ChatView), not in group info.
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await page.getByRole('button', { name: 'Disappearing messages', exact: true }).click()
+      await page.getByRole('radio', { name: '24 hours', exact: true }).click()
+      await page.getByRole('button', { name: 'Apply', exact: true }).click()
+      await expect.poll(() => conversation.disappearing_seconds).toBe(86400)
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await page.getByRole('button', { name: 'Disappearing messages', exact: true }).click()
+      await expect(page.getByRole('radio', { name: '24 hours', exact: true })).toBeChecked()
+      await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await page.getByRole('button', { name: 'Mute for 8 hours', exact: true }).click()
+      await expect.poll(() => Boolean(conversation.muted_until)).toBe(true)
+      await page.getByRole('button', { name: 'Conversation options', exact: true }).click()
+      await page.getByRole('button', { name: 'Unmute', exact: true }).waitFor()
+      await page.getByRole('button', { name: 'Clear chat for me', exact: true }).click()
+      await page.getByRole('button', { name: 'Clear chat', exact: true }).click()
       await page.getByText('No messages yet.', { exact: true }).waitFor()
       const restricted = message('restricted', 1, 'Restricted example'); restricted.attachments = [audioAttachment]; messages = [restricted]; socketClient.send(JSON.stringify({ type: 'MESSAGE_CREATED', data: restricted }))
       await page.getByRole('button', { name: 'Open media Example audio.wav', exact: true }).click()
@@ -335,7 +400,7 @@ async function run() {
       await page.getByRole('button', { name: 'Open Updated example group', exact: true }).waitFor()
       await expect(page.getByLabel('Message', { exact: true })).toHaveCount(0)
       await expect(page.getByRole('button', { name: 'Close media', exact: true })).toHaveCount(0)
-      await page.getByRole('link', { name: 'Profile', exact: true }).click()
+      await page.getByRole('link', { name: /^Profile: / }).last().click()
       await page.getByLabel('Display name').waitFor()
       await page.getByRole('link',{name:'Home',exact:true}).click()
         await page.getByRole('link',{name:'Profile & security',exact:true}).waitFor()
@@ -362,7 +427,7 @@ async function run() {
       await page.getByLabel('Current profile photo',{exact:true}).waitFor({state:'hidden'})
       await captureTests.profileLifecycleAndInstall(page)
       await page.evaluate(()=>window.credentialMock.mode='success');await page.getByRole('button',{name:'Turn on app lock',exact:true}).click();await page.getByRole('button',{name:'Turn off app lock',exact:true}).waitFor();
-      await page.reload();await page.getByText('JM is locked',{exact:true}).waitFor();await page.getByLabel('App unlock password',{exact:true}).fill('mock-only-password');await page.getByRole('button',{name:'Unlock JM',exact:true}).click();await page.getByText('JM is locked',{exact:true}).waitFor({state:'hidden'});await page.getByRole('link',{name:'Profile',exact:true}).click();await page.getByRole('button',{name:'Turn off app lock',exact:true}).waitFor();await page.getByRole('button',{name:'Turn off app lock',exact:true}).click();await page.getByRole('button',{name:'Turn on app lock',exact:true}).waitFor();
+      await page.reload();await page.getByText('JM is locked',{exact:true}).waitFor();await page.getByLabel('App unlock password',{exact:true}).fill('mock-only-password');await page.getByRole('button',{name:'Unlock JM',exact:true}).click();await page.getByText('JM is locked',{exact:true}).waitFor({state:'hidden'});await page.getByRole('link',{name:/^Profile: /}).last().click();await page.getByRole('button',{name:'Turn off app lock',exact:true}).waitFor();await page.getByRole('button',{name:'Turn off app lock',exact:true}).click();await page.getByRole('button',{name:'Turn on app lock',exact:true}).waitFor();
 
       for(const mode of ['success','cancel','pending']){verified=false;stepMethods=['passkey','password'];const calls=await page.evaluate(()=>window.credentialMock.calls);await page.evaluate(mode=>window.credentialMock.mode=mode,mode);await page.getByRole('button',{name:'Save profile',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.credentialMock.calls)).toBe(calls+1);if(mode==='pending'){await page.getByRole('button',{name:'Use your password instead',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.credentialMock.cancelled)).toBeGreaterThan(0)}if(mode!=='success'){await page.getByRole('button',{name:'Verify password',exact:true}).waitFor();await expect(page.getByText('The passkey could not be used.',{exact:true})).toHaveCount(0);await page.locator('input[aria-label="Current password"]:visible').last().fill('mock-only-password');await page.getByRole('button',{name:'Verify password',exact:true}).click()}await expect.poll(()=>verified).toBe(true);await expect(page.getByText('Profile updated.',{exact:true})).toBeVisible()}
       verified=false;stepMethods=['passkey'];await page.evaluate(()=>window.credentialMock.mode='cancel');await page.getByRole('button',{name:'Save profile',exact:true}).click();await page.getByRole('button',{name:'Verify with passkey',exact:true}).waitFor();await expect(page.getByRole('button',{name:'Verify password',exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Cancel',exact:true}).click();stepMethods=['password'];verified=true;
@@ -495,12 +560,13 @@ async function run() {
       await page.getByRole('button', { name: 'Rename vault', exact: true }).click()
       await page.getByLabel('Vault name', { exact:true }).fill('Renamed example vault')
       await page.getByRole('button', { name:'Save vault name',exact:true }).click()
-      await page.getByRole('button', { name:'Open vault Renamed example vault',exact:true }).waitFor()
+      // The reference opens a vault as its own page (no vault grid beside it), so check the saved name (a personal vault is titled 'My vault', as in the reference).
+      await page.getByRole('button', { name:'Save vault name',exact:true }).waitFor({ state: 'hidden' }); assert.equal(vault.name,'Renamed example vault');
       await page.getByRole('button', { name:'Archive vault',exact:true }).click()
       await page.getByRole('button', { name:'Confirm vault archive change',exact:true }).click()
       await page.getByRole('button', { name:'Unarchive vault',exact:true }).waitFor()
       await page.getByRole('button', { name:'Vault activity',exact:true }).click()
-      await page.getByText('vault created · success', { exact:true }).waitFor()
+      await page.getByText('vault created \u00b7 success', { exact:true }).waitFor()
       await page.getByRole('button', { name:'Team vaults',exact:true }).click()
       await page.getByRole('button', { name:'New team vault',exact:true }).click()
       await page.getByLabel('Team vault name', {exact:true}).fill('Mock team vault')
@@ -523,23 +589,22 @@ async function run() {
       await page.getByRole('button',{name:'Cancel emergency request',exact:true}).waitFor({state:'hidden'})
       await page.getByText('Requested. Another approver must decide.',{exact:true}).waitFor()
       assert.equal(emergency.length,1)
-      await page.getByRole('link', { name: 'Activity', exact: true }).click()
+      await openNotifications(page, width)
       await page.getByRole('button', { name: 'Open Example activity', exact: true }).click()
       denied=false
       await page.getByRole('button', {name:'Go to linked item',exact:true}).click()
       await page.getByText('Restricted example',{exact:true}).waitFor()
       assert.match(page.url(), /conversation=chat/)
       if (width < 768) await page.getByRole('button', {name:'Back to conversations',exact:true}).click()
-      await page.getByRole('link', {name:'Activity',exact:true}).click()
+      await openNotifications(page, width)
       await page.getByRole('button', { name: 'Remove notification', exact: true }).click()
       await page.getByRole('button', { name: 'Confirm removal', exact: true }).click()
-      await page.getByText('No notifications match these filters.', { exact: true }).waitFor()
+      await page.getByText('No notifications.', { exact: true }).waitFor()
       await page.getByRole('button', { name: 'Notification preferences', exact: true }).click()
-      await page.getByLabel('Quiet hours start (HH:MM)', { exact: true }).fill('22:00')
-      await page.getByLabel('Quiet hours end (HH:MM)', { exact: true }).fill('07:00')
+      await page.getByLabel('Quiet hours start', { exact: true }).fill('22:00')
+      await page.getByLabel('Quiet hours end', { exact: true }).fill('07:00')
       await page.getByRole('button', { name: 'Save preferences', exact: true }).click()
-      await page.getByRole('button', { name: 'Close preferences', exact: true }).waitFor({ state: 'hidden' })
-      assert.equal(preferences.dnd_start, '22:00')
+      await expect.poll(() => preferences.dnd_start).toBe('22:00')
       await page.getByRole('button', { name: 'Alerts', exact: true }).click()
       await page.getByRole('button', { name: 'Compose alert', exact: true }).click()
       await page.getByLabel('Alert title', { exact: true }).fill('Example alert')
@@ -552,7 +617,7 @@ async function run() {
       await page.getByRole('button', { name: 'Confirm alert change', exact: true }).click()
       await page.getByRole('button', { name: 'Remove sent alert Example alert', exact: true }).waitFor()
       assert.equal(sentAlerts[0].status, 'cancelled')
-      await page.getByRole('link', { name: 'Admin', exact: true }).click()
+      await nav(page, width, 'People', null, 'Administration')
       await page.getByRole('button', { name: 'Edit person Example Tester', exact: true }).click()
       await page.getByLabel('Full name', { exact: true }).fill('Edited Example Tester')
       await page.getByRole('button', { name: 'Save changes', exact: true }).click()
@@ -564,7 +629,12 @@ async function run() {
       await page.getByRole('button',{name:'Create invited person',exact:true}).click()
       await page.getByRole('button',{name:'Close access link',exact:true}).click()
       await page.getByRole('button',{name:'Close create person',exact:true}).click()
+      // An existing membership makes the Companies section appear (the reference hides it for people without one).
+      managedUsers[1].companies.push({id:'seed-membership',company:'SD',company_name:'Seed Company',company_color:'#0EA5E9',title:'',department:'',is_active:true,is_default:true})
       await page.getByRole('button',{name:'Manage person New Mock Person',exact:true}).click()
+      // Person page (reference UserDetailPage): set password, deactivate and reactivate sit in the More actions menu.
+      await page.getByRole('button',{name:'More actions',exact:true}).click()
+      await page.getByRole('menuitem',{name:'Set password',exact:true}).click()
       await page.getByLabel('Person new password',{exact:true}).fill('SYNTHETIC_ONLY_PASSWORD')
       await page.getByLabel('Confirm person password',{exact:true}).fill('SYNTHETIC_ONLY_PASSWORD')
       await page.getByRole('button',{name:'Review person password',exact:true}).click()
@@ -581,33 +651,31 @@ async function run() {
       await page.getByLabel('Person new password',{exact:true}).fill('SYNTHETIC_CLEAR_ON_BLUR')
       await page.evaluate(()=>{window.dispatchEvent(new Event('blur'));window.dispatchEvent(new Event('focus'))})
       await expect(page.getByLabel('Person new password',{exact:true})).toHaveValue('')
-      await page.getByRole('button',{name:'Deactivate person',exact:true}).click()
+      await page.getByRole('button',{name:'Close set password',exact:true}).click()
+      await page.getByRole('button',{name:'More actions',exact:true}).click()
+      await page.getByRole('menuitem',{name:'Deactivate person',exact:true}).click()
       await page.getByRole('button',{name:'Confirm person action',exact:true}).click()
-      await page.getByRole('button',{name:'Reactivate person',exact:true}).click()
+      await page.getByRole('button',{name:'More actions',exact:true}).click()
+      await page.getByRole('menuitem',{name:'Reactivate person',exact:true}).click()
       await page.getByRole('button',{name:'Confirm person action',exact:true}).click()
       await page.getByText('Sent for approval: a second administrator must approve it.',{exact:true}).first().waitFor()
       assert.equal(managedUsers[1].is_active,false)
-      await page.getByRole('button',{name:'access',exact:true}).click()
-      await page.getByRole('switch',{name:'Group Team access',exact:true}).click()
-      await page.getByRole('button',{name:'Review group access',exact:true}).click()
-      await page.getByRole('button',{name:'Confirm group access',exact:true}).click()
+      await page.getByRole('checkbox',{name:'Team access',exact:true}).click()
+      await page.getByRole('button',{name:'Save access',exact:true}).click()
       await expect.poll(()=>managedUsers[1].groups).toEqual(['Team access'])
-      await page.getByRole('button',{name:'devices',exact:true}).click()
       await page.getByRole('button',{name:'Revoke device Mock tablet',exact:true}).click()
       await page.getByRole('button',{name:'Confirm session revocation',exact:true}).click()
       await expect(page.getByRole('button',{name:'Revoke device Mock tablet',exact:true})).toHaveCount(0)
 
-      await page.getByRole('dialog').getByRole('button',{name:'companies',exact:true}).click()
       await page.getByRole('button',{name:'Example Company',exact:true}).click()
       await page.getByLabel('Membership title',{exact:true}).fill('Mock role')
       await page.getByLabel('Membership department',{exact:true}).fill('Mock department')
       await page.getByRole('button',{name:'Add company membership',exact:true}).click()
       await page.getByRole('button',{name:'Make Example Company default',exact:true}).click()
-      await expect.poll(()=>managedUsers[1].companies[0]?.is_default).toBe(true)
+      await expect.poll(()=>managedUsers[1].companies.find(m=>m.id==='membership')?.is_default).toBe(true)
       await page.getByRole('button',{name:'Remove membership Example Company',exact:true}).click()
       await page.getByRole('button',{name:'Confirm membership removal',exact:true}).click()
-      await expect.poll(()=>managedUsers[1].companies.length).toBe(0)
-      await page.getByRole('button',{name:'chat',exact:true}).click()
+      await expect.poll(()=>managedUsers[1].companies.some(m=>m.id==='membership')).toBe(false)
       await page.getByRole('button',{name:'Restrict to selected people',exact:true}).click()
       await page.getByRole('button',{name:'Example Tester',exact:true}).click()
       await page.getByRole('button',{name:'Add selected chat people',exact:true}).click()
@@ -618,8 +686,8 @@ async function run() {
       await page.getByRole('button',{name:'Allow all people',exact:true}).click()
       await expect.poll(()=>chatPolicy.mode).toBe('all')
 
-      await page.getByRole('button',{name:'Close person details',exact:true}).click()
-      await page.getByRole('button',{name:'groups',exact:true}).click()
+      await page.getByRole('link',{name:'Close person details',exact:true}).click()
+      await adminSection(page,width,'Permission groups')
       await page.getByRole('button',{name:'New permission group',exact:true}).click()
       await page.getByLabel('Permission group name',{exact:true}).fill('Mock permission group')
       await page.getByRole('switch',{name:'Capability Messenger access',exact:true}).click()
@@ -627,7 +695,7 @@ async function run() {
       await page.getByRole('button',{name:'Save permission group',exact:true}).click()
       await page.getByRole('button',{name:'Close permission group',exact:true}).waitFor({state:'hidden'})
       assert.deepEqual(permissionGroups[0].capabilities,['JM_ACCESS'])
-      await page.getByRole('button',{name:'security',exact:true}).click()
+      await adminSection(page,width,'Security')
       await page.getByRole('button',{name:'Review requiring two-step',exact:true}).click()
       await page.getByRole('button',{name:'Confirm security policy change',exact:true}).click()
       await page.getByRole('button',{name:'Review disabling required two-step',exact:true}).click()
@@ -635,20 +703,30 @@ async function run() {
       await page.getByText('Sent for approval: a second administrator must approve it.',{exact:true}).first().waitFor()
       assert.equal(policy.two_step_enforced,true)
       approvalRows=['approve','deny','cancel'].map(kind=>({...pendingApproval,id:kind,kind:'reset_password',target:{id:'target-'+kind,name:'Same name',email:'target-'+kind+'@example.invalid'},label:'Mock '+kind,can:{decide:kind!=='cancel',cancel:kind==='cancel'}}))
-      await page.getByRole('button',{name:'approvals',exact:true}).click()
+      await page.goto(base + '/admin?tab=approvals')
       for(const kind of ['approve','deny','cancel']){await page.getByRole('button',{name:kind[0].toUpperCase()+kind.slice(1)+' Mock '+kind,exact:true}).click();await expect(page.getByRole('dialog').getByText('Target: Same name (target-'+kind+'@example.invalid)',{exact:true})).toBeVisible();await expect(page.getByRole('dialog').getByText('Requested by: Example Tester (tester@example.invalid)',{exact:true})).toBeVisible();await expect(page.getByRole('dialog').getByText(/^Expires:/)).toBeVisible();if(kind==='approve')await expect(page.getByRole('dialog').getByText(/24 hours/)).toBeVisible();await page.getByRole('button',{name:'Confirm decision',exact:true}).click();await page.getByRole('button',{name:'Go back',exact:true}).waitFor({state:'hidden'});if(kind==='approve'){await page.getByText('https://example.invalid/reset/MOCK_APPROVED',{exact:true}).waitFor();await page.evaluate(()=>window.dispatchEvent(new Event('blur')));await page.getByRole('button',{name:'Close access link',exact:true}).waitFor({state:'hidden'});await page.evaluate(()=>window.dispatchEvent(new Event('focus')))}}
       assert.deepEqual(approvalRows.map(a=>a.status),['approve','deny','cancel'])
+      // Unified approvals inbox (FE-023): badge on the navigation entry, confirmation, then the item leaves the list.
+      await page.goto(base + '/home')
+      // The reference shows this badge on the rail only (the phone bar has no Approvals tab).
+      if (width >= 768) await expect(page.getByLabel('1 waiting for your approval', { exact: true })).toBeVisible()
+      await nav(page, width, 'Approvals', null, 'Approvals')
+      await page.getByText('Reset two-step verification', { exact: true }).waitFor()
+      await page.getByRole('button', { name: 'Approve Reset two-step verification', exact: true }).click()
+      await page.getByText('Approve: Reset two-step verification?', { exact: true }).waitFor()
+      assert.equal(approvalDecided, false, 'Approve must ask for confirmation first')
+      await page.getByRole('button', { name: 'Approve', exact: true }).click()
+      await expect.poll(() => approvalDecided).toBe(true)
+      await page.getByText('Nothing waiting on you.', { exact: true }).waitFor()
       if (width === 360) await require('./scripts/share-ui.cjs')(page, { base, me, conversation })
 
-      await page.getByRole('button', { name: 'Sign out', exact: true }).click()
-      await page.getByRole('button', { name: 'Continue', exact: true }).waitFor()
+      await signOut(page)
       for (const path of ['/invite/mock-token', '/reset-password/mock-token']) {
         await page.goto(base + path)
         await page.getByLabel('New password', { exact: true }).fill('MOCK_NEW_PASSWORD')
         await page.getByLabel('Repeat password', { exact: true }).fill('MOCK_NEW_PASSWORD')
         await page.getByRole('button', { name: /^(Set password and sign in|Save and sign in)$/ }).click()
-        await page.getByRole('button', { name: 'Sign out', exact: true }).click()
-        await page.getByRole('button', { name: 'Continue', exact: true }).waitFor()
+        await signOut(page)
       }
       assert.deepEqual(unexpected, [], 'No unmocked or external request is permitted')
       assert.deepEqual(runtimeErrors, [], 'No browser runtime exceptions')

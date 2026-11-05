@@ -73,16 +73,16 @@ export function LocationPicker({ onClose, onSend, mode = 'send' }: { onClose: ()
     <Label large>{review ? 'Location details' : mode === 'pick' ? 'Choose location' : 'Send location'}</Label>
     {review ? <>
       <LocationMap center={review} initialZoom={17} height={170} />
-      <Text style={{ color: c.muted, fontSize: 12, fontVariant: ['tabular-nums'] }}>{review.latitude.toFixed(6)}, {review.longitude.toFixed(6)}{review.accuracy !== null ? ` · ${accuracyLabel(review.accuracy)}` : ''}</Text>
+      <Text style={{ fontFamily: 'Inter_400Regular', color: c.muted, fontSize: 12, fontVariant: ['tabular-nums'] }}>{review.latitude.toFixed(6)}, {review.longitude.toFixed(6)}{review.accuracy !== null ? ` · ${accuracyLabel(review.accuracy)}` : ''}</Text>
       <Field label="Name (optional)" placeholder="e.g. Home, Office, Plot 14" value={name} onChangeText={value => { touched.current.name = true; setName(value) }} maxLength={120} editable={!busy} />
       <Field label="Address" value={address} onChangeText={value => { touched.current.address = true; setAddress(value) }} maxLength={300} multiline editable={!busy} />
-      <Text style={{ color: c.muted, fontSize: 12 }}>{resolving ? 'Finding the address…' : 'Add the house or plot number, block and floor if needed.'}</Text>
+      <Text style={{ fontFamily: 'Inter_400Regular', color: c.muted, fontSize: 12 }}>{resolving ? 'Finding the address…' : 'Add the house or plot number, block and floor if needed.'}</Text>
       <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}><Button title="Back" variant="secondary" disabled={busy} onPress={() => setReview(null)} /><Button title={busy ? `${verb === 'Use' ? 'Using' : 'Sending'}…` : verb} disabled={busy || !final || !validLocation(final)} onPress={() => void submit()} /></View>
     </> : <>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: c.border, borderRadius: 999, backgroundColor: c.panel, paddingLeft: 12, paddingRight: 4, minHeight: 44 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: c.border, borderRadius: 999, backgroundColor: c.panel, paddingLeft: 16, paddingRight: 4, minHeight: 48 }}>
         <Icon name="search" size={16} />
-        <TextInput value={term} onChangeText={setTerm} onSubmitEditing={() => setQuery(term.trim())} returnKeyType="search" maxLength={200} placeholder="Search for a place or address" placeholderTextColor={c.muted} accessibilityLabel="Search for a place" style={{ flex: 1, minWidth: 0, fontFamily: 'Inter_400Regular', fontSize: 15, color: c.text, paddingVertical: 10 }} />
-        {!!term && <Pressable accessibilityRole="button" accessibilityLabel="Clear search" onPress={() => { setTerm(''); setQuery('') }} style={{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: c.muted, fontSize: 18, lineHeight: 20 }}>×</Text></Pressable>}
+        <TextInput selectionColor={c.brand} cursorColor={c.brand} underlineColorAndroid="transparent" value={term} onChangeText={setTerm} onSubmitEditing={() => setQuery(term.trim())} returnKeyType="search" maxLength={200} placeholder="Search for a place or address" placeholderTextColor={c.muted} accessibilityLabel="Search for a place" style={{ flex: 1, minWidth: 0, fontFamily: 'Inter_400Regular', fontSize: 16, color: c.text, paddingHorizontal: 0, paddingVertical: 12, includeFontPadding: false }} />
+        {!!term && <Pressable accessibilityRole="button" accessibilityLabel="Clear search" onPress={() => { setTerm(''); setQuery('') }} style={{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }}><Text style={{ fontFamily: 'Inter_400Regular', color: c.muted, fontSize: 18, lineHeight: 20 }}>×</Text></Pressable>}
       </View>
       {term.trim().length >= 2 ? <View accessibilityLabel="Places found">
         {term.trim() !== query ? <Status>Searching when you stop typing · Enter to search now</Status> : searching ? <View style={{ paddingVertical: 12 }}><ActivityIndicator accessibilityLabel="Searching places" color={c.brand} /></View> : <>
@@ -96,7 +96,7 @@ export function LocationPicker({ onClose, onSend, mode = 'send' }: { onClose: ()
           <Row first icon="send" iconColor={c.brand} iconBg={c.soft} title={`${verb} your current location`} subtitle={fix ? accuracyLabel(fix.accuracy) : fixError || 'Finding your location…'} warning={approximateFix(fix?.accuracy) ? 'Approximate: move the map to the exact spot, or search.' : ''} disabled={!fix || busy} onPress={() => { if (fix) reviewPoint(fix) }} />
           {pin && <Row icon="pin" iconColor="#ef4444" iconBg={c.dangerSoft} title={`${verb} this location`} subtitle={[pin.name, pin.address].filter(Boolean).join(' · ') || `${pin.latitude.toFixed(5)}, ${pin.longitude.toFixed(5)}`} disabled={busy} onPress={() => reviewPoint(pin)} />}
         </View>
-        <Text style={{ color: c.muted, fontSize: 12 }}>Move the map to place the pin exactly, or search. Maps © OpenStreetMap contributors.</Text>
+        <Text style={{ fontFamily: 'Inter_400Regular', color: c.muted, fontSize: 12 }}>Move the map to place the pin exactly, or search. Maps © OpenStreetMap contributors.</Text>
       </>}
     </>}
     {!!error && <Status danger>{error}</Status>}
@@ -112,7 +112,8 @@ function Status({ children, danger = false }: { children: ReactNode; danger?: bo
 /** Reference list row: round icon, medium title, muted subtitle; the whole row is the target (pointer cursor on web). */
 function Row({ icon, iconColor, iconBg, title, subtitle, trailing, warning, first = false, disabled = false, onPress }: { icon: IconName; iconColor: string; iconBg?: string; title: string; subtitle?: string; trailing?: string; warning?: string; first?: boolean; disabled?: boolean; onPress: () => void }) {
   const c = useColors()
-  return <Pressable accessibilityRole="button" accessibilityLabel={[title, subtitle].filter(Boolean).join(', ')} accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
+  // Action rows (icon chip) are named by their action, with the status line as the hint; result rows read name and address.
+  return <Pressable accessibilityRole="button" accessibilityLabel={iconBg ? title : [title, subtitle].filter(Boolean).join(', ')} accessibilityHint={iconBg ? subtitle : undefined} accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
     style={state => ({ flexDirection: 'row', alignItems: iconBg ? 'center' : 'flex-start', gap: 12, paddingVertical: iconBg ? 12 : 10, paddingHorizontal: 4, borderTopWidth: first ? 0 : 1, borderColor: c.border, backgroundColor: state.pressed || (state as { hovered?: boolean }).hovered ? c.neutral : 'transparent', opacity: disabled ? 0.6 : 1, cursor: disabled ? 'auto' : 'pointer' })}>
     {iconBg ? <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: iconBg, alignItems: 'center', justifyContent: 'center' }}><Icon name={icon} size={20} color={iconColor} /></View> : <View style={{ paddingTop: 2 }}><Icon name={icon} size={20} color={iconColor} /></View>}
     <View style={{ flex: 1, minWidth: 0 }}>

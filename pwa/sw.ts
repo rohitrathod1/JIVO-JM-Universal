@@ -12,7 +12,7 @@ importScripts('/share-worker.js')
 const prefix = 'jm-universal-shell-'
 const cacheName = prefix + __JM_BUILD__
 const assets = new Set(__JM_PRECACHE__)
-const shellRoute = /^\/(?:$|(?:login|home|share|messenger|profile|passwords|notifications|admin|preview)\/?$|(?:invite|reset-password)\/[^/]+\/?$)/
+const shellRoute = /^\/(?:$|(?:login|home|share|messenger|profile|passwords|notifications|admin|preview|tools|approvals|alerts|atlas|group-info|group-edit)\/?$|(?:invite|reset-password)\/[^/]+\/?$)/
 
 self.addEventListener('install', event => {
   // An incomplete download must never replace the working offline shell.

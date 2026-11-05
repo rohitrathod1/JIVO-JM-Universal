@@ -4,7 +4,9 @@ import * as LocalAuthentication from 'expo-local-authentication'
 import * as SecureStore from 'expo-secure-store'
 import { useSession } from '../core/auth/Session'
 import { NativeAppLock } from '../core/auth/nativeAppLock'
-import { Button, Card, Label, useColors } from '../ui'
+import { useScreenCaptureGuard } from '../shared/useScreenCaptureGuard'
+import { SettingRow } from './ProfileSection'
+import { Button, Label, useColors } from '../ui'
 
 const Context = createContext<NativeAppLock | null>(null)
 export function AppLock({ children }: { children: ReactNode }) {
@@ -27,6 +29,8 @@ function AccountLock({ account, children }: { account: string; children: ReactNo
     return () => { sub.remove(); model.dispose() }
   }, [model])
   const cover = !state.ready || (state.enabled && (state.locked || !foreground))
+  // Cover shown: block capture (Android FLAG_SECURE also blanks recents). Lock on: blur the iOS app-switcher snapshot.
+  useScreenCaptureGuard(cover ? 'capture' : state.enabled ? 'switcher' : false)
   // Preserve an already-open screen beneath the privacy cover. Native system
   // pickers temporarily background JM; unmounting loses their reviewed result.
   return <Context.Provider value={model}>{(state.opened || !cover) && <View style={{ flex: 1, display: cover ? 'none' : 'flex' }} accessibilityElementsHidden={cover} importantForAccessibility={cover ? 'no-hide-descendants' : 'auto'}>{children}</View>}{cover && <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 16, backgroundColor: colors.bg }}>
@@ -43,8 +47,8 @@ export function AppLockSetting() {
 }
 function LockSetting({ model }: { model: NativeAppLock }) {
   const state = useSyncExternalStore(model.subscribe, model.snapshot, model.snapshot)
-  return <Card><Label large>Device app lock</Label><Label>Require device verification when opening JM or returning from the background. This privacy screen does not replace server sign-in or two-step verification.</Label>
-    {!!state.error && <Label>{state.error}</Label>}
-    <Button title={state.enabled ? 'Turn off app lock' : 'Turn on app lock'} disabled={!state.ready || state.busy} onPress={() => void model.verify(!state.enabled)} />
-  </Card>
+  // Reference: a row inside the profile's 'This device' section.
+  return <SettingRow icon="lockKeyhole" title="Device app lock" detail={state.error || 'Require device verification when opening JM or returning from the background. This privacy screen does not replace server sign-in or two-step verification.'}>
+    <Button size="sm" variant="secondary" title={state.enabled ? 'Turn off' : 'Turn on'} accessibilityLabel={state.enabled ? 'Turn off app lock' : 'Turn on app lock'} disabled={!state.ready || state.busy} onPress={() => void model.verify(!state.enabled)} />
+  </SettingRow>
 }

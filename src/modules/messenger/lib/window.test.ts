@@ -99,3 +99,10 @@ describe('live patches', () => {
     expect(advanceReceipts(s, { read_seq: 1, delivered_seq: 1 })).toBe(s)
   })
 })
+
+it('preserves server-confirmed read/delivered state while receipt updates catch up', () => {
+  const receipts = { read_seq: 0, delivered_seq: 0 }
+  expect(statusFor(msg(8, { status: 'read' }), 'me', receipts)).toBe('read')
+  expect(statusFor(msg(8, { status: 'delivered' }), 'me', receipts)).toBe('delivered')
+  expect(statusFor(msg(8), 'me', receipts)).toBe('sent')
+})

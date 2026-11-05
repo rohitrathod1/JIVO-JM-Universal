@@ -4,3 +4,9 @@ const DARK = 'radial-gradient(40rem 30rem at 10% 0%, rgba(34, 197, 94, 0.07), tr
 export function AppBackdrop({ dark }: { dark: boolean }) {
   return <div aria-hidden style={{ position: 'fixed', inset: 0, pointerEvents: 'none', background: dark ? DARK : LIGHT }} />
 }
+/** Reference `.app-backdrop-vivid` (Frontend src/index.css, AuthLayout): the sign-in and link pages' brighter mesh. */
+const VIVID_LIGHT = 'radial-gradient(44rem 34rem at 0% 0%, rgba(134, 239, 172, 0.45), transparent 60%), radial-gradient(40rem 30rem at 100% 20%, rgba(94, 234, 212, 0.35), transparent 60%), radial-gradient(44rem 34rem at 50% 100%, rgba(253, 230, 138, 0.4), transparent 60%), linear-gradient(160deg, #f0fdf4, #ecfeff 50%, #fefce8)'
+const VIVID_DARK = 'radial-gradient(44rem 34rem at 0% 0%, rgba(34, 197, 94, 0.18), transparent 60%), radial-gradient(40rem 30rem at 100% 20%, rgba(20, 184, 166, 0.14), transparent 60%), radial-gradient(44rem 34rem at 50% 100%, rgba(245, 158, 11, 0.12), transparent 60%), linear-gradient(160deg, #0b1310, #0b1416 50%, #13130e)'
+export function AuthBackdrop({ dark }: { dark: boolean }) {
+  return <div aria-hidden style={{ position: 'fixed', inset: 0, pointerEvents: 'none', background: dark ? VIVID_DARK : VIVID_LIGHT }} />
+}

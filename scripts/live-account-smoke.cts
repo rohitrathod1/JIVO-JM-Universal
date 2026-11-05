@@ -43,9 +43,9 @@ async function main() {
     for (const [index, page] of pages.entries()) {
       await page.goto(base + '/login')
       expect((await api(page, '/auth/csrf/')).status).toBe(204)
-      await page.getByLabel('Email address', { exact: true }).fill(index === 1 && secondEmail ? secondEmail : email)
+      await page.getByLabel(/^(Email|JIVO email)$/).fill(index === 1 && secondEmail ? secondEmail : email)
       await page.getByLabel('Password', { exact: true }).fill(index === 1 && secondPassword ? secondPassword : password)
-      await page.getByRole('button', { name: 'Continue', exact: true }).click()
+      await page.getByRole('button', { name: 'Sign in', exact: true }).click()
       await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible({ timeout: 30000 })
       // Exercise the real first-run prompt before navigating or going offline.
       await page.getByRole('button', { name: 'Not now', exact: true }).waitFor({ timeout: 10000 })

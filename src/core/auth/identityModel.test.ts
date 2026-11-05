@@ -1,17 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { canSubmitToken, identityFromOptions, localIdentity, safeWebUrl, tokenPageMode } from './identityModel'
-import { addableJivoCandidates, type JivoCandidate } from '../../modules/admin/jivoCandidates'
+import { canSubmitToken, identityFromOptions, localIdentity, peopleStatuses, safeWebUrl, tokenPageMode } from './identityModel'
 import { safeMailHref } from '../../modules/profile/contact'
 
 describe('identity from /auth/options/', () => {
   it('stays local when the server says nothing new', () => {
     expect(identityFromOptions(null)).toEqual(localIdentity)
-    expect(identityFromOptions({ passkey_sign_in: true })).toEqual({ jivo: false, passwordResetUrl: null, passkeySignIn: true })
+    expect(identityFromOptions({ passkey_sign_in: true })).toEqual({ jivo: false, passwordResetUrl: null, passkeySignIn: true, canChangePassword: true, canChangeName: false })
     expect(identityFromOptions({ passkey_sign_in: false, identity: 'local', password_reset_url: 'https://auth.example.invalid/forgot-password/' }).passwordResetUrl).toBeNull()
   })
   it('reads Jivo Auth and keeps only a web reset address', () => {
     expect(identityFromOptions({ passkey_sign_in: false, identity: 'jivo', password_reset_url: 'https://auth.example.invalid/forgot-password/' }))
-      .toEqual({ jivo: true, passwordResetUrl: 'https://auth.example.invalid/forgot-password/', passkeySignIn: false })
+      .toEqual({ jivo: true, passwordResetUrl: 'https://auth.example.invalid/forgot-password/', passkeySignIn: false, canChangePassword: false, canChangeName: false })
     expect(identityFromOptions({ identity: 'jivo', password_reset_url: 'javascript:alert(1)' }).passwordResetUrl).toBeNull()
     expect(identityFromOptions({ identity: 'jivo', password_reset_url: null }).passwordResetUrl).toBeNull()
   })
@@ -40,17 +39,19 @@ describe('invitation and reset page', () => {
   })
 })
 
-describe('New person with Jivo Auth', () => {
-  const person = (over: Partial<JivoCandidate>): JivoCandidate => ({ auth_id: 'a1', email: 'asha@example.invalid', full_name: 'Asha Rao', employee_code: 'E-17', is_active: true, local_user_id: null, ...over })
-  const list = [person({}), person({ auth_id: 'a2', full_name: 'Bina Shah', email: 'bina@example.invalid', employee_code: 'E-22', local_user_id: 'u2' }), person({ auth_id: 'a3', full_name: 'Chetan Das', email: 'chetan@example.invalid', employee_code: '', is_active: false }), person({ auth_id: 'a4', full_name: 'Dev Patel', email: 'dev@example.invalid', employee_code: 'E-40' })]
-  it('shows only active JIVO accounts not yet in JM', () => {
-    expect(addableJivoCandidates(list, '').map(p => p.auth_id)).toEqual(['a1', 'a4'])
-    expect(addableJivoCandidates(null, '')).toEqual([])
+describe('Jivo Auth people and password (FE-033)', () => {
+  it('offers password change only when advertised in Jivo mode', () => {
+    expect(identityFromOptions({ identity: 'jivo', password_change: true }).canChangePassword).toBe(true)
+    expect(identityFromOptions({ identity: 'jivo', password_change: false }).canChangePassword).toBe(false)
+    expect(identityFromOptions({ identity: 'jivo' }).canChangePassword).toBe(false)
+    expect(identityFromOptions({ identity: 'local' }).canChangePassword).toBe(true)
+    expect(identityFromOptions({ identity: 'local', password_change: false }).canChangePassword).toBe(false)
+    expect(identityFromOptions({ identity: 'jivo', name_change: true }).canChangeName).toBe(true)
+    expect(identityFromOptions({ identity: 'jivo', name_change: 'yes' as unknown as boolean }).canChangeName).toBe(false)
   })
-  it('searches name, email and employee code', () => {
-    expect(addableJivoCandidates(list, ' DEV ').map(p => p.auth_id)).toEqual(['a4'])
-    expect(addableJivoCandidates(list, 'e-17').map(p => p.auth_id)).toEqual(['a1'])
-    expect(addableJivoCandidates(list, 'bina')).toEqual([])
+  it('drops the Invited filter in Jivo mode only', () => {
+    expect(peopleStatuses(false)).toEqual(['active', 'invited', 'inactive', 'deleted', 'all'])
+    expect(peopleStatuses(true)).toEqual(['active', 'inactive', 'deleted', 'all'])
   })
 })
 

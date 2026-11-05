@@ -1,0 +1,11 @@
+const { chromium, login, OUT } = require('./lib.cjs'); const fs = require('fs')
+;(async () => {
+  const b = await chromium.launch({ channel: 'msedge', headless: true })
+  const { page } = await login(b, 'alice')
+  fs.writeFileSync(OUT + '/explore-home.yml', await page.locator('body').ariaSnapshot())
+  await page.getByText('Bob E2E').first().click(); await page.waitForTimeout(2500)
+  fs.writeFileSync(OUT + '/explore-chat.yml', await page.locator('body').ariaSnapshot())
+  await page.screenshot({ path: OUT + '/explore-chat.png' })
+  console.log('url', page.url(), 'errors', page.errors)
+  await b.close()
+})().catch(e => { console.error('FAIL', e); process.exit(1) })

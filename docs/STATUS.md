@@ -1,6 +1,65 @@
-# Universal status - 2 November 2026 continuation
+# Universal status - 04/05-Nov-2026 full end-to-end test
 
-Universal has been updated in the existing strict TypeScript Expo/React Native codebase. Frontend and Backend remain read-only references; no schema changes were made. The unified `/approvals` page remains excluded by the user's explicit instruction. Existing administration/vault approval actions remain available.
+**Current:** typecheck, lint (0 warnings), 576 vitest tests in 85 files, 8 tooling tests, the production web build and the PWA smoke test PASS on the final source. Mocked browser UI: FAIL at 360 px on a group-info step because the test is out of date (STATIC-6), after passing the composer, offline queue, capture, poll, event, location and lock steps.
+
+Against the isolated backend (8010), these pass:
+- Real three-user messaging.
+- The offline outbox: exactly once, in order, across flapping networks and two tabs.
+- Recovery from a cold start offline (fixed).
+- Responsive layout from 320 to 1920 px.
+- Deep links on every route (fixed).
+- The security probes: API, XSS, redirects and the bundle scan.
+- The virtualised 500-chat list (fixed: 50 fps, was 9 fps).
+
+[testing.md](../testing.md) "Full end-to-end test - 04-Nov-2026" is authoritative.
+
+**Deployment readiness: web client READY WITH RISKS; full system NOT READY until the backend items are resolved.**
+
+Backend items (owner: backend, not changed here):
+- PERF-02: DB pool of 6 gives HTTP 500 under 5 users on a loaded host.
+- PERF-01: on Windows, uvicorn stops accepting connections after a load burst.
+- PERF-03: per-member event rendering inside each send.
+- M-01: attachments return 404 when no AV scanner marks uploads clean. This is environment-specific.
+
+Open Universal items:
+- OFF-02: offline cold start shows no cached chats (by design, U-004).
+- SEC-1: no native screenshot protection; needs `expo-screen-capture`.
+- Font size: TTF, not woff2.
+- Several minor UI/UX items (touch targets, contrast, install prompt timing).
+
+Android native E2E was BLOCKED by host memory and must be re-run.
+
+The `jm_e2e` database on 127.0.0.1:5433 was kept. Drop it when it is no longer needed.
+
+---
+# Universal status - 03-Nov-2026 UX parity pass
+
+**Current:** typecheck, lint, 509 vitest tests in 75 files, 7 tooling tests, the production web build, the PWA smoke test and the mocked browser UI run (360/768/1440/844 px plus cross-tab) PASS on the final source. Parity screenshots against the reference (5174) were captured for login, chat list, chat thread, group info, contact profile, profile, notifications, passwords, admin and approvals. Android build, native runtime and real-backend checks were NOT RUN in this pass. [testing.md](../testing.md) is authoritative.
+
+Landed in this pass: reference shell (lucide rail/tab icons, bell menu, rail tooltips, danger badge), Home tiles and admin list, conversation list rows, chat header and options dropdown, new chat/new group dialog, bubble contents (attachments, file chips, reply quote, forwarded, deleted, reaction pill), composer reply/edit bar, profile sections, group info dialog and contact side panel, notifications and alerts, Passwords lock/vault grid/vault page, People, Permission groups, Security, Approvals and the login card.
+
+Known: the shared dev server on port 8090 was started with `CI=1` and does not reload edits; restart it without `CI=1` before visual checks. Open items: FEATURE-PARITY-CHECKLIST.md "Remaining issues".
+
+---
+# Universal status - 02-Nov-2026 parity pass
+
+**Current:** typecheck, lint, 507 vitest tests in 75 files, 7 tooling tests, the production web build, the PWA smoke test, the mocked browser UI run (360/768/1440/844 px plus cross-tab) and the x86_64 Android debug build all PASS on the final source of this pass. iOS build is BLOCKED (Windows host). Native runtime, real-backend, load and performance checks were NOT RUN in this pass. [testing.md](../testing.md) is authoritative.
+
+Landed in this pass:
+- Unified `/approvals` inbox (FE-023) with navigation entry and waiting badge; no longer excluded.
+- Reference shell and tokens (glass levels, radius, shadow, 40px web / 44pt native controls, 16/32px page padding, reference rail and phone bar).
+- Group info, Group settings and Add members sub-views; person profile layout; chat header title and phone button; Media/Docs/Links tabs.
+- Location picker, date/time fields and composer link preview in the reference layouts.
+- Jivo Auth: FE-032 sign-in/token/profile labels, FE-030 required mobile, and FE-033/FE-034/BE-083 (automatic people list, no invitations, central name/email read-only, password change only when advertised).
+
+Open items: see [FEATURE-PARITY-CHECKLIST.md](../FEATURE-PARITY-CHECKLIST.md) "Remaining issues" and testing.md "Not verified".
+
+---
+
+# Previous checkpoint (historical)
+
+
+Universal has been updated in the existing strict TypeScript Expo/React Native codebase. Frontend and Backend remain read-only references; no schema changes were made. At that time the unified `/approvals` page was excluded by the user's explicit instruction. Existing administration/vault approval actions remain available.
 
 **Current static/unit/tooling and Android build checks pass; responsive browser, cross-tab and production PWA checks pass.** [testing.md](../testing.md) is authoritative for final counts, command outcomes and build status. Source presence, earlier unit passes and a debug APK do not establish full feature/pixel parity or production readiness.
 

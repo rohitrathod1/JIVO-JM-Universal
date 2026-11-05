@@ -1,3 +1,4 @@
+import { NativeNotifications } from '../components/NativeNotifications'
 import { IncomingShareBridge } from '../components/IncomingShareBridge'
 import { AppLock } from '../components/AppLock'
 import { AttachmentExportStatus } from '../components/AttachmentExportStatus'
@@ -19,6 +20,6 @@ import { PwaSupport } from '../components/PwaSupport'
 export default function Layout() {
   const [loaded, error] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold })
   if (!loaded && !error) return <ActivityIndicator accessibilityLabel="Loading JM" />
-  return <SafeAreaProvider><ThemeProvider><SessionProvider><ChatAppearance><VaultExportStatus /><AttachmentExportStatus /><AppLock><LiveUpdates><PwaSupport /><IncomingShareBridge /><Stack screenOptions={{ headerShown: false }} /><StepUp /></LiveUpdates></AppLock></ChatAppearance></SessionProvider></ThemeProvider></SafeAreaProvider>
+  return <SafeAreaProvider><ThemeProvider><SessionProvider><ChatAppearance><VaultExportStatus /><AttachmentExportStatus /><AppLock><LiveUpdates><NativeNotifications /><PwaSupport /><IncomingShareBridge /><Stack screenOptions={{ headerShown: false }} /><StepUp /></LiveUpdates></AppLock></ChatAppearance></SessionProvider></ThemeProvider></SafeAreaProvider>
 }
 

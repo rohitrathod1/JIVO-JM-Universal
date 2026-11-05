@@ -5,6 +5,7 @@ import { getLinkPreview } from '../modules/messenger/api'
 import { previewLines, safePreviewImage } from '../modules/messenger/composerPreview'
 import { useResource } from '../shared/useResource'
 import { useColors } from '../ui'
+import { Icon } from './Icon'
 
 /** Link being typed: compact card above the box (reference Composer + LinkPreviewCard compact), with a hide button. */
 export function ComposerPreview({ body }: { body: string }) {
@@ -24,6 +25,22 @@ export function ComposerPreview({ body }: { body: string }) {
         <Text numberOfLines={1} style={{ fontSize: 11, color: c.muted }}>{lines.site}</Text>
       </View>
     </Pressable>
-    <Pressable accessibilityRole="button" accessibilityLabel="Hide link preview" onPress={() => setDismissed(url)} style={{ width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Text style={{ color: c.muted, fontSize: 18, lineHeight: 20 }}>×</Text></Pressable>
+    <Pressable accessibilityRole="button" accessibilityLabel="Hide link preview" onPress={() => setDismissed(url)} style={{ width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Icon name="x" size={16} color={c.muted} /></Pressable>
+  </View>
+}
+
+/** Reference reply / edit bar above the box: 4px brand bar, black/5 fill, title in brand, one muted line, cancel X. */
+export function ComposerContext({ mode, name, text, onCancel }: { mode: 'reply' | 'edit'; name?: string; text: string; onCancel: () => void }) {
+  const c = useColors()
+  return <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 8, borderLeftWidth: 4, borderColor: c.brand, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: c.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
+    <Icon name={mode === 'edit' ? 'pencil' : 'cornerUpLeft'} size={16} color={c.brand} />
+    <View style={{ flex: 1, minWidth: 0 }}>
+      <Text numberOfLines={1} style={{ color: c.brand, fontFamily: 'Inter_600SemiBold', fontSize: 12, lineHeight: 16 }}>{mode === 'edit' ? 'Edit message' : `Replying to ${name ?? ''}`}</Text>
+      <Text numberOfLines={1} style={{ color: c.muted, fontFamily: 'Inter_400Regular', fontSize: 14, lineHeight: 20 }}>{text}</Text>
+    </View>
+    <Pressable accessibilityRole="button" accessibilityLabel={mode === 'edit' ? 'Cancel edit' : 'Cancel reply'} onPress={onCancel} hitSlop={8}
+      style={({ hovered }: { pressed: boolean; hovered?: boolean }) => ({ borderRadius: 4, padding: 2, opacity: hovered ? 1 : 0.85, cursor: 'pointer' })}>
+      <Icon name="x" size={16} color={c.muted} />
+    </Pressable>
   </View>
 }
